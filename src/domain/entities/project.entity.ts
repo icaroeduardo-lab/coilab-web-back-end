@@ -8,7 +8,7 @@ import {
   IsDate,
   ValidateNested,
 } from 'class-validator';
-import { ClassValidatorStrategy } from '../validators/class-validator-strategy';
+import { Entity } from './entity.base';
 import { Task } from './task.entity';
 import { Applicant } from '../value-objects/applicant.vo';
 import { Flow } from '../value-objects/flow.vo';
@@ -33,7 +33,7 @@ export interface ProjectProps {
   flows?: Flow[];
 }
 
-export class Project {
+export class Project extends Entity {
   @IsUUID()
   @IsNotEmpty()
   private id: string;
@@ -69,6 +69,7 @@ export class Project {
   private tasks: Task[];
 
   constructor(props: ProjectProps) {
+    super();
     this.id = props.id;
     this.name = props.name;
     this.projectNumber = props.projectNumber;
@@ -81,11 +82,6 @@ export class Project {
     this.flows = props.flows ?? [];
 
     this.validate();
-  }
-
-  private validate() {
-    const validator = new ClassValidatorStrategy<Project>();
-    validator.validate(this);
   }
 
   // Getters

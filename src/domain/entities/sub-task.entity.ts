@@ -1,9 +1,10 @@
 import 'reflect-metadata';
 import { IsEnum, IsNotEmpty, IsOptional, IsUUID, IsDate, ValidateNested } from 'class-validator';
-import { ClassValidatorStrategy } from '../validators/class-validator-strategy';
+import { Entity } from './entity.base';
 import { Discovery } from '../value-objects/discovery.vo';
 import { Design } from '../value-objects/design.vo';
 import { Diagram } from '../value-objects/diagram.vo';
+import { TaskStatus } from './task-status.enum';
 
 export enum SubTaskStatus {
   NAO_INICIADO = 'Não iniciado',
@@ -29,7 +30,7 @@ export interface SubTaskProps {
   completionDate?: Date;
 }
 
-export class SubTask {
+export abstract class SubTask extends Entity {
   @IsUUID()
   @IsNotEmpty()
   protected id: string;
@@ -56,6 +57,7 @@ export class SubTask {
   protected completionDate?: Date;
 
   constructor(props: SubTaskProps) {
+    super();
     this.id = props.id;
     this.taskId = props.taskId;
     this.status = props.status;
@@ -64,11 +66,6 @@ export class SubTask {
     this.startDate = props.startDate;
     this.completionDate = props.completionDate;
     this.validate();
-  }
-
-  protected validate() {
-    const validator = new ClassValidatorStrategy<SubTask>();
-    validator.validate(this);
   }
 
   // Getters
@@ -102,8 +99,30 @@ export class SubTask {
   }
 
   complete(): void {
-    this.status = SubTaskStatus.APROVADO;
+    this.status = SubTaskStatus.AGUARDANDO_CHECKOUT;
     this.completionDate = new Date();
+    this.validate();
+  }
+
+  approve(taskStatus: TaskStatus): void {
+    if (this.status !== SubTaskStatus.AGUARDANDO_CHECKOUT) {
+      throw new Error('A subtask precisa estar Aguardando Checkout para ser aprovada');
+    }
+    if (taskStatus !== TaskStatus.CHECKOUT) {
+      throw new Error('A task precisa estar em Checkout para aprovar uma subtask');
+    }
+    this.status = SubTaskStatus.APROVADO;
+    this.validate();
+  }
+
+  reject(taskStatus: TaskStatus): void {
+    if (this.status !== SubTaskStatus.AGUARDANDO_CHECKOUT) {
+      throw new Error('A subtask precisa estar Aguardando Checkout para ser reprovada');
+    }
+    if (taskStatus !== TaskStatus.CHECKOUT) {
+      throw new Error('A task precisa estar em Checkout para reprovar uma subtask');
+    }
+    this.status = SubTaskStatus.REPROVADO;
     this.validate();
   }
 
