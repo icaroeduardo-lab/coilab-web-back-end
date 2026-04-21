@@ -130,4 +130,44 @@ describe('Project Entity', () => {
     project.updateStatus(ProjectStatus.EM_EXECUCAO);
     expect(project.getStatus()).toBe(ProjectStatus.EM_EXECUCAO);
   });
+
+  it('should expose all getters correctly', () => {
+    const project = new Project({
+      name: 'Name',
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      projectNumber: 'P-001',
+      description: 'Some description',
+      urlDocument: 'https://example.com/doc',
+    });
+
+    expect(project.getId()).toBe('550e8400-e29b-41d4-a716-446655440000');
+    expect(project.getProjectNumber()).toBe('P-001');
+    expect(project.getDescription()).toBe('Some description');
+    expect(project.getUrlDocument()).toBe('https://example.com/doc');
+    expect(project.getCreatedAt()).toBeInstanceOf(Date);
+  });
+
+  it('should change description correctly', () => {
+    const project = new Project({
+      name: 'Name',
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      projectNumber: 'P-001',
+      description: 'Old desc',
+    });
+
+    project.changeDescription('New desc');
+    expect(project.getDescription()).toBe('New desc');
+  });
+
+  it('should update urlDocument correctly', () => {
+    const project = new Project({
+      name: 'Name',
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      projectNumber: 'P-001',
+      description: 'Desc',
+    });
+
+    project.updateUrlDocument('https://example.com/new-doc');
+    expect(project.getUrlDocument()).toBe('https://example.com/new-doc');
+  });
 });

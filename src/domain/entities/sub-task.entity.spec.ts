@@ -338,4 +338,29 @@ describe('SubTask Entity', () => {
       );
     });
   });
+
+  describe('Frequency enum', () => {
+    it.each([
+      [Frequency.DAILY, 'Diária'],
+      [Frequency.WEEKLY, 'Semanal'],
+      [Frequency.MONTHLY, 'Mensal'],
+      [Frequency.OCCASIONAL, 'Eventual'],
+    ])('%s has correct value', (value, expected) => {
+      expect(value).toBe(expected);
+    });
+  });
+
+  describe('updateStatus()', () => {
+    it('should update status directly', () => {
+      const subTask = new DiscoverySubTask({
+        id: '550e8400-e29b-41d4-a716-446655440040',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status: SubTaskStatus.NAO_INICIADO,
+        expectedDelivery: new Date(),
+      });
+
+      subTask.updateStatus(SubTaskStatus.EM_PROGRESSO);
+      expect(subTask.getStatus()).toBe(SubTaskStatus.EM_PROGRESSO);
+    });
+  });
 });
