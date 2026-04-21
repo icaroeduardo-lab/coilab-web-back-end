@@ -4,11 +4,30 @@ import {
   DiscoverySubTask,
   DesignSubTask,
   DiagramSubTask,
+  Level,
+  Frequency,
 } from './sub-task.entity';
-import { Discovery } from '../value-objects/discovery.vo';
 import { Design } from '../value-objects/design.vo';
 import { Diagram } from '../value-objects/diagram.vo';
 import { TaskStatus } from './task-status.enum';
+
+const fullDiscoveryForm = {
+  complexity: Level.HIGH,
+  projectName: 'Coilab',
+  summary: 'Resumo do projeto',
+  painPoints: 'Dificuldade em gerenciar tarefas',
+  frequency: Frequency.DAILY,
+  currentProcess: 'Processo manual',
+  inactionCost: 'R$ 10.000/mês',
+  volume: '500 requisições/dia',
+  avgTime: '30 minutos',
+  humanDependency: Level.MEDIUM,
+  rework: '20% das entregas',
+  previousAttempts: 'Tentativa com Jira',
+  benchmark: 'Linear, Jira',
+  institutionalPriority: Level.HIGH,
+  technicalOpinion: 'Viável com 3 sprints',
+};
 
 describe('SubTask Entity', () => {
   it('should create a subtask with common properties', () => {
@@ -37,37 +56,96 @@ describe('SubTask Entity', () => {
     expect(subTask.getStartDate()).toBeInstanceOf(Date);
   });
 
-  it('should move to AGUARDANDO_CHECKOUT when complete() is called', () => {
-    const subTask = new DiscoverySubTask({
-      id: '550e8400-e29b-41d4-a716-446655440008',
-      taskId: '550e8400-e29b-41d4-a716-446655440001',
-      status: SubTaskStatus.EM_PROGRESSO,
-      expectedDelivery: new Date(),
+  describe('DiscoverySubTask', () => {
+    it('should create with type DISCOVERY', () => {
+      const subTask = new DiscoverySubTask({
+        id: '550e8400-e29b-41d4-a716-446655440008',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status: SubTaskStatus.NAO_INICIADO,
+        expectedDelivery: new Date(),
+      });
+
+      expect(subTask.getType()).toBe(SubTaskType.DISCOVERY);
     });
 
-    subTask.complete();
-    expect(subTask.getStatus()).toBe(SubTaskStatus.AGUARDANDO_CHECKOUT);
-    expect(subTask.getCompletionDate()).toBeInstanceOf(Date);
-  });
+    it('should create with form fields pre-filled', () => {
+      const subTask = new DiscoverySubTask({
+        id: '550e8400-e29b-41d4-a716-446655440008',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status: SubTaskStatus.NAO_INICIADO,
+        expectedDelivery: new Date(),
+        ...fullDiscoveryForm,
+      });
 
-  it('should create DiscoverySubTask with discoveries', () => {
-    const discovery = new Discovery({
-      title: 'Research',
-      description: 'Desc',
-      urlResearch: 'https://example.com',
+      expect(subTask.getForm().complexity).toBe(Level.HIGH);
+      expect(subTask.getForm().projectName).toBe('Coilab');
+      expect(subTask.getForm().frequency).toBe(Frequency.DAILY);
     });
 
-    const subTask = new DiscoverySubTask({
-      id: '550e8400-e29b-41d4-a716-446655440008',
-      taskId: '550e8400-e29b-41d4-a716-446655440001',
-      status: SubTaskStatus.NAO_INICIADO,
-      expectedDelivery: new Date(),
-      discoveries: [discovery],
+    it('should allow partial form when status is EM_PROGRESSO', () => {
+      const subTask = new DiscoverySubTask({
+        id: '550e8400-e29b-41d4-a716-446655440008',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status: SubTaskStatus.EM_PROGRESSO,
+        expectedDelivery: new Date(),
+        complexity: Level.LOW,
+      });
+
+      expect(subTask.getForm().complexity).toBe(Level.LOW);
+      expect(subTask.getForm().summary).toBeUndefined();
     });
 
-    expect(subTask.getDiscoveries()).toHaveLength(1);
-    expect(subTask.getDiscoveries()[0].getTitle()).toBe('Research');
-    expect(subTask.getType()).toBe(SubTaskType.DISCOVERY);
+    it('should update form fields', () => {
+      const subTask = new DiscoverySubTask({
+        id: '550e8400-e29b-41d4-a716-446655440008',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status: SubTaskStatus.EM_PROGRESSO,
+        expectedDelivery: new Date(),
+      });
+
+      subTask.updateForm({ projectName: 'Coilab', complexity: Level.MEDIUM });
+      expect(subTask.getForm().projectName).toBe('Coilab');
+      expect(subTask.getForm().complexity).toBe(Level.MEDIUM);
+    });
+
+    it('should throw when updating form on locked subtask', () => {
+      const subTask = new DiscoverySubTask({
+        id: '550e8400-e29b-41d4-a716-446655440008',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+        expectedDelivery: new Date(),
+      });
+
+      expect(() => subTask.updateForm({ projectName: 'Test' })).toThrow(
+        `Subtask com status "${SubTaskStatus.AGUARDANDO_CHECKOUT}" não pode ser modificada`,
+      );
+    });
+
+    it('should complete when all form fields are filled', () => {
+      const subTask = new DiscoverySubTask({
+        id: '550e8400-e29b-41d4-a716-446655440008',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status: SubTaskStatus.EM_PROGRESSO,
+        expectedDelivery: new Date(),
+        ...fullDiscoveryForm,
+      });
+
+      subTask.complete();
+      expect(subTask.getStatus()).toBe(SubTaskStatus.AGUARDANDO_CHECKOUT);
+      expect(subTask.getCompletionDate()).toBeInstanceOf(Date);
+    });
+
+    it('should throw when completing with missing form fields', () => {
+      const subTask = new DiscoverySubTask({
+        id: '550e8400-e29b-41d4-a716-446655440008',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status: SubTaskStatus.EM_PROGRESSO,
+        expectedDelivery: new Date(),
+        complexity: Level.HIGH,
+      });
+
+      expect(() => subTask.complete()).toThrow('Campos obrigatórios não preenchidos:');
+    });
   });
 
   const validDesign = new Design({

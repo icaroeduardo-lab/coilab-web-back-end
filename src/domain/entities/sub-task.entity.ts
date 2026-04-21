@@ -1,10 +1,40 @@
 import 'reflect-metadata';
 import { IsEnum, IsNotEmpty, IsOptional, IsUUID, IsDate, ValidateNested } from 'class-validator';
 import { Entity } from './entity.base';
-import { Discovery } from '../value-objects/discovery.vo';
 import { Design } from '../value-objects/design.vo';
 import { Diagram } from '../value-objects/diagram.vo';
 import { TaskStatus } from './task-status.enum';
+
+export enum Level {
+  HIGH = 'Alta',
+  MEDIUM = 'Média',
+  LOW = 'Baixa',
+}
+
+export enum Frequency {
+  DAILY = 'Diária',
+  WEEKLY = 'Semanal',
+  MONTHLY = 'Mensal',
+  OCCASIONAL = 'Eventual',
+}
+
+export interface DiscoveryFormProps {
+  complexity?: Level;
+  projectName?: string;
+  summary?: string;
+  painPoints?: string;
+  frequency?: Frequency;
+  currentProcess?: string;
+  inactionCost?: string;
+  volume?: string;
+  avgTime?: string;
+  humanDependency?: Level;
+  rework?: string;
+  previousAttempts?: string;
+  benchmark?: string;
+  institutionalPriority?: Level;
+  technicalOpinion?: string;
+}
 
 export enum SubTaskStatus {
   NAO_INICIADO = 'Não iniciado',
@@ -144,21 +174,81 @@ export abstract class SubTask extends Entity {
 }
 
 export class DiscoverySubTask extends SubTask {
-  @ValidateNested({ each: true })
-  private discoveries: Discovery[];
+  private complexity?: Level;
+  private projectName?: string;
+  private summary?: string;
+  private painPoints?: string;
+  private frequency?: Frequency;
+  private currentProcess?: string;
+  private inactionCost?: string;
+  private volume?: string;
+  private avgTime?: string;
+  private humanDependency?: Level;
+  private rework?: string;
+  private previousAttempts?: string;
+  private benchmark?: string;
+  private institutionalPriority?: Level;
+  private technicalOpinion?: string;
 
-  constructor(props: Omit<SubTaskProps, 'type'> & { discoveries?: Discovery[] }) {
+  constructor(props: Omit<SubTaskProps, 'type'> & DiscoveryFormProps) {
     super({ ...props, type: SubTaskType.DISCOVERY });
-    this.discoveries = props.discoveries ?? [];
+    this.complexity = props.complexity;
+    this.projectName = props.projectName;
+    this.summary = props.summary;
+    this.painPoints = props.painPoints;
+    this.frequency = props.frequency;
+    this.currentProcess = props.currentProcess;
+    this.inactionCost = props.inactionCost;
+    this.volume = props.volume;
+    this.avgTime = props.avgTime;
+    this.humanDependency = props.humanDependency;
+    this.rework = props.rework;
+    this.previousAttempts = props.previousAttempts;
+    this.benchmark = props.benchmark;
+    this.institutionalPriority = props.institutionalPriority;
+    this.technicalOpinion = props.technicalOpinion;
   }
 
-  getDiscoveries(): Discovery[] {
-    return this.discoveries;
+  getForm(): DiscoveryFormProps {
+    return {
+      complexity: this.complexity,
+      projectName: this.projectName,
+      summary: this.summary,
+      painPoints: this.painPoints,
+      frequency: this.frequency,
+      currentProcess: this.currentProcess,
+      inactionCost: this.inactionCost,
+      volume: this.volume,
+      avgTime: this.avgTime,
+      humanDependency: this.humanDependency,
+      rework: this.rework,
+      previousAttempts: this.previousAttempts,
+      benchmark: this.benchmark,
+      institutionalPriority: this.institutionalPriority,
+      technicalOpinion: this.technicalOpinion,
+    };
   }
-  addDiscovery(discovery: Discovery): void {
+
+  updateForm(data: DiscoveryFormProps): void {
     this.assertEditable();
-    this.discoveries.push(discovery);
-    this.validate();
+    Object.assign(this, data);
+  }
+
+  override complete(): void {
+    this.assertFormComplete();
+    super.complete();
+  }
+
+  private assertFormComplete(): void {
+    const fields: (keyof DiscoveryFormProps)[] = [
+      'complexity', 'projectName', 'summary', 'painPoints', 'frequency',
+      'currentProcess', 'inactionCost', 'volume', 'avgTime', 'humanDependency',
+      'rework', 'previousAttempts', 'benchmark', 'institutionalPriority', 'technicalOpinion',
+    ];
+    const missing = fields.filter((f) => !this[f]);
+    if (missing.length > 0) {
+      throw new Error(`Campos obrigatórios não preenchidos: ${missing.join(', ')}`);
+    }
   }
 }
 

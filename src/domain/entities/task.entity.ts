@@ -10,6 +10,7 @@ import {
   SubTaskType,
 } from './sub-task.entity';
 import { Flow } from '../value-objects/flow.vo';
+import { Applicant } from '../value-objects/applicant.vo';
 import { TaskStatus } from './task-status.enum';
 
 export { TaskStatus };
@@ -28,6 +29,7 @@ export interface TaskProps {
   taskNumber: string;
   priority: TaskPriority;
   status: TaskStatus;
+  applicant: Applicant;
   subTasks?: SubTask[];
   flows?: Flow[];
   createdAt?: Date;
@@ -60,6 +62,9 @@ export class Task extends Entity {
   @IsEnum(TaskStatus)
   private status: TaskStatus;
 
+  @ValidateNested()
+  private applicant: Applicant;
+
   @ValidateNested({ each: true })
   private subTasks: SubTask[];
 
@@ -78,6 +83,7 @@ export class Task extends Entity {
     this.taskNumber = props.taskNumber;
     this.priority = props.priority;
     this.status = props.status;
+    this.applicant = props.applicant;
     this.subTasks = props.subTasks ?? [];
     this.flows = props.flows ?? [];
     this.createdAt = props.createdAt ?? new Date();
@@ -155,6 +161,9 @@ export class Task extends Entity {
   getSubTasks(): SubTask[] {
     return this.subTasks;
   }
+  getApplicant(): Applicant {
+    return this.applicant;
+  }
   getFlows(): Flow[] {
     return this.flows;
   }
@@ -197,6 +206,11 @@ export class Task extends Entity {
   changeStatus(status: TaskStatus): void {
     this.status = status;
     this.applyStatusRules();
+    this.validate();
+  }
+
+  changeApplicant(applicant: Applicant): void {
+    this.applicant = applicant;
     this.validate();
   }
 
