@@ -1,13 +1,13 @@
 import 'reflect-metadata';
 import { IsNotEmpty, IsString, IsUUID, MinLength } from 'class-validator';
-import { ClassValidatorStrategy } from '../validators/class-validator-strategy';
+import { ValueObject } from './value-object.base';
 
 export interface ApplicantProps {
   id: string;
   name: string;
 }
 
-export class Applicant {
+export class Applicant extends ValueObject {
   @IsUUID()
   @IsNotEmpty()
   private readonly id: string;
@@ -18,14 +18,10 @@ export class Applicant {
   private readonly name: string;
 
   constructor(props: ApplicantProps) {
+    super();
     this.id = props.id;
     this.name = props.name;
     this.validate();
-  }
-
-  private validate() {
-    const validator = new ClassValidatorStrategy<Applicant>();
-    validator.validate(this);
   }
 
   getId(): string {

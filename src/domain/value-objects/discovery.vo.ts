@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { IsNotEmpty, IsString, IsUrl } from 'class-validator';
-import { ClassValidatorStrategy } from '../validators/class-validator-strategy';
+import { ValueObject } from './value-object.base';
 
 export interface DiscoveryProps {
   title: string;
@@ -8,7 +8,7 @@ export interface DiscoveryProps {
   urlResearch: string;
 }
 
-export class Discovery {
+export class Discovery extends ValueObject {
   @IsString()
   @IsNotEmpty()
   private readonly title: string;
@@ -22,23 +22,21 @@ export class Discovery {
   private readonly urlResearch: string;
 
   constructor(props: DiscoveryProps) {
+    super();
     this.title = props.title;
     this.description = props.description;
     this.urlResearch = props.urlResearch;
     this.validate();
   }
 
-  private validate() {
-    const validator = new ClassValidatorStrategy<Discovery>();
-    validator.validate(this);
-  }
-
   getTitle(): string {
     return this.title;
   }
+
   getDescription(): string {
     return this.description;
   }
+
   getUrlResearch(): string {
     return this.urlResearch;
   }

@@ -1,13 +1,13 @@
 import 'reflect-metadata';
 import { IsNotEmpty, IsString, IsUUID, MinLength } from 'class-validator';
-import { ClassValidatorStrategy } from '../validators/class-validator-strategy';
+import { ValueObject } from './value-object.base';
 
 export interface FlowProps {
   id: string;
   name: string;
 }
 
-export class Flow {
+export class Flow extends ValueObject {
   @IsUUID()
   @IsNotEmpty()
   private readonly id: string;
@@ -18,14 +18,10 @@ export class Flow {
   private readonly name: string;
 
   constructor(props: FlowProps) {
+    super();
     this.id = props.id;
     this.name = props.name;
     this.validate();
-  }
-
-  private validate() {
-    const validator = new ClassValidatorStrategy<Flow>();
-    validator.validate(this);
   }
 
   getId(): string {
