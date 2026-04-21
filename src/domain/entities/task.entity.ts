@@ -121,13 +121,15 @@ export class Task extends Entity {
       const types = Object.values(groupedByType);
 
       const canCheckout = types.every((group) => {
-        const hasAwaiting = group.some((s) => s.getStatus() === SubTaskStatus.AGUARDANDO_CHECKOUT);
-        const allAreAwaitingOrReproved = group.every(
+        const allTerminal = group.every(
           (s) =>
             s.getStatus() === SubTaskStatus.AGUARDANDO_CHECKOUT ||
+            s.getStatus() === SubTaskStatus.APROVADO ||
             s.getStatus() === SubTaskStatus.REPROVADO,
         );
-        return hasAwaiting && allAreAwaitingOrReproved;
+        const hasReprovado = group.some((s) => s.getStatus() === SubTaskStatus.REPROVADO);
+        const hasAwaiting = group.some((s) => s.getStatus() === SubTaskStatus.AGUARDANDO_CHECKOUT);
+        return allTerminal && (!hasReprovado || hasAwaiting);
       });
 
       if (!canCheckout) {

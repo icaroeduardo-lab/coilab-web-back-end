@@ -9,7 +9,6 @@ import {
 } from './sub-task.entity';
 import { Design } from '../value-objects/design.vo';
 import { Diagram } from '../value-objects/diagram.vo';
-import { TaskStatus } from './task-status.enum';
 
 const fullDiscoveryForm = {
   complexity: Level.HIGH,
@@ -287,7 +286,7 @@ describe('SubTask Entity', () => {
   });
 
   describe('approve()', () => {
-    it('should approve when subtask is AGUARDANDO_CHECKOUT and task is CHECKOUT', () => {
+    it('should approve when subtask is AGUARDANDO_CHECKOUT', () => {
       const subTask = new DiscoverySubTask({
         id: '550e8400-e29b-41d4-a716-446655440030',
         taskId: '550e8400-e29b-41d4-a716-446655440001',
@@ -295,7 +294,7 @@ describe('SubTask Entity', () => {
         expectedDelivery: new Date(),
       });
 
-      subTask.approve(TaskStatus.CHECKOUT);
+      subTask.approve();
       expect(subTask.getStatus()).toBe(SubTaskStatus.APROVADO);
     });
 
@@ -307,27 +306,14 @@ describe('SubTask Entity', () => {
         expectedDelivery: new Date(),
       });
 
-      expect(() => subTask.approve(TaskStatus.CHECKOUT)).toThrow(
+      expect(() => subTask.approve()).toThrow(
         'A subtask precisa estar Aguardando Checkout para ser aprovada',
-      );
-    });
-
-    it('should throw if task is not in CHECKOUT', () => {
-      const subTask = new DiscoverySubTask({
-        id: '550e8400-e29b-41d4-a716-446655440032',
-        taskId: '550e8400-e29b-41d4-a716-446655440001',
-        status: SubTaskStatus.AGUARDANDO_CHECKOUT,
-        expectedDelivery: new Date(),
-      });
-
-      expect(() => subTask.approve(TaskStatus.EM_EXECUCAO)).toThrow(
-        'A task precisa estar em Checkout para aprovar uma subtask',
       );
     });
   });
 
   describe('reject()', () => {
-    it('should reject when subtask is AGUARDANDO_CHECKOUT and task is CHECKOUT', () => {
+    it('should reject when subtask is AGUARDANDO_CHECKOUT', () => {
       const subTask = new DiscoverySubTask({
         id: '550e8400-e29b-41d4-a716-446655440033',
         taskId: '550e8400-e29b-41d4-a716-446655440001',
@@ -335,7 +321,7 @@ describe('SubTask Entity', () => {
         expectedDelivery: new Date(),
       });
 
-      subTask.reject(TaskStatus.CHECKOUT);
+      subTask.reject();
       expect(subTask.getStatus()).toBe(SubTaskStatus.REPROVADO);
     });
 
@@ -347,21 +333,8 @@ describe('SubTask Entity', () => {
         expectedDelivery: new Date(),
       });
 
-      expect(() => subTask.reject(TaskStatus.CHECKOUT)).toThrow(
+      expect(() => subTask.reject()).toThrow(
         'A subtask precisa estar Aguardando Checkout para ser reprovada',
-      );
-    });
-
-    it('should throw if task is not in CHECKOUT', () => {
-      const subTask = new DiscoverySubTask({
-        id: '550e8400-e29b-41d4-a716-446655440035',
-        taskId: '550e8400-e29b-41d4-a716-446655440001',
-        status: SubTaskStatus.AGUARDANDO_CHECKOUT,
-        expectedDelivery: new Date(),
-      });
-
-      expect(() => subTask.reject(TaskStatus.EM_EXECUCAO)).toThrow(
-        'A task precisa estar em Checkout para reprovar uma subtask',
       );
     });
   });
