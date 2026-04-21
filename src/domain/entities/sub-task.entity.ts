@@ -3,7 +3,6 @@ import { IsEnum, IsNotEmpty, IsOptional, IsUUID, IsDate, ValidateNested } from '
 import { Entity } from './entity.base';
 import { Design } from '../value-objects/design.vo';
 import { Diagram } from '../value-objects/diagram.vo';
-import { TaskStatus } from './task-status.enum';
 
 export enum Level {
   HIGH = 'Alta',
@@ -145,23 +144,17 @@ export abstract class SubTask extends Entity {
     this.validate();
   }
 
-  approve(taskStatus: TaskStatus): void {
+  approve(): void {
     if (this.status !== SubTaskStatus.AGUARDANDO_CHECKOUT) {
       throw new Error('A subtask precisa estar Aguardando Checkout para ser aprovada');
-    }
-    if (taskStatus !== TaskStatus.CHECKOUT) {
-      throw new Error('A task precisa estar em Checkout para aprovar uma subtask');
     }
     this.status = SubTaskStatus.APROVADO;
     this.validate();
   }
 
-  reject(taskStatus: TaskStatus): void {
+  reject(): void {
     if (this.status !== SubTaskStatus.AGUARDANDO_CHECKOUT) {
       throw new Error('A subtask precisa estar Aguardando Checkout para ser reprovada');
-    }
-    if (taskStatus !== TaskStatus.CHECKOUT) {
-      throw new Error('A task precisa estar em Checkout para reprovar uma subtask');
     }
     this.status = SubTaskStatus.REPROVADO;
     this.validate();
