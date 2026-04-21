@@ -131,4 +131,76 @@ describe('Task Entity', () => {
     expect(task.getFlows()).toHaveLength(1);
     expect(task.getFlows()[0].getName()).toBe('Flow A');
   });
+
+  describe('assertCanBeDeleted()', () => {
+    it('should allow deletion when task has no subtasks', () => {
+      const task = baseTask();
+      expect(() => task.assertCanBeDeleted()).not.toThrow();
+    });
+
+    it('should allow deletion when all subtasks are NAO_INICIADO', () => {
+      const task = baseTask();
+      task.addSubTask(new DiscoverySubTask({
+        id: SubTaskId('550e8400-e29b-41d4-a716-446655440020'),
+        taskId,
+        status: SubTaskStatus.NAO_INICIADO,
+        expectedDelivery: deliveryDate,
+      }));
+      expect(() => task.assertCanBeDeleted()).not.toThrow();
+    });
+
+    it('should throw when a subtask is EM_PROGRESSO', () => {
+      const task = baseTask();
+      task.addSubTask(new DiscoverySubTask({
+        id: SubTaskId('550e8400-e29b-41d4-a716-446655440021'),
+        taskId,
+        status: SubTaskStatus.EM_PROGRESSO,
+        expectedDelivery: deliveryDate,
+      }));
+      expect(() => task.assertCanBeDeleted()).toThrow(
+        'Task não pode ser removida pois possui subtasks iniciadas ou aprovadas',
+      );
+    });
+
+    it('should throw when a subtask is AGUARDANDO_CHECKOUT', () => {
+      const task = baseTask();
+      task.addSubTask(new DiscoverySubTask({
+        id: SubTaskId('550e8400-e29b-41d4-a716-446655440022'),
+        taskId,
+        status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+        expectedDelivery: deliveryDate,
+      }));
+      expect(() => task.assertCanBeDeleted()).toThrow(
+        'Task não pode ser removida pois possui subtasks iniciadas ou aprovadas',
+      );
+    });
+
+    it('should throw when a subtask is APROVADO', () => {
+      const task = baseTask();
+      task.addSubTask(new DiscoverySubTask({
+        id: SubTaskId('550e8400-e29b-41d4-a716-446655440023'),
+        taskId,
+        status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+        expectedDelivery: deliveryDate,
+      }));
+      task.getSubTasks()[0].approve();
+      expect(() => task.assertCanBeDeleted()).toThrow(
+        'Task não pode ser removida pois possui subtasks iniciadas ou aprovadas',
+      );
+    });
+
+    it('should throw when a subtask is REPROVADO', () => {
+      const task = baseTask();
+      task.addSubTask(new DiscoverySubTask({
+        id: SubTaskId('550e8400-e29b-41d4-a716-446655440024'),
+        taskId,
+        status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+        expectedDelivery: deliveryDate,
+      }));
+      task.getSubTasks()[0].reject();
+      expect(() => task.assertCanBeDeleted()).toThrow(
+        'Task não pode ser removida pois possui subtasks iniciadas ou aprovadas',
+      );
+    });
+  });
 });

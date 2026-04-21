@@ -222,6 +222,15 @@ export class Task extends Entity {
     this.validate();
   }
 
+  assertCanBeDeleted(): void {
+    const hasActiveSubTask = this.subTasks.some(
+      (s) => s.getStatus() !== SubTaskStatus.NAO_INICIADO,
+    );
+    if (hasActiveSubTask) {
+      throw new Error('Task não pode ser removida pois possui subtasks iniciadas ou aprovadas');
+    }
+  }
+
   addSubTask(subTask: SubTask): void {
     const lastOfSameType = this.subTasks.filter((s) => s.getType() === subTask.getType()).pop();
 
