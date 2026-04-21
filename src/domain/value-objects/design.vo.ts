@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { IsNotEmpty, IsString, IsUrl } from 'class-validator';
-import { ClassValidatorStrategy } from '../validators/class-validator-strategy';
+import { ValueObject } from './value-object.base';
 
 export interface DesignProps {
   title: string;
@@ -8,7 +8,7 @@ export interface DesignProps {
   urlImage: string;
 }
 
-export class Design {
+export class Design extends ValueObject {
   @IsString()
   @IsNotEmpty()
   private readonly title: string;
@@ -22,15 +22,11 @@ export class Design {
   private readonly urlImage: string;
 
   constructor(props: DesignProps) {
+    super();
     this.title = props.title;
     this.description = props.description;
     this.urlImage = props.urlImage;
     this.validate();
-  }
-
-  private validate() {
-    const validator = new ClassValidatorStrategy<Design>();
-    validator.validate(this);
   }
 
   getTitle(): string {

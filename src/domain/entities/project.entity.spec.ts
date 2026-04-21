@@ -2,7 +2,6 @@ import { Project, ProjectStatus } from './project.entity';
 import { Task, TaskPriority, TaskStatus } from './task.entity';
 import { Applicant } from '../value-objects/applicant.vo';
 import { Flow } from '../value-objects/flow.vo';
-import { TaskStatus as SubTaskStatusEnum } from './task.entity'; // Apenas para evitar conflito se necessário, mas TaskStatus já é o enum
 
 describe('Project Entity', () => {
   const applicant = new Applicant({

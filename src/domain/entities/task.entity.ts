@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { IsNotEmpty, IsString, IsUUID, IsDate, IsEnum, ValidateNested } from 'class-validator';
-import { ClassValidatorStrategy } from '../validators/class-validator-strategy';
+import { Entity } from './entity.base';
 import {
   DiscoverySubTask,
   DesignSubTask,
@@ -10,20 +10,14 @@ import {
   SubTaskType,
 } from './sub-task.entity';
 import { Flow } from '../value-objects/flow.vo';
+import { TaskStatus } from './task-status.enum';
+
+export { TaskStatus };
 
 export enum TaskPriority {
   BAIXA = 'baixa',
   MEDIA = 'média',
   ALTA = 'alta',
-}
-
-export enum TaskStatus {
-  BACKLOG = 'Backlog',
-  EM_EXECUCAO = 'Em Execução',
-  CHECKOUT = 'Checkout',
-  DESENVOLVIMENTO = 'Desenvolvimento',
-  TESTES = 'Testes',
-  CONCLUIDO = 'Concluído',
 }
 
 export interface TaskProps {
@@ -39,7 +33,7 @@ export interface TaskProps {
   createdAt?: Date;
 }
 
-export class Task {
+export class Task extends Entity {
   @IsUUID()
   @IsNotEmpty()
   private id: string;
@@ -76,6 +70,7 @@ export class Task {
   private createdAt: Date;
 
   constructor(props: TaskProps) {
+    super();
     this.id = props.id;
     this.projectId = props.projectId;
     this.name = props.name;
@@ -135,10 +130,6 @@ export class Task {
     }
   }
 
-  private validate() {
-    const validator = new ClassValidatorStrategy<Task>();
-    validator.validate(this);
-  }
 
   // Getters
   getId(): string {
@@ -216,6 +207,14 @@ export class Task {
   }
 
   addSubTask(subTask: SubTask): void {
+    const lastOfSameType = this.subTasks.filter((s) => s.getType() === subTask.getType()).pop();
+
+    if (lastOfSameType && lastOfSameType.getStatus() !== SubTaskStatus.REPROVADO) {
+      throw new Error(
+        `Não é possível adicionar uma nova subtask do tipo ${subTask.getType()} enquanto a anterior não estiver Reprovada`,
+      );
+    }
+
     this.subTasks.push(subTask);
     this.applyStatusRules();
     this.validate();
