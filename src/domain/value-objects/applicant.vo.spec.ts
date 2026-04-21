@@ -1,32 +1,19 @@
 import { Applicant } from './applicant.vo';
+import { ApplicantId } from './entity-ids';
 
 describe('Applicant Value Object', () => {
-  it('should create a valid applicant', () => {
-    const props = {
-      id: '550e8400-e29b-41d4-a716-446655440003',
-      name: 'pomar',
-    };
-    const applicant = new Applicant(props);
+  const validId = ApplicantId('550e8400-e29b-41d4-a716-446655440003');
 
-    expect(applicant.getId()).toBe(props.id);
-    expect(applicant.getName()).toBe(props.name);
+  it('should create a valid applicant', () => {
+    const applicant = new Applicant({ id: validId, name: 'pomar' });
+
+    expect(applicant.getId()).toBe(validId);
+    expect(applicant.getName()).toBe('pomar');
   });
 
   it('should throw error if name is too short', () => {
-    const props = {
-      id: '550e8400-e29b-41d4-a716-446655440003',
-      name: 'Jo',
-    };
-    expect(() => new Applicant(props)).toThrow(
+    expect(() => new Applicant({ id: validId, name: 'Jo' })).toThrow(
       'Validation failed: name must be longer than or equal to 3 characters',
     );
-  });
-
-  it('should throw error if id is invalid', () => {
-    const props = {
-      id: 'invalid-uuid',
-      name: 'coilab',
-    };
-    expect(() => new Applicant(props)).toThrow('Validation failed: id must be a UUID');
   });
 });
