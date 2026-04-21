@@ -1,9 +1,15 @@
 import { Task, TaskPriority, TaskStatus } from './task.entity';
 import { DiscoverySubTask, DesignSubTask, DiagramSubTask, SubTaskStatus } from './sub-task.entity';
+import { Applicant } from '../value-objects/applicant.vo';
 
 describe('Task Entity', () => {
   const taskId = '550e8400-e29b-41d4-a716-446655440001';
   const deliveryDate = new Date('2026-12-31');
+
+  const applicant = new Applicant({
+    id: '550e8400-e29b-41d4-a716-446655440003',
+    name: 'John Doe',
+  });
 
   const discovery = new DiscoverySubTask({
     id: '550e8400-e29b-41d4-a716-446655440008',
@@ -35,6 +41,7 @@ describe('Task Entity', () => {
       taskNumber: 'T-001',
       priority: TaskPriority.MEDIA,
       status: TaskStatus.BACKLOG,
+      applicant,
       subTasks: [discovery, design, diagram],
     });
 
@@ -52,6 +59,7 @@ describe('Task Entity', () => {
       taskNumber: 'T-001',
       priority: TaskPriority.BAIXA,
       status: TaskStatus.BACKLOG,
+      applicant,
       subTasks: [discovery],
     });
 
@@ -68,6 +76,7 @@ describe('Task Entity', () => {
       taskNumber: 'T-001',
       priority: TaskPriority.BAIXA,
       status: TaskStatus.BACKLOG,
+      applicant,
       subTasks: [],
     });
 

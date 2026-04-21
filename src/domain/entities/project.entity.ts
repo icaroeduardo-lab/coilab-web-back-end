@@ -10,7 +10,6 @@ import {
 } from 'class-validator';
 import { Entity } from './entity.base';
 import { Task } from './task.entity';
-import { Applicant } from '../value-objects/applicant.vo';
 import { Flow } from '../value-objects/flow.vo';
 
 export enum ProjectStatus {
@@ -29,7 +28,6 @@ export interface ProjectProps {
   status?: ProjectStatus;
   createdAt?: Date;
   tasks?: Task[];
-  applicant: Applicant;
   flows?: Flow[];
 }
 
@@ -60,9 +58,6 @@ export class Project extends Entity {
   @IsDate()
   private createdAt: Date;
 
-  @ValidateNested()
-  private applicant: Applicant;
-
   @ValidateNested({ each: true })
   private flows: Flow[];
 
@@ -78,7 +73,6 @@ export class Project extends Entity {
     this.status = props.status ?? ProjectStatus.BACKLOG;
     this.createdAt = props.createdAt ?? new Date();
     this.tasks = props.tasks ?? [];
-    this.applicant = props.applicant;
     this.flows = props.flows ?? [];
 
     this.validate();
@@ -108,9 +102,6 @@ export class Project extends Entity {
   }
   getTasks(): Task[] {
     return this.tasks;
-  }
-  getApplicant(): Applicant {
-    return this.applicant;
   }
   getFlows(): Flow[] {
     return this.flows;
@@ -142,11 +133,6 @@ export class Project extends Entity {
       throw new Error('Task does not belong to this project');
     }
     this.tasks.push(task);
-  }
-
-  changeApplicant(applicant: Applicant): void {
-    this.applicant = applicant;
-    this.validate();
   }
 
   addFlow(flow: Flow): void {
