@@ -341,6 +341,41 @@ describe('SubTask Entity', () => {
     });
   });
 
+  describe('cancel()', () => {
+    it('should cancel subtask from any non-APROVADO status', () => {
+      const statuses = [
+        SubTaskStatus.NAO_INICIADO,
+        SubTaskStatus.EM_PROGRESSO,
+        SubTaskStatus.AGUARDANDO_CHECKOUT,
+        SubTaskStatus.REPROVADO,
+      ];
+
+      for (const status of statuses) {
+        const subTask = new DiscoverySubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440050'),
+          taskId: TaskId('550e8400-e29b-41d4-a716-446655440001'),
+          status,
+          expectedDelivery: new Date(),
+        });
+        subTask.cancel();
+        expect(subTask.getStatus()).toBe(SubTaskStatus.CANCELADO);
+      }
+    });
+
+    it('should throw when trying to cancel an APROVADO subtask', () => {
+      const subTask = new DiscoverySubTask({
+        id: SubTaskId('550e8400-e29b-41d4-a716-446655440051'),
+        taskId: TaskId('550e8400-e29b-41d4-a716-446655440001'),
+        status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+        expectedDelivery: new Date(),
+      });
+      subTask.approve();
+      expect(() => subTask.cancel()).toThrow(
+        'A subtask já foi aprovada e não pode ser cancelada',
+      );
+    });
+  });
+
   describe('approve()', () => {
     it('should approve when subtask is AGUARDANDO_CHECKOUT', () => {
       const subTask = new DiscoverySubTask({

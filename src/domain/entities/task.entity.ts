@@ -223,15 +223,13 @@ export class Task extends Entity {
   }
 
   assertCanBeDeleted(): void {
-    const allNaoIniciado = this.subTasks.every(
-      (s) => s.getStatus() === SubTaskStatus.NAO_INICIADO,
-    );
-    if (allNaoIniciado) return;
-
-    const allReprovado =
-      this.subTasks.length > 0 &&
-      this.subTasks.every((s) => s.getStatus() === SubTaskStatus.REPROVADO);
-    if (allReprovado) return;
+    const terminalStatuses = [
+      SubTaskStatus.NAO_INICIADO,
+      SubTaskStatus.REPROVADO,
+      SubTaskStatus.CANCELADO,
+    ];
+    const allTerminal = this.subTasks.every((s) => terminalStatuses.includes(s.getStatus()));
+    if (allTerminal) return;
 
     throw new Error('Task não pode ser removida pois possui subtasks ativas');
   }

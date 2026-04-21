@@ -189,6 +189,37 @@ describe('Task Entity', () => {
       );
     });
 
+    it('should allow deletion when all subtasks are CANCELADO', () => {
+      const task = baseTask();
+      task.addSubTask(new DiscoverySubTask({
+        id: SubTaskId('550e8400-e29b-41d4-a716-446655440026'),
+        taskId,
+        status: SubTaskStatus.EM_PROGRESSO,
+        expectedDelivery: deliveryDate,
+      }));
+      task.getSubTasks()[0].cancel();
+      expect(() => task.assertCanBeDeleted()).not.toThrow();
+    });
+
+    it('should allow deletion when subtasks are mix of REPROVADO and CANCELADO', () => {
+      const task = baseTask();
+      task.addSubTask(new DiscoverySubTask({
+        id: SubTaskId('550e8400-e29b-41d4-a716-446655440027'),
+        taskId,
+        status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+        expectedDelivery: deliveryDate,
+      }));
+      task.addSubTask(new DesignSubTask({
+        id: SubTaskId('550e8400-e29b-41d4-a716-446655440028'),
+        taskId,
+        status: SubTaskStatus.EM_PROGRESSO,
+        expectedDelivery: deliveryDate,
+      }));
+      task.getSubTasks()[0].reject();
+      task.getSubTasks()[1].cancel();
+      expect(() => task.assertCanBeDeleted()).not.toThrow();
+    });
+
     it('should throw when task is not BACKLOG and subtasks are mixed (some REPROVADO, some not)', () => {
       const task = baseTask();
       task.addSubTask(new DiscoverySubTask({

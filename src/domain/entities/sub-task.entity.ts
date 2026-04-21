@@ -42,6 +42,7 @@ export enum SubTaskStatus {
   AGUARDANDO_CHECKOUT = 'Aguardando Checkout',
   APROVADO = 'Aprovado',
   REPROVADO = 'Reprovado',
+  CANCELADO = 'Cancelado',
 }
 
 export enum SubTaskType {
@@ -126,6 +127,7 @@ export abstract class SubTask extends Entity {
       SubTaskStatus.AGUARDANDO_CHECKOUT,
       SubTaskStatus.APROVADO,
       SubTaskStatus.REPROVADO,
+      SubTaskStatus.CANCELADO,
     ];
     if (lockedStatuses.includes(this.status)) {
       throw new Error(`Subtask com status "${this.status}" não pode ser modificada`);
@@ -158,6 +160,14 @@ export abstract class SubTask extends Entity {
       throw new Error('A subtask precisa estar Aguardando Checkout para ser reprovada');
     }
     this.status = SubTaskStatus.REPROVADO;
+    this.validate();
+  }
+
+  cancel(): void {
+    if (this.status === SubTaskStatus.APROVADO) {
+      throw new Error('A subtask já foi aprovada e não pode ser cancelada');
+    }
+    this.status = SubTaskStatus.CANCELADO;
     this.validate();
   }
 
@@ -235,9 +245,21 @@ export class DiscoverySubTask extends SubTask {
 
   private assertFormComplete(): void {
     const fields: (keyof DiscoveryFormProps)[] = [
-      'complexity', 'projectName', 'summary', 'painPoints', 'frequency',
-      'currentProcess', 'inactionCost', 'volume', 'avgTime', 'humanDependency',
-      'rework', 'previousAttempts', 'benchmark', 'institutionalPriority', 'technicalOpinion',
+      'complexity',
+      'projectName',
+      'summary',
+      'painPoints',
+      'frequency',
+      'currentProcess',
+      'inactionCost',
+      'volume',
+      'avgTime',
+      'humanDependency',
+      'rework',
+      'previousAttempts',
+      'benchmark',
+      'institutionalPriority',
+      'technicalOpinion',
     ];
     const missing = fields.filter((f) => !this[f]);
     if (missing.length > 0) {
