@@ -223,12 +223,17 @@ export class Task extends Entity {
   }
 
   assertCanBeDeleted(): void {
-    const hasActiveSubTask = this.subTasks.some(
-      (s) => s.getStatus() !== SubTaskStatus.NAO_INICIADO,
+    const allNaoIniciado = this.subTasks.every(
+      (s) => s.getStatus() === SubTaskStatus.NAO_INICIADO,
     );
-    if (hasActiveSubTask) {
-      throw new Error('Task não pode ser removida pois possui subtasks iniciadas ou aprovadas');
-    }
+    if (allNaoIniciado) return;
+
+    const allReprovado =
+      this.subTasks.length > 0 &&
+      this.subTasks.every((s) => s.getStatus() === SubTaskStatus.REPROVADO);
+    if (allReprovado) return;
+
+    throw new Error('Task não pode ser removida pois possui subtasks ativas');
   }
 
   addSubTask(subTask: SubTask): void {
