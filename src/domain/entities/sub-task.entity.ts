@@ -3,6 +3,7 @@ import { IsEnum, IsNotEmpty, IsOptional, IsUUID, IsDate, ValidateNested } from '
 import { Entity } from './entity.base';
 import { Design } from '../value-objects/design.vo';
 import { Diagram } from '../value-objects/diagram.vo';
+import { SubTaskId, TaskId, DesignId } from '../value-objects/entity-ids';
 
 export enum Level {
   HIGH = 'Alta',
@@ -50,8 +51,8 @@ export enum SubTaskType {
 }
 
 export interface SubTaskProps {
-  id: string;
-  taskId: string;
+  id: SubTaskId;
+  taskId: TaskId;
   status: SubTaskStatus;
   type: SubTaskType;
   expectedDelivery: Date;
@@ -62,11 +63,11 @@ export interface SubTaskProps {
 export abstract class SubTask extends Entity {
   @IsUUID()
   @IsNotEmpty()
-  protected id: string;
+  protected id: SubTaskId;
 
   @IsUUID()
   @IsNotEmpty()
-  protected taskId: string;
+  protected taskId: TaskId;
 
   @IsEnum(SubTaskStatus)
   protected status: SubTaskStatus;
@@ -98,10 +99,10 @@ export abstract class SubTask extends Entity {
   }
 
   // Getters
-  getId(): string {
+  getId(): SubTaskId {
     return this.id;
   }
-  getTaskId(): string {
+  getTaskId(): TaskId {
     return this.taskId;
   }
   getStatus(): SubTaskStatus {
@@ -264,7 +265,7 @@ export class DesignSubTask extends SubTask {
     this.validate();
   }
 
-  removeDesign(id: string): void {
+  removeDesign(id: DesignId): void {
     this.assertEditable();
     const index = this.designs.findIndex((d) => d.getId() === id);
     if (index === -1) {
@@ -287,9 +288,20 @@ export class DiagramSubTask extends SubTask {
   getDiagrams(): Diagram[] {
     return this.diagrams;
   }
+
   addDiagram(diagram: Diagram): void {
     this.assertEditable();
     this.diagrams.push(diagram);
+    this.validate();
+  }
+
+  removeDiagram(title: string): void {
+    this.assertEditable();
+    const index = this.diagrams.findIndex((d) => d.getTitle() === title);
+    if (index === -1) {
+      throw new Error(`Diagram com título "${title}" não encontrado`);
+    }
+    this.diagrams.splice(index, 1);
     this.validate();
   }
 }

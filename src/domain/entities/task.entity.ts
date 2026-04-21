@@ -12,6 +12,7 @@ import {
 import { Flow } from '../value-objects/flow.vo';
 import { Applicant } from '../value-objects/applicant.vo';
 import { TaskStatus } from './task-status.enum';
+import { ProjectId, TaskId } from '../value-objects/entity-ids';
 
 export { TaskStatus };
 
@@ -22,8 +23,8 @@ export enum TaskPriority {
 }
 
 export interface TaskProps {
-  id: string;
-  projectId: string;
+  id: TaskId;
+  projectId: ProjectId;
   name: string;
   description: string;
   taskNumber: string;
@@ -38,11 +39,11 @@ export interface TaskProps {
 export class Task extends Entity {
   @IsUUID()
   @IsNotEmpty()
-  private id: string;
+  private id: TaskId;
 
   @IsUUID()
   @IsNotEmpty()
-  private projectId: string;
+  private projectId: ProjectId;
 
   @IsString()
   @IsNotEmpty()
@@ -139,10 +140,10 @@ export class Task extends Entity {
   }
 
   // Getters
-  getId(): string {
+  getId(): TaskId {
     return this.id;
   }
-  getProjectId(): string {
+  getProjectId(): ProjectId {
     return this.projectId;
   }
   getName(): string {
