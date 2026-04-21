@@ -70,23 +70,66 @@ describe('SubTask Entity', () => {
     expect(subTask.getType()).toBe(SubTaskType.DISCOVERY);
   });
 
-  it('should create DesignSubTask with designs', () => {
-    const design = new Design({
-      title: 'Mobile Home',
-      description: 'Desc',
-      urlImage: 'https://example.com/img.png',
-    });
+  const validDesign = new Design({
+    id: '550e8400-e29b-41d4-a716-446655440050',
+    title: 'Mobile Home',
+    description: 'Desc',
+    urlImage: 'https://example.com/img.png',
+    user: '550e8400-e29b-41d4-a716-446655440003',
+    dateUpload: new Date('2026-04-21'),
+  });
 
+  it('should create DesignSubTask with designs', () => {
     const subTask = new DesignSubTask({
       id: '550e8400-e29b-41d4-a716-446655440008',
       taskId: '550e8400-e29b-41d4-a716-446655440001',
       status: SubTaskStatus.NAO_INICIADO,
       expectedDelivery: new Date(),
-      designs: [design],
+      designs: [validDesign],
     });
 
     expect(subTask.getDesigns()).toHaveLength(1);
     expect(subTask.getType()).toBe(SubTaskType.DESIGN);
+  });
+
+  describe('DesignSubTask', () => {
+    it('should add a design', () => {
+      const subTask = new DesignSubTask({
+        id: '550e8400-e29b-41d4-a716-446655440008',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status: SubTaskStatus.NAO_INICIADO,
+        expectedDelivery: new Date(),
+      });
+
+      subTask.addDesign(validDesign);
+      expect(subTask.getDesigns()).toHaveLength(1);
+    });
+
+    it('should remove a design by id', () => {
+      const subTask = new DesignSubTask({
+        id: '550e8400-e29b-41d4-a716-446655440008',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status: SubTaskStatus.NAO_INICIADO,
+        expectedDelivery: new Date(),
+        designs: [validDesign],
+      });
+
+      subTask.removeDesign(validDesign.getId());
+      expect(subTask.getDesigns()).toHaveLength(0);
+    });
+
+    it('should throw when removing a design that does not exist', () => {
+      const subTask = new DesignSubTask({
+        id: '550e8400-e29b-41d4-a716-446655440008',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status: SubTaskStatus.NAO_INICIADO,
+        expectedDelivery: new Date(),
+      });
+
+      expect(() => subTask.removeDesign('550e8400-e29b-41d4-a716-446655440099')).toThrow(
+        'Design com id 550e8400-e29b-41d4-a716-446655440099 não encontrado',
+      );
+    });
   });
 
   it('should create DiagramSubTask with diagrams', () => {
@@ -107,6 +150,62 @@ describe('SubTask Entity', () => {
     expect(subTask.getDiagrams()).toHaveLength(1);
     expect(subTask.getDiagrams()[0].getTitle()).toBe('Database Diagram');
     expect(subTask.getType()).toBe(SubTaskType.DIAGRAM);
+  });
+
+  describe('assertEditable()', () => {
+    const lockedStatuses = [
+      SubTaskStatus.AGUARDANDO_CHECKOUT,
+      SubTaskStatus.APROVADO,
+      SubTaskStatus.REPROVADO,
+    ];
+
+    it.each(lockedStatuses)('should throw when trying to addDesign with status "%s"', (status) => {
+      const subTask = new DesignSubTask({
+        id: '550e8400-e29b-41d4-a716-446655440008',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status,
+        expectedDelivery: new Date(),
+      });
+
+      expect(() => subTask.addDesign(validDesign)).toThrow(
+        `Subtask com status "${status}" não pode ser modificada`,
+      );
+    });
+
+    it.each(lockedStatuses)('should throw when trying to removeDesign with status "%s"', (status) => {
+      const subTask = new DesignSubTask({
+        id: '550e8400-e29b-41d4-a716-446655440008',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status,
+        expectedDelivery: new Date(),
+      });
+
+      expect(() => subTask.removeDesign('550e8400-e29b-41d4-a716-446655440099')).toThrow(
+        `Subtask com status "${status}" não pode ser modificada`,
+      );
+    });
+
+    it('should allow addDesign when status is NAO_INICIADO', () => {
+      const subTask = new DesignSubTask({
+        id: '550e8400-e29b-41d4-a716-446655440008',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status: SubTaskStatus.NAO_INICIADO,
+        expectedDelivery: new Date(),
+      });
+
+      expect(() => subTask.addDesign(validDesign)).not.toThrow();
+    });
+
+    it('should allow addDesign when status is EM_PROGRESSO', () => {
+      const subTask = new DesignSubTask({
+        id: '550e8400-e29b-41d4-a716-446655440008',
+        taskId: '550e8400-e29b-41d4-a716-446655440001',
+        status: SubTaskStatus.EM_PROGRESSO,
+        expectedDelivery: new Date(),
+      });
+
+      expect(() => subTask.addDesign(validDesign)).not.toThrow();
+    });
   });
 
   describe('approve()', () => {

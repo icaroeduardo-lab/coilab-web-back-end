@@ -91,6 +91,17 @@ export abstract class SubTask extends Entity {
     return this.completionDate;
   }
 
+  protected assertEditable(): void {
+    const lockedStatuses = [
+      SubTaskStatus.AGUARDANDO_CHECKOUT,
+      SubTaskStatus.APROVADO,
+      SubTaskStatus.REPROVADO,
+    ];
+    if (lockedStatuses.includes(this.status)) {
+      throw new Error(`Subtask com status "${this.status}" não pode ser modificada`);
+    }
+  }
+
   // Common Business Rules
   start(): void {
     this.status = SubTaskStatus.EM_PROGRESSO;
@@ -145,6 +156,7 @@ export class DiscoverySubTask extends SubTask {
     return this.discoveries;
   }
   addDiscovery(discovery: Discovery): void {
+    this.assertEditable();
     this.discoveries.push(discovery);
     this.validate();
   }
@@ -162,8 +174,20 @@ export class DesignSubTask extends SubTask {
   getDesigns(): Design[] {
     return this.designs;
   }
+
   addDesign(design: Design): void {
+    this.assertEditable();
     this.designs.push(design);
+    this.validate();
+  }
+
+  removeDesign(id: string): void {
+    this.assertEditable();
+    const index = this.designs.findIndex((d) => d.getId() === id);
+    if (index === -1) {
+      throw new Error(`Design com id ${id} não encontrado`);
+    }
+    this.designs.splice(index, 1);
     this.validate();
   }
 }
@@ -181,6 +205,7 @@ export class DiagramSubTask extends SubTask {
     return this.diagrams;
   }
   addDiagram(diagram: Diagram): void {
+    this.assertEditable();
     this.diagrams.push(diagram);
     this.validate();
   }

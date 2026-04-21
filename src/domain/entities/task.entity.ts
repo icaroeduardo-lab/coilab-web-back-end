@@ -130,7 +130,6 @@ export class Task extends Entity {
     }
   }
 
-
   // Getters
   getId(): string {
     return this.id;
