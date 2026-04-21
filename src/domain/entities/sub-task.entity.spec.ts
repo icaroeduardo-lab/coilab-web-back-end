@@ -357,8 +357,9 @@ describe('SubTask Entity', () => {
           status,
           expectedDelivery: new Date(),
         });
-        subTask.cancel();
+        subTask.cancel('Motivo de cancelamento');
         expect(subTask.getStatus()).toBe(SubTaskStatus.CANCELADO);
+        expect(subTask.getReason()).toBe('Motivo de cancelamento');
       }
     });
 
@@ -370,7 +371,7 @@ describe('SubTask Entity', () => {
         expectedDelivery: new Date(),
       });
       subTask.approve();
-      expect(() => subTask.cancel()).toThrow(
+      expect(() => subTask.cancel('Motivo de cancelamento')).toThrow(
         'A subtask já foi aprovada e não pode ser cancelada',
       );
     });
@@ -412,8 +413,9 @@ describe('SubTask Entity', () => {
         expectedDelivery: new Date(),
       });
 
-      subTask.reject();
+      subTask.reject('Motivo de reprovação');
       expect(subTask.getStatus()).toBe(SubTaskStatus.REPROVADO);
+      expect(subTask.getReason()).toBe('Motivo de reprovação');
     });
 
     it('should throw if subtask is not AGUARDANDO_CHECKOUT', () => {
@@ -424,7 +426,7 @@ describe('SubTask Entity', () => {
         expectedDelivery: new Date(),
       });
 
-      expect(() => subTask.reject()).toThrow(
+      expect(() => subTask.reject('Motivo de reprovação')).toThrow(
         'A subtask precisa estar Aguardando Checkout para ser reprovada',
       );
     });

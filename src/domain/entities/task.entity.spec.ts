@@ -157,7 +157,7 @@ describe('Task Entity', () => {
         status: SubTaskStatus.AGUARDANDO_CHECKOUT,
         expectedDelivery: deliveryDate,
       }));
-      task.getSubTasks()[0].reject();
+      task.getSubTasks()[0].reject('Motivo de reprovação');
       task.changeStatus(TaskStatus.EM_EXECUCAO);
       expect(() => task.assertCanBeDeleted()).not.toThrow();
     });
@@ -197,7 +197,7 @@ describe('Task Entity', () => {
         status: SubTaskStatus.EM_PROGRESSO,
         expectedDelivery: deliveryDate,
       }));
-      task.getSubTasks()[0].cancel();
+      task.getSubTasks()[0].cancel('Motivo de cancelamento');
       expect(() => task.assertCanBeDeleted()).not.toThrow();
     });
 
@@ -215,8 +215,8 @@ describe('Task Entity', () => {
         status: SubTaskStatus.EM_PROGRESSO,
         expectedDelivery: deliveryDate,
       }));
-      task.getSubTasks()[0].reject();
-      task.getSubTasks()[1].cancel();
+      task.getSubTasks()[0].reject('Motivo de reprovação');
+      task.getSubTasks()[1].cancel('Motivo de cancelamento');
       expect(() => task.assertCanBeDeleted()).not.toThrow();
     });
 
@@ -234,7 +234,7 @@ describe('Task Entity', () => {
         status: SubTaskStatus.EM_PROGRESSO,
         expectedDelivery: deliveryDate,
       }));
-      task.getSubTasks()[0].reject();
+      task.getSubTasks()[0].reject('Motivo de reprovação');
       expect(() => task.assertCanBeDeleted()).toThrow(
         'Task não pode ser removida pois possui subtasks ativas',
       );

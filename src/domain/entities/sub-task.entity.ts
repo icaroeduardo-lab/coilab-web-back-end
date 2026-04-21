@@ -1,5 +1,13 @@
 import 'reflect-metadata';
-import { IsEnum, IsNotEmpty, IsOptional, IsUUID, IsDate, ValidateNested } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  IsDate,
+  ValidateNested,
+} from 'class-validator';
 import { Entity } from './entity.base';
 import { Design } from '../value-objects/design.vo';
 import { Diagram } from '../value-objects/diagram.vo';
@@ -59,6 +67,7 @@ export interface SubTaskProps {
   expectedDelivery: Date;
   startDate?: Date;
   completionDate?: Date;
+  reason?: string;
 }
 
 export abstract class SubTask extends Entity {
@@ -87,6 +96,11 @@ export abstract class SubTask extends Entity {
   @IsOptional()
   protected completionDate?: Date;
 
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  protected reason?: string;
+
   constructor(props: SubTaskProps) {
     super();
     this.id = props.id;
@@ -96,6 +110,7 @@ export abstract class SubTask extends Entity {
     this.expectedDelivery = props.expectedDelivery;
     this.startDate = props.startDate;
     this.completionDate = props.completionDate;
+    this.reason = props.reason;
     this.validate();
   }
 
@@ -120,6 +135,10 @@ export abstract class SubTask extends Entity {
   }
   getCompletionDate(): Date | undefined {
     return this.completionDate;
+  }
+
+  getReason(): string | undefined {
+    return this.reason;
   }
 
   protected assertEditable(): void {
@@ -155,19 +174,21 @@ export abstract class SubTask extends Entity {
     this.validate();
   }
 
-  reject(): void {
+  reject(reason: string): void {
     if (this.status !== SubTaskStatus.AGUARDANDO_CHECKOUT) {
       throw new Error('A subtask precisa estar Aguardando Checkout para ser reprovada');
     }
     this.status = SubTaskStatus.REPROVADO;
+    this.reason = reason;
     this.validate();
   }
 
-  cancel(): void {
+  cancel(reason: string): void {
     if (this.status === SubTaskStatus.APROVADO) {
       throw new Error('A subtask já foi aprovada e não pode ser cancelada');
     }
     this.status = SubTaskStatus.CANCELADO;
+    this.reason = reason;
     this.validate();
   }
 
