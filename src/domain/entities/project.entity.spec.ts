@@ -15,7 +15,7 @@ describe('Project Entity', () => {
       name: 'Initial Flow',
     });
 
-    const projectProps = {
+    const project = new Project({
       name: 'Project Alpha',
       id: '550e8400-e29b-41d4-a716-446655440000',
       projectNumber: 'P-001',
@@ -23,17 +23,13 @@ describe('Project Entity', () => {
       urlDocument: 'https://example.com/doc',
       status: ProjectStatus.BACKLOG,
       createdAt: new Date(),
-      applicant,
       flows: [flow],
-    };
+    });
 
-    const project = new Project(projectProps);
-
-    expect(project.getId()).toBe(projectProps.id);
+    expect(project.getId()).toBe('550e8400-e29b-41d4-a716-446655440000');
     expect(project.getFlows()).toHaveLength(1);
     expect(project.getFlows()[0].getName()).toBe('Initial Flow');
     expect(project.getTasks()).toHaveLength(0);
-    expect(project.getApplicant().getName()).toBe('John Doe');
   });
 
   it('should add flow to project', () => {
@@ -42,7 +38,6 @@ describe('Project Entity', () => {
       id: '550e8400-e29b-41d4-a716-446655440000',
       projectNumber: 'P-001',
       description: 'Desc',
-      applicant,
     });
 
     const flow = new Flow({
@@ -60,7 +55,6 @@ describe('Project Entity', () => {
       id: '550e8400-e29b-41d4-a716-446655440000',
       projectNumber: 'P-001',
       description: 'Desc',
-      applicant,
     });
 
     const task = new Task({
@@ -71,6 +65,7 @@ describe('Project Entity', () => {
       taskNumber: 'T-001',
       priority: TaskPriority.BAIXA,
       status: TaskStatus.BACKLOG,
+      applicant,
     });
 
     project.addTask(task);
@@ -85,7 +80,6 @@ describe('Project Entity', () => {
       id: '550e8400-e29b-41d4-a716-446655440000',
       projectNumber: 'P-001',
       description: 'Desc',
-      applicant,
     });
 
     const task = new Task({
@@ -96,6 +90,7 @@ describe('Project Entity', () => {
       taskNumber: 'T-001',
       priority: TaskPriority.BAIXA,
       status: TaskStatus.BACKLOG,
+      applicant,
     });
 
     expect(() => project.addTask(task)).toThrow('Task does not belong to this project');
@@ -107,7 +102,6 @@ describe('Project Entity', () => {
       id: '550e8400-e29b-41d4-a716-446655440000',
       projectNumber: 'P-001',
       description: 'Desc',
-      applicant,
     });
 
     project.changeName('New Name');
@@ -120,7 +114,6 @@ describe('Project Entity', () => {
       id: '550e8400-e29b-41d4-a716-446655440000',
       projectNumber: 'P-001',
       description: 'Desc',
-      applicant,
     });
 
     expect(() => project.changeName('')).toThrow('Validation failed: name should not be empty');
@@ -132,28 +125,9 @@ describe('Project Entity', () => {
       id: '550e8400-e29b-41d4-a716-446655440000',
       projectNumber: 'P-001',
       description: 'Desc',
-      applicant,
     });
 
     project.updateStatus(ProjectStatus.EM_EXECUCAO);
     expect(project.getStatus()).toBe(ProjectStatus.EM_EXECUCAO);
-  });
-
-  it('should change applicant', () => {
-    const project = new Project({
-      name: 'Name',
-      id: '550e8400-e29b-41d4-a716-446655440000',
-      projectNumber: 'P-001',
-      description: 'Desc',
-      applicant,
-    });
-
-    const newApplicant = new Applicant({
-      id: '550e8400-e29b-41d4-a716-446655440004',
-      name: 'Jane Smith',
-    });
-
-    project.changeApplicant(newApplicant);
-    expect(project.getApplicant().getName()).toBe('Jane Smith');
   });
 });

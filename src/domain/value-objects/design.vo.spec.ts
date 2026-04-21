@@ -1,34 +1,47 @@
 import { Design } from './design.vo';
 
 describe('Design Value Object', () => {
-  it('should create a valid design', () => {
-    const props = {
-      title: 'Homepage Desktop',
-      description: 'Main landing page design',
-      urlImage: 'https://example.com/image.png',
-    };
-    const design = new Design(props);
+  const validProps = {
+    id: '550e8400-e29b-41d4-a716-446655440010',
+    title: 'Homepage Desktop',
+    description: 'Main landing page design',
+    urlImage: 'https://example.com/image.png',
+    user: '550e8400-e29b-41d4-a716-446655440003',
+    dateUpload: new Date('2026-04-21'),
+  };
 
-    expect(design.getTitle()).toBe(props.title);
-    expect(design.getDescription()).toBe(props.description);
-    expect(design.getUrlImage()).toBe(props.urlImage);
+  it('should create a valid design', () => {
+    const design = new Design(validProps);
+
+    expect(design.getId()).toBe(validProps.id);
+    expect(design.getTitle()).toBe(validProps.title);
+    expect(design.getDescription()).toBe(validProps.description);
+    expect(design.getUrlImage()).toBe(validProps.urlImage);
+    expect(design.getUser()).toBe(validProps.user);
+    expect(design.getDateUpload()).toBe(validProps.dateUpload);
+  });
+
+  it('should throw error if id is not a valid UUID', () => {
+    expect(() => new Design({ ...validProps, id: 'invalid-uuid' })).toThrow(
+      'Validation failed: id must be a UUID',
+    );
   });
 
   it('should throw error if title is empty', () => {
-    const props = {
-      title: '',
-      description: 'Desc',
-      urlImage: 'https://example.com/image.png',
-    };
-    expect(() => new Design(props)).toThrow('Validation failed: title should not be empty');
+    expect(() => new Design({ ...validProps, title: '' })).toThrow(
+      'Validation failed: title should not be empty',
+    );
   });
 
   it('should throw error if urlImage is not a valid URL', () => {
-    const props = {
-      title: 'Title',
-      description: 'Desc',
-      urlImage: 'invalid-url',
-    };
-    expect(() => new Design(props)).toThrow('Validation failed: urlImage must be a URL address');
+    expect(() => new Design({ ...validProps, urlImage: 'invalid-url' })).toThrow(
+      'Validation failed: urlImage must be a URL address',
+    );
+  });
+
+  it('should throw error if user is not a valid UUID', () => {
+    expect(() => new Design({ ...validProps, user: 'invalid-uuid' })).toThrow(
+      'Validation failed: user must be a UUID',
+    );
   });
 });
