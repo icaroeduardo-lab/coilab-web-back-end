@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { IsNotEmpty, IsString, IsUUID, MinLength } from 'class-validator';
 import { ValueObject } from './value-object.base';
-import { ApplicantId } from './entity-ids';
+import { ApplicantId } from '../shared/entity-ids';
 
 export interface ApplicantProps {
   id: ApplicantId;

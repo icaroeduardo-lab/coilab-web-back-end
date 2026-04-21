@@ -1,5 +1,5 @@
 import { Applicant } from './applicant.vo';
-import { ApplicantId } from './entity-ids';
+import { ApplicantId } from '../shared/entity-ids';
 
 describe('Applicant Value Object', () => {
   const validId = ApplicantId('550e8400-e29b-41d4-a716-446655440003');

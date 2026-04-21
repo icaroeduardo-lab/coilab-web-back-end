@@ -12,7 +12,7 @@ import {
 import { Flow } from '../value-objects/flow.vo';
 import { Applicant } from '../value-objects/applicant.vo';
 import { TaskStatus } from './task-status.enum';
-import { ProjectId, TaskId } from '../value-objects/entity-ids';
+import { ProjectId, TaskId } from '../shared/entity-ids';
 
 export { TaskStatus };
 
