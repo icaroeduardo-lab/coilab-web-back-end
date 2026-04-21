@@ -1,32 +1,19 @@
 import { Flow } from './flow.vo';
+import { FlowId } from './entity-ids';
 
 describe('Flow Value Object', () => {
-  it('should create a valid flow', () => {
-    const props = {
-      id: '550e8400-e29b-41d4-a716-446655440005',
-      name: 'Initial Flow',
-    };
-    const flow = new Flow(props);
+  const validId = FlowId('550e8400-e29b-41d4-a716-446655440005');
 
-    expect(flow.getId()).toBe(props.id);
-    expect(flow.getName()).toBe(props.name);
+  it('should create a valid flow', () => {
+    const flow = new Flow({ id: validId, name: 'Initial Flow' });
+
+    expect(flow.getId()).toBe(validId);
+    expect(flow.getName()).toBe('Initial Flow');
   });
 
   it('should throw error if name is too short', () => {
-    const props = {
-      id: '550e8400-e29b-41d4-a716-446655440005',
-      name: 'Jo',
-    };
-    expect(() => new Flow(props)).toThrow(
+    expect(() => new Flow({ id: validId, name: 'Jo' })).toThrow(
       'Validation failed: name must be longer than or equal to 3 characters',
     );
-  });
-
-  it('should throw error if id is invalid', () => {
-    const props = {
-      id: 'invalid-uuid',
-      name: 'Flow Name',
-    };
-    expect(() => new Flow(props)).toThrow('Validation failed: id must be a UUID');
   });
 });

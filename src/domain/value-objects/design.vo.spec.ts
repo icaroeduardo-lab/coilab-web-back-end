@@ -1,12 +1,13 @@
 import { Design } from './design.vo';
+import { DesignId, ApplicantId } from './entity-ids';
 
 describe('Design Value Object', () => {
   const validProps = {
-    id: '550e8400-e29b-41d4-a716-446655440010',
+    id: DesignId('550e8400-e29b-41d4-a716-446655440010'),
     title: 'Homepage Desktop',
     description: 'Main landing page design',
     urlImage: 'https://example.com/image.png',
-    user: '550e8400-e29b-41d4-a716-446655440003',
+    user: ApplicantId('550e8400-e29b-41d4-a716-446655440003'),
     dateUpload: new Date('2026-04-21'),
   };
 
@@ -21,12 +22,6 @@ describe('Design Value Object', () => {
     expect(design.getDateUpload()).toBe(validProps.dateUpload);
   });
 
-  it('should throw error if id is not a valid UUID', () => {
-    expect(() => new Design({ ...validProps, id: 'invalid-uuid' })).toThrow(
-      'Validation failed: id must be a UUID',
-    );
-  });
-
   it('should throw error if title is empty', () => {
     expect(() => new Design({ ...validProps, title: '' })).toThrow(
       'Validation failed: title should not be empty',
@@ -36,12 +31,6 @@ describe('Design Value Object', () => {
   it('should throw error if urlImage is not a valid URL', () => {
     expect(() => new Design({ ...validProps, urlImage: 'invalid-url' })).toThrow(
       'Validation failed: urlImage must be a URL address',
-    );
-  });
-
-  it('should throw error if user is not a valid UUID', () => {
-    expect(() => new Design({ ...validProps, user: 'invalid-uuid' })).toThrow(
-      'Validation failed: user must be a UUID',
     );
   });
 });
