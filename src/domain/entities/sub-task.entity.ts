@@ -3,7 +3,7 @@ import { IsEnum, IsNotEmpty, IsOptional, IsUUID, IsDate, ValidateNested } from '
 import { Entity } from './entity.base';
 import { Design } from '../value-objects/design.vo';
 import { Diagram } from '../value-objects/diagram.vo';
-import { SubTaskId, TaskId, DesignId } from '../value-objects/entity-ids';
+import { SubTaskId, TaskId, DesignId } from '../shared/entity-ids';
 
 export enum Level {
   HIGH = 'Alta',

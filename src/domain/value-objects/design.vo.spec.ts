@@ -1,5 +1,5 @@
 import { Design } from './design.vo';
-import { DesignId, ApplicantId } from './entity-ids';
+import { DesignId, ApplicantId } from '../shared/entity-ids';
 
 describe('Design Value Object', () => {
   const validProps = {

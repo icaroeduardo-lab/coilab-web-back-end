@@ -1,7 +1,7 @@
 import { Task, TaskPriority, TaskStatus } from './task.entity';
 import { DiscoverySubTask, DesignSubTask, SubTaskStatus } from './sub-task.entity';
 import { Applicant } from '../value-objects/applicant.vo';
-import { TaskId, ProjectId, SubTaskId, ApplicantId } from '../value-objects/entity-ids';
+import { TaskId, ProjectId, SubTaskId, ApplicantId } from '../shared/entity-ids';
 
 describe('Task Status Transition Rules', () => {
   const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');

@@ -2,7 +2,7 @@ import { Task, TaskPriority, TaskStatus } from './task.entity';
 import { DiscoverySubTask, DesignSubTask, DiagramSubTask, SubTaskStatus } from './sub-task.entity';
 import { Applicant } from '../value-objects/applicant.vo';
 import { Flow } from '../value-objects/flow.vo';
-import { TaskId, ProjectId, SubTaskId, ApplicantId, FlowId } from '../value-objects/entity-ids';
+import { TaskId, ProjectId, SubTaskId, ApplicantId, FlowId } from '../shared/entity-ids';
 
 describe('Task Entity', () => {
   const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');

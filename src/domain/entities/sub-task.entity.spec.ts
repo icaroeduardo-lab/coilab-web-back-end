@@ -9,7 +9,7 @@ import {
 } from './sub-task.entity';
 import { Design } from '../value-objects/design.vo';
 import { Diagram } from '../value-objects/diagram.vo';
-import { SubTaskId, TaskId, DesignId, ApplicantId } from '../value-objects/entity-ids';
+import { SubTaskId, TaskId, DesignId, ApplicantId } from '../shared/entity-ids';
 
 const fullDiscoveryForm = {
   complexity: Level.HIGH,
@@ -239,11 +239,13 @@ describe('SubTask Entity', () => {
         expectedDelivery: new Date(),
       });
 
-      subTask.addDiagram(new Diagram({
-        title: 'New Diagram',
-        description: 'Desc',
-        urlDiagram: 'https://example.com/diagram.png',
-      }));
+      subTask.addDiagram(
+        new Diagram({
+          title: 'New Diagram',
+          description: 'Desc',
+          urlDiagram: 'https://example.com/diagram.png',
+        }),
+      );
       expect(subTask.getDiagrams()).toHaveLength(1);
     });
 
@@ -300,18 +302,21 @@ describe('SubTask Entity', () => {
       );
     });
 
-    it.each(lockedStatuses)('should throw when trying to removeDesign with status "%s"', (status) => {
-      const subTask = new DesignSubTask({
-        id: SubTaskId('550e8400-e29b-41d4-a716-446655440008'),
-        taskId: TaskId('550e8400-e29b-41d4-a716-446655440001'),
-        status,
-        expectedDelivery: new Date(),
-      });
+    it.each(lockedStatuses)(
+      'should throw when trying to removeDesign with status "%s"',
+      (status) => {
+        const subTask = new DesignSubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440008'),
+          taskId: TaskId('550e8400-e29b-41d4-a716-446655440001'),
+          status,
+          expectedDelivery: new Date(),
+        });
 
-      expect(() => subTask.removeDesign(DesignId('550e8400-e29b-41d4-a716-446655440099'))).toThrow(
-        `Subtask com status "${status}" não pode ser modificada`,
-      );
-    });
+        expect(() =>
+          subTask.removeDesign(DesignId('550e8400-e29b-41d4-a716-446655440099')),
+        ).toThrow(`Subtask com status "${status}" não pode ser modificada`);
+      },
+    );
 
     it('should allow addDesign when status is NAO_INICIADO', () => {
       const subTask = new DesignSubTask({
