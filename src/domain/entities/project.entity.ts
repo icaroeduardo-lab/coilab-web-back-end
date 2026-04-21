@@ -11,6 +11,7 @@ import {
 import { Entity } from './entity.base';
 import { Task } from './task.entity';
 import { Flow } from '../value-objects/flow.vo';
+import { ProjectId } from '../value-objects/entity-ids';
 
 export enum ProjectStatus {
   BACKLOG = 'backlog',
@@ -20,7 +21,7 @@ export enum ProjectStatus {
 }
 
 export interface ProjectProps {
-  id: string;
+  id: ProjectId;
   name: string;
   projectNumber: string;
   description: string;
@@ -34,7 +35,7 @@ export interface ProjectProps {
 export class Project extends Entity {
   @IsUUID()
   @IsNotEmpty()
-  private id: string;
+  private id: ProjectId;
 
   @IsString()
   @IsNotEmpty()
@@ -79,7 +80,7 @@ export class Project extends Entity {
   }
 
   // Getters
-  getId(): string {
+  getId(): ProjectId {
     return this.id;
   }
   getName(): string {

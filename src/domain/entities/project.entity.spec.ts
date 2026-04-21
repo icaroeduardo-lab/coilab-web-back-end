@@ -2,22 +2,23 @@ import { Project, ProjectStatus } from './project.entity';
 import { Task, TaskPriority, TaskStatus } from './task.entity';
 import { Applicant } from '../value-objects/applicant.vo';
 import { Flow } from '../value-objects/flow.vo';
+import { ProjectId, TaskId, ApplicantId, FlowId } from '../value-objects/entity-ids';
 
 describe('Project Entity', () => {
   const applicant = new Applicant({
-    id: '550e8400-e29b-41d4-a716-446655440003',
+    id: ApplicantId('550e8400-e29b-41d4-a716-446655440003'),
     name: 'John Doe',
   });
 
   it('should create a new project with all properties', () => {
     const flow = new Flow({
-      id: '550e8400-e29b-41d4-a716-446655440005',
+      id: FlowId('550e8400-e29b-41d4-a716-446655440005'),
       name: 'Initial Flow',
     });
 
     const project = new Project({
       name: 'Project Alpha',
-      id: '550e8400-e29b-41d4-a716-446655440000',
+      id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
       projectNumber: 'P-001',
       description: 'Test description',
       urlDocument: 'https://example.com/doc',
@@ -35,13 +36,13 @@ describe('Project Entity', () => {
   it('should add flow to project', () => {
     const project = new Project({
       name: 'Project Alpha',
-      id: '550e8400-e29b-41d4-a716-446655440000',
+      id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
       projectNumber: 'P-001',
       description: 'Desc',
     });
 
     const flow = new Flow({
-      id: '550e8400-e29b-41d4-a716-446655440005',
+      id: FlowId('550e8400-e29b-41d4-a716-446655440005'),
       name: 'New Flow',
     });
 
@@ -52,13 +53,13 @@ describe('Project Entity', () => {
   it('should add tasks to project', () => {
     const project = new Project({
       name: 'Project Alpha',
-      id: '550e8400-e29b-41d4-a716-446655440000',
+      id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
       projectNumber: 'P-001',
       description: 'Desc',
     });
 
     const task = new Task({
-      id: '550e8400-e29b-41d4-a716-446655440001',
+      id: TaskId('550e8400-e29b-41d4-a716-446655440001'),
       projectId: project.getId(),
       name: 'Task 01',
       description: 'Desc',
@@ -77,14 +78,14 @@ describe('Project Entity', () => {
   it('should throw error when adding task from another project', () => {
     const project = new Project({
       name: 'Project Alpha',
-      id: '550e8400-e29b-41d4-a716-446655440000',
+      id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
       projectNumber: 'P-001',
       description: 'Desc',
     });
 
     const task = new Task({
-      id: '550e8400-e29b-41d4-a716-446655440001',
-      projectId: '550e8400-e29b-41d4-a716-446655440002',
+      id: TaskId('550e8400-e29b-41d4-a716-446655440001'),
+      projectId: ProjectId('550e8400-e29b-41d4-a716-446655440002'),
       name: 'Task 01',
       description: 'Desc',
       taskNumber: 'T-001',
@@ -99,7 +100,7 @@ describe('Project Entity', () => {
   it('should change name correctly', () => {
     const project = new Project({
       name: 'Old Name',
-      id: '550e8400-e29b-41d4-a716-446655440000',
+      id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
       projectNumber: 'P-001',
       description: 'Desc',
     });
@@ -111,7 +112,7 @@ describe('Project Entity', () => {
   it('should throw error when changing to an invalid name', () => {
     const project = new Project({
       name: 'Old Name',
-      id: '550e8400-e29b-41d4-a716-446655440000',
+      id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
       projectNumber: 'P-001',
       description: 'Desc',
     });
@@ -122,7 +123,7 @@ describe('Project Entity', () => {
   it('should update status', () => {
     const project = new Project({
       name: 'Name',
-      id: '550e8400-e29b-41d4-a716-446655440000',
+      id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
       projectNumber: 'P-001',
       description: 'Desc',
     });
@@ -134,7 +135,7 @@ describe('Project Entity', () => {
   it('should expose all getters correctly', () => {
     const project = new Project({
       name: 'Name',
-      id: '550e8400-e29b-41d4-a716-446655440000',
+      id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
       projectNumber: 'P-001',
       description: 'Some description',
       urlDocument: 'https://example.com/doc',
@@ -150,7 +151,7 @@ describe('Project Entity', () => {
   it('should change description correctly', () => {
     const project = new Project({
       name: 'Name',
-      id: '550e8400-e29b-41d4-a716-446655440000',
+      id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
       projectNumber: 'P-001',
       description: 'Old desc',
     });
@@ -162,7 +163,7 @@ describe('Project Entity', () => {
   it('should update urlDocument correctly', () => {
     const project = new Project({
       name: 'Name',
-      id: '550e8400-e29b-41d4-a716-446655440000',
+      id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
       projectNumber: 'P-001',
       description: 'Desc',
     });

@@ -2,32 +2,34 @@ import { Task, TaskPriority, TaskStatus } from './task.entity';
 import { DiscoverySubTask, DesignSubTask, DiagramSubTask, SubTaskStatus } from './sub-task.entity';
 import { Applicant } from '../value-objects/applicant.vo';
 import { Flow } from '../value-objects/flow.vo';
+import { TaskId, ProjectId, SubTaskId, ApplicantId, FlowId } from '../value-objects/entity-ids';
 
 describe('Task Entity', () => {
-  const taskId = '550e8400-e29b-41d4-a716-446655440001';
+  const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');
+  const projectId = ProjectId('550e8400-e29b-41d4-a716-446655440000');
   const deliveryDate = new Date('2026-12-31');
 
   const applicant = new Applicant({
-    id: '550e8400-e29b-41d4-a716-446655440003',
+    id: ApplicantId('550e8400-e29b-41d4-a716-446655440003'),
     name: 'John Doe',
   });
 
   const discovery = new DiscoverySubTask({
-    id: '550e8400-e29b-41d4-a716-446655440008',
+    id: SubTaskId('550e8400-e29b-41d4-a716-446655440008'),
     taskId,
     status: SubTaskStatus.NAO_INICIADO,
     expectedDelivery: deliveryDate,
   });
 
   const design = new DesignSubTask({
-    id: '550e8400-e29b-41d4-a716-446655440009',
+    id: SubTaskId('550e8400-e29b-41d4-a716-446655440009'),
     taskId,
     status: SubTaskStatus.NAO_INICIADO,
     expectedDelivery: deliveryDate,
   });
 
   const diagram = new DiagramSubTask({
-    id: '550e8400-e29b-41d4-a716-446655440011',
+    id: SubTaskId('550e8400-e29b-41d4-a716-446655440011'),
     taskId,
     status: SubTaskStatus.NAO_INICIADO,
     expectedDelivery: deliveryDate,
@@ -36,7 +38,7 @@ describe('Task Entity', () => {
   const baseTask = () =>
     new Task({
       id: taskId,
-      projectId: '550e8400-e29b-41d4-a716-446655440000',
+      projectId,
       name: 'Task 01',
       description: 'Task description',
       taskNumber: 'T-001',
@@ -48,7 +50,7 @@ describe('Task Entity', () => {
   it('should create a new task with subtasks', () => {
     const task = new Task({
       id: taskId,
-      projectId: '550e8400-e29b-41d4-a716-446655440000',
+      projectId,
       name: 'Task 01',
       description: 'Task description',
       taskNumber: 'T-001',
@@ -69,7 +71,7 @@ describe('Task Entity', () => {
     const task = baseTask();
 
     expect(task.getId()).toBe(taskId);
-    expect(task.getProjectId()).toBe('550e8400-e29b-41d4-a716-446655440000');
+    expect(task.getProjectId()).toBe(projectId);
     expect(task.getName()).toBe('Task 01');
     expect(task.getDescription()).toBe('Task description');
     expect(task.getTaskNumber()).toBe('T-001');
@@ -112,7 +114,7 @@ describe('Task Entity', () => {
   it('should change applicant correctly', () => {
     const task = baseTask();
     const newApplicant = new Applicant({
-      id: '550e8400-e29b-41d4-a716-446655440004',
+      id: ApplicantId('550e8400-e29b-41d4-a716-446655440004'),
       name: 'Jane Smith',
     });
     task.changeApplicant(newApplicant);
@@ -122,7 +124,7 @@ describe('Task Entity', () => {
   it('should add flow correctly', () => {
     const task = baseTask();
     const flow = new Flow({
-      id: '550e8400-e29b-41d4-a716-446655440005',
+      id: FlowId('550e8400-e29b-41d4-a716-446655440005'),
       name: 'Flow A',
     });
     task.addFlow(flow);
