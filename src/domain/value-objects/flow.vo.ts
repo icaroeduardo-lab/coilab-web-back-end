@@ -1,16 +1,17 @@
 import 'reflect-metadata';
 import { IsNotEmpty, IsString, IsUUID, MinLength } from 'class-validator';
 import { ValueObject } from './value-object.base';
+import { FlowId } from './entity-ids';
 
 export interface FlowProps {
-  id: string;
+  id: FlowId;
   name: string;
 }
 
 export class Flow extends ValueObject {
   @IsUUID()
   @IsNotEmpty()
-  private readonly id: string;
+  private readonly id: FlowId;
 
   @IsString()
   @IsNotEmpty()
@@ -24,7 +25,7 @@ export class Flow extends ValueObject {
     this.validate();
   }
 
-  getId(): string {
+  getId(): FlowId {
     return this.id;
   }
 

@@ -1,16 +1,17 @@
 import 'reflect-metadata';
 import { IsNotEmpty, IsString, IsUUID, MinLength } from 'class-validator';
 import { ValueObject } from './value-object.base';
+import { ApplicantId } from './entity-ids';
 
 export interface ApplicantProps {
-  id: string;
+  id: ApplicantId;
   name: string;
 }
 
 export class Applicant extends ValueObject {
   @IsUUID()
   @IsNotEmpty()
-  private readonly id: string;
+  private readonly id: ApplicantId;
 
   @IsString()
   @IsNotEmpty()
@@ -24,7 +25,7 @@ export class Applicant extends ValueObject {
     this.validate();
   }
 
-  getId(): string {
+  getId(): ApplicantId {
     return this.id;
   }
 
