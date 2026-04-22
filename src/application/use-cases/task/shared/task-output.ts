@@ -1,0 +1,64 @@
+import { TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
+import { SubTaskStatus, SubTaskType } from '../../../../domain/entities/sub-task.entity';
+
+export interface TaskOutput {
+  id: string;
+  projectId: string;
+  name: string;
+  taskNumber: string;
+  priority: TaskPriority;
+  status: TaskStatus;
+}
+
+export interface CreatorOutput {
+  id: string;
+  name: string;
+  imageUrl?: string;
+}
+
+export interface ApplicantOutput {
+  id: string;
+  name: string;
+}
+
+export interface FlowOutput {
+  id: string;
+  name: string;
+}
+
+export interface SubTaskOutput {
+  id: string;
+  type: SubTaskType;
+  status: SubTaskStatus;
+  expectedDelivery: Date;
+  startDate?: Date;
+  completionDate?: Date;
+}
+
+export interface ProjectOutput {
+  id: string;
+  name: string;
+}
+
+export interface SubTaskSummaryOutput {
+  type: SubTaskType;
+  status: SubTaskStatus;
+}
+
+export interface TaskListOutput extends Omit<TaskOutput, 'projectId'> {
+  description: string;
+  project: ProjectOutput;
+  applicant: ApplicantOutput;
+  subTasks: SubTaskSummaryOutput[];
+  createdAt: Date;
+}
+
+export interface TaskDetailOutput extends Omit<TaskOutput, 'projectId'> {
+  description: string;
+  project: ProjectOutput;
+  applicant: ApplicantOutput;
+  creator: CreatorOutput;
+  flows: FlowOutput[];
+  subTasks: SubTaskOutput[];
+  createdAt: Date;
+}

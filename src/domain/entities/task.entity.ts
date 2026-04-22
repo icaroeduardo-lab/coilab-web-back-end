@@ -1,5 +1,14 @@
 import 'reflect-metadata';
-import { IsNotEmpty, IsString, IsUUID, IsDate, IsEnum, ValidateNested } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsUUID,
+  IsDate,
+  IsEnum,
+  IsArray,
+  Matches,
+  ValidateNested,
+} from 'class-validator';
 import { Entity } from './entity.base';
 import {
   DiscoverySubTask,
@@ -9,10 +18,9 @@ import {
   SubTaskStatus,
   SubTaskType,
 } from './sub-task.entity';
-import { Flow } from '../value-objects/flow.vo';
-import { Applicant } from '../value-objects/applicant.vo';
 import { TaskStatus } from './task-status.enum';
-import { ProjectId, TaskId } from '../shared/entity-ids';
+import { ProjectId, TaskId, ApplicantId, UserId, FlowId } from '../shared/entity-ids';
+import { SEQUENTIAL_NUMBER_REGEX } from '../shared/sequential-number';
 
 export { TaskStatus };
 
@@ -30,9 +38,10 @@ export interface TaskProps {
   taskNumber: string;
   priority: TaskPriority;
   status: TaskStatus;
-  applicant: Applicant;
+  applicantId: ApplicantId;
+  creatorId: UserId;
   subTasks?: SubTask[];
-  flows?: Flow[];
+  flowIds?: FlowId[];
   createdAt?: Date;
 }
 
@@ -53,7 +62,7 @@ export class Task extends Entity {
   @IsNotEmpty()
   private description: string;
 
-  @IsString()
+  @Matches(SEQUENTIAL_NUMBER_REGEX)
   @IsNotEmpty()
   private taskNumber: string;
 
@@ -63,14 +72,20 @@ export class Task extends Entity {
   @IsEnum(TaskStatus)
   private status: TaskStatus;
 
-  @ValidateNested()
-  private applicant: Applicant;
+  @IsUUID()
+  @IsNotEmpty()
+  private applicantId: ApplicantId;
+
+  @IsUUID()
+  @IsNotEmpty()
+  private creatorId: UserId;
 
   @ValidateNested({ each: true })
   private subTasks: SubTask[];
 
-  @ValidateNested({ each: true })
-  private flows: Flow[];
+  @IsArray()
+  @IsUUID('4', { each: true })
+  private flowIds: FlowId[];
 
   @IsDate()
   private createdAt: Date;
@@ -84,9 +99,10 @@ export class Task extends Entity {
     this.taskNumber = props.taskNumber;
     this.priority = props.priority;
     this.status = props.status;
-    this.applicant = props.applicant;
+    this.applicantId = props.applicantId;
+    this.creatorId = props.creatorId;
     this.subTasks = props.subTasks ?? [];
-    this.flows = props.flows ?? [];
+    this.flowIds = props.flowIds ?? [];
     this.createdAt = props.createdAt ?? new Date();
 
     this.applyStatusRules();
@@ -94,7 +110,6 @@ export class Task extends Entity {
   }
 
   private applyStatusRules(): void {
-    // Regra: Se a Task estiver em Backlog mas tiver subtask em progresso, vai para Em Execução
     if (this.status === TaskStatus.BACKLOG) {
       const hasAnyInProgress = this.subTasks.some(
         (s) => s.getStatus() === SubTaskStatus.EM_PROGRESSO,
@@ -104,11 +119,9 @@ export class Task extends Entity {
       }
     }
 
-    // Regra: Checkout
     if (this.status === TaskStatus.CHECKOUT) {
       if (this.subTasks.length === 0) return;
 
-      // Agrupa subtarefas por tipo
       const groupedByType = this.subTasks.reduce(
         (acc, sub) => {
           const type = sub.getType();
@@ -119,9 +132,7 @@ export class Task extends Entity {
         {} as Record<SubTaskType, SubTask[]>,
       );
 
-      const types = Object.values(groupedByType);
-
-      const canCheckout = types.every((group) => {
+      const canCheckout = Object.values(groupedByType).every((group) => {
         const allTerminal = group.every(
           (s) =>
             s.getStatus() === SubTaskStatus.AGUARDANDO_CHECKOUT ||
@@ -139,7 +150,6 @@ export class Task extends Entity {
     }
   }
 
-  // Getters
   getId(): TaskId {
     return this.id;
   }
@@ -161,20 +171,22 @@ export class Task extends Entity {
   getStatus(): TaskStatus {
     return this.status;
   }
+  getApplicantId(): ApplicantId {
+    return this.applicantId;
+  }
+  getCreatorId(): UserId {
+    return this.creatorId;
+  }
   getSubTasks(): SubTask[] {
     return this.subTasks;
   }
-  getApplicant(): Applicant {
-    return this.applicant;
-  }
-  getFlows(): Flow[] {
-    return this.flows;
+  getFlowIds(): FlowId[] {
+    return this.flowIds;
   }
   getCreatedAt(): Date {
     return this.createdAt;
   }
 
-  // Filtros de conveniência para manter a compatibilidade/facilidade se necessário
   getDiscovery(): DiscoverySubTask[] {
     return this.subTasks.filter((s) => s instanceof DiscoverySubTask) as DiscoverySubTask[];
   }
@@ -185,7 +197,6 @@ export class Task extends Entity {
     return this.subTasks.filter((s) => s instanceof DiagramSubTask) as DiagramSubTask[];
   }
 
-  // Business Rules
   changeName(name: string): void {
     this.name = name;
     this.validate();
@@ -193,11 +204,6 @@ export class Task extends Entity {
 
   changeDescription(description: string): void {
     this.description = description;
-    this.validate();
-  }
-
-  changeTaskNumber(taskNumber: string): void {
-    this.taskNumber = taskNumber;
     this.validate();
   }
 
@@ -212,13 +218,30 @@ export class Task extends Entity {
     this.validate();
   }
 
-  changeApplicant(applicant: Applicant): void {
-    this.applicant = applicant;
+  changeProjectId(projectId: ProjectId): void {
+    this.projectId = projectId;
     this.validate();
   }
 
-  addFlow(flow: Flow): void {
-    this.flows.push(flow);
+  changeApplicantId(applicantId: ApplicantId): void {
+    this.applicantId = applicantId;
+    this.validate();
+  }
+
+  addFlowId(flowId: FlowId): void {
+    if (this.flowIds.includes(flowId)) {
+      throw new Error(`Flow já adicionado: ${flowId}`);
+    }
+    this.flowIds.push(flowId);
+    this.validate();
+  }
+
+  removeFlowId(flowId: string): void {
+    const exists = this.flowIds.includes(flowId as FlowId);
+    if (!exists) {
+      throw new Error(`Flow não encontrado: ${flowId}`);
+    }
+    this.flowIds = this.flowIds.filter((f) => f !== flowId);
     this.validate();
   }
 
@@ -230,8 +253,24 @@ export class Task extends Entity {
     ];
     const allTerminal = this.subTasks.every((s) => terminalStatuses.includes(s.getStatus()));
     if (allTerminal) return;
-
     throw new Error('Task não pode ser removida pois possui subtasks ativas');
+  }
+
+  removeSubTask(subTaskId: string): void {
+    const removableStatuses = [
+      SubTaskStatus.NAO_INICIADO,
+      SubTaskStatus.REPROVADO,
+      SubTaskStatus.CANCELADO,
+    ];
+    const subTask = this.subTasks.find((s) => s.getId() === subTaskId);
+    if (!subTask) {
+      throw new Error(`SubTask não encontrada: ${subTaskId}`);
+    }
+    if (!removableStatuses.includes(subTask.getStatus())) {
+      throw new Error(`SubTask com status "${subTask.getStatus()}" não pode ser removida`);
+    }
+    this.subTasks = this.subTasks.filter((s) => s.getId() !== subTaskId);
+    this.validate();
   }
 
   addSubTask(subTask: SubTask): void {
