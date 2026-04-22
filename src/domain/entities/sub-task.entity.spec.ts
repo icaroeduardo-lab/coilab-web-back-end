@@ -244,6 +244,8 @@ describe('SubTask Entity', () => {
       title: 'Database Diagram',
       description: 'Desc',
       urlDiagram: 'https://example.com/diagram.png',
+      user: userId,
+      dateUpload: new Date(),
     });
 
     const subTask = new DiagramSubTask({
@@ -275,6 +277,8 @@ describe('SubTask Entity', () => {
           title: 'New Diagram',
           description: 'Desc',
           urlDiagram: 'https://example.com/diagram.png',
+          user: userId,
+          dateUpload: new Date(),
         }),
       );
       expect(subTask.getDiagrams()).toHaveLength(1);
@@ -285,6 +289,8 @@ describe('SubTask Entity', () => {
         title: 'Database Diagram',
         description: 'Desc',
         urlDiagram: 'https://example.com/diagram.png',
+        user: userId,
+        dateUpload: new Date(),
       });
 
       const subTask = new DiagramSubTask({
