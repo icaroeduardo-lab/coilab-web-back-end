@@ -8,7 +8,14 @@ import {
 } from '../../../../domain/entities/sub-task.entity';
 import { Flow } from '../../../../domain/value-objects/flow.vo';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
-import { TaskId, ProjectId, ApplicantId, UserId, SubTaskId, FlowId } from '../../../../domain/shared/entity-ids';
+import {
+  TaskId,
+  ProjectId,
+  ApplicantId,
+  UserId,
+  SubTaskId,
+  FlowId,
+} from '../../../../domain/shared/entity-ids';
 import { generateNextNumber } from '../../../../domain/shared/sequential-number';
 import { generateId } from '../../../../shared/generate-id';
 
@@ -43,9 +50,12 @@ const buildSubTask = (input: CreateTaskSubTaskInput, taskId: string) => {
   };
 
   switch (input.type) {
-    case SubTaskType.DISCOVERY: return new DiscoverySubTask(base);
-    case SubTaskType.DESIGN: return new DesignSubTask(base);
-    case SubTaskType.DIAGRAM: return new DiagramSubTask(base);
+    case SubTaskType.DISCOVERY:
+      return new DiscoverySubTask(base);
+    case SubTaskType.DESIGN:
+      return new DesignSubTask(base);
+    case SubTaskType.DIAGRAM:
+      return new DiagramSubTask(base);
   }
 };
 

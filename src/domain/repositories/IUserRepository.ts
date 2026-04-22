@@ -1,10 +1,7 @@
-import { ApplicantId } from '../shared/entity-ids';
-
-export interface UserData {
-  id: string;
-  name: string;
-}
+import { User } from '../entities/user.entity';
+import { UserId } from '../shared/entity-ids';
 
 export interface IUserRepository {
-  findById(id: ApplicantId): Promise<UserData | null>;
+  findById(id: UserId): Promise<User | null>;
+  save(user: User): Promise<void>;
 }

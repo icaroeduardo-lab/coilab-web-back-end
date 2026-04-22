@@ -1,10 +1,12 @@
 import { ListTasksByProjectUseCase } from './ListTasksByProjectUseCase';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
+import { IUserRepository } from '../../../../domain/repositories/IUserRepository';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
+import { User } from '../../../../domain/entities/user.entity';
 import { TaskId, ProjectId, ApplicantId, UserId } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
-const makeRepo = (): jest.Mocked<ITaskRepository> => ({
+const makeTaskRepo = (): jest.Mocked<ITaskRepository> => ({
   findById: jest.fn(),
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
@@ -12,7 +14,12 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   delete: jest.fn(),
 });
 
-const makeTask = (projectId: string) =>
+const makeUserRepo = (): jest.Mocked<IUserRepository> => ({
+  findById: jest.fn(),
+  save: jest.fn(),
+});
+
+const makeTask = (projectId: string, creatorId: string) =>
   new Task({
     id: TaskId(randomUUID()),
     projectId: ProjectId(projectId),
@@ -22,26 +29,47 @@ const makeTask = (projectId: string) =>
     priority: TaskPriority.MEDIA,
     status: TaskStatus.BACKLOG,
     applicantId: ApplicantId(randomUUID()),
-    creatorId: UserId(randomUUID()),
+    creatorId: UserId(creatorId),
   });
 
+const makeUser = (id: string) =>
+  new User({ id: UserId(id), name: 'Jane Doe', imageUrl: undefined });
+
 describe('ListTasksByProjectUseCase', () => {
-  it('returns tasks for project', async () => {
-    const repo = makeRepo();
+  it('returns tasks with creator data', async () => {
+    const taskRepo = makeTaskRepo();
+    const userRepo = makeUserRepo();
     const projectId = randomUUID();
-    repo.findByProjectId.mockResolvedValue([makeTask(projectId), makeTask(projectId)]);
-    const sut = new ListTasksByProjectUseCase(repo);
+    const creatorId = randomUUID();
+    taskRepo.findByProjectId.mockResolvedValue([
+      makeTask(projectId, creatorId),
+      makeTask(projectId, creatorId),
+    ]);
+    userRepo.findById.mockResolvedValue(makeUser(creatorId));
+    const sut = new ListTasksByProjectUseCase(taskRepo, userRepo);
 
     const result = await sut.execute({ projectId });
 
     expect(result).toHaveLength(2);
-    expect(repo.findByProjectId).toHaveBeenCalledTimes(1);
+    expect(result[0].creator?.name).toBe('Jane Doe');
+  });
+
+  it('throws when creator not found', async () => {
+    const taskRepo = makeTaskRepo();
+    const userRepo = makeUserRepo();
+    const projectId = randomUUID();
+    taskRepo.findByProjectId.mockResolvedValue([makeTask(projectId, randomUUID())]);
+    userRepo.findById.mockResolvedValue(null);
+    const sut = new ListTasksByProjectUseCase(taskRepo, userRepo);
+
+    await expect(sut.execute({ projectId })).rejects.toThrow('Creator not found');
   });
 
   it('returns empty when no tasks', async () => {
-    const repo = makeRepo();
-    repo.findByProjectId.mockResolvedValue([]);
-    const sut = new ListTasksByProjectUseCase(repo);
+    const taskRepo = makeTaskRepo();
+    const userRepo = makeUserRepo();
+    taskRepo.findByProjectId.mockResolvedValue([]);
+    const sut = new ListTasksByProjectUseCase(taskRepo, userRepo);
 
     const result = await sut.execute({ projectId: randomUUID() });
 
