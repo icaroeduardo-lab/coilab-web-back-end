@@ -150,18 +150,42 @@ export class Task extends Entity {
     }
   }
 
-  getId(): TaskId { return this.id; }
-  getProjectId(): ProjectId { return this.projectId; }
-  getName(): string { return this.name; }
-  getDescription(): string { return this.description; }
-  getTaskNumber(): string { return this.taskNumber; }
-  getPriority(): TaskPriority { return this.priority; }
-  getStatus(): TaskStatus { return this.status; }
-  getApplicantId(): ApplicantId { return this.applicantId; }
-  getCreatorId(): UserId { return this.creatorId; }
-  getSubTasks(): SubTask[] { return this.subTasks; }
-  getFlowIds(): FlowId[] { return this.flowIds; }
-  getCreatedAt(): Date { return this.createdAt; }
+  getId(): TaskId {
+    return this.id;
+  }
+  getProjectId(): ProjectId {
+    return this.projectId;
+  }
+  getName(): string {
+    return this.name;
+  }
+  getDescription(): string {
+    return this.description;
+  }
+  getTaskNumber(): string {
+    return this.taskNumber;
+  }
+  getPriority(): TaskPriority {
+    return this.priority;
+  }
+  getStatus(): TaskStatus {
+    return this.status;
+  }
+  getApplicantId(): ApplicantId {
+    return this.applicantId;
+  }
+  getCreatorId(): UserId {
+    return this.creatorId;
+  }
+  getSubTasks(): SubTask[] {
+    return this.subTasks;
+  }
+  getFlowIds(): FlowId[] {
+    return this.flowIds;
+  }
+  getCreatedAt(): Date {
+    return this.createdAt;
+  }
 
   getDiscovery(): DiscoverySubTask[] {
     return this.subTasks.filter((s) => s instanceof DiscoverySubTask) as DiscoverySubTask[];
