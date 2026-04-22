@@ -7,6 +7,7 @@ import { randomUUID } from 'crypto';
 
 const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   findById: jest.fn(),
+  findAll: jest.fn(),
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
   save: jest.fn(),

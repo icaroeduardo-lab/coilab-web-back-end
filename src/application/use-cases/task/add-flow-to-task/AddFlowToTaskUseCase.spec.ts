@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 
 const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   findById: jest.fn(),
+  findAll: jest.fn(),
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
   save: jest.fn(),
@@ -57,6 +58,8 @@ describe('AddFlowToTaskUseCase', () => {
     repo.findById.mockResolvedValue(null);
     const sut = new AddFlowToTaskUseCase(repo);
 
-    await expect(sut.execute({ taskId: randomUUID(), flowId: randomUUID() })).rejects.toThrow('Task not found');
+    await expect(sut.execute({ taskId: randomUUID(), flowId: randomUUID() })).rejects.toThrow(
+      'Task not found',
+    );
   });
 });
