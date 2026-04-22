@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(/home/icaro/COILAB/coilab-web-back-end/*)",
+      "Write(/home/icaro/COILAB/coilab-web-back-end/*)",
+      "Read(/home/icaro/COILAB/coilab-web-back-end/*)"
+    ]
+  }
+}
