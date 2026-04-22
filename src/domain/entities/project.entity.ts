@@ -1,17 +1,8 @@
 import 'reflect-metadata';
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUUID,
-  IsDate,
-  ValidateNested,
-} from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, IsDate, Matches } from 'class-validator';
 import { Entity } from './entity.base';
-import { Task } from './task.entity';
-import { Flow } from '../value-objects/flow.vo';
 import { ProjectId } from '../shared/entity-ids';
+import { SEQUENTIAL_NUMBER_REGEX } from '../shared/sequential-number';
 
 export enum ProjectStatus {
   BACKLOG = 'backlog',
@@ -28,8 +19,6 @@ export interface ProjectProps {
   urlDocument?: string;
   status?: ProjectStatus;
   createdAt?: Date;
-  tasks?: Task[];
-  flows?: Flow[];
 }
 
 export class Project extends Entity {
@@ -43,6 +32,7 @@ export class Project extends Entity {
 
   @IsString()
   @IsNotEmpty()
+  @Matches(SEQUENTIAL_NUMBER_REGEX)
   private projectNumber: string;
 
   @IsString()
@@ -59,11 +49,6 @@ export class Project extends Entity {
   @IsDate()
   private createdAt: Date;
 
-  @ValidateNested({ each: true })
-  private flows: Flow[];
-
-  private tasks: Task[];
-
   constructor(props: ProjectProps) {
     super();
     this.id = props.id;
@@ -73,8 +58,6 @@ export class Project extends Entity {
     this.urlDocument = props.urlDocument;
     this.status = props.status ?? ProjectStatus.BACKLOG;
     this.createdAt = props.createdAt ?? new Date();
-    this.tasks = props.tasks ?? [];
-    this.flows = props.flows ?? [];
 
     this.validate();
   }
@@ -101,12 +84,6 @@ export class Project extends Entity {
   getCreatedAt(): Date {
     return this.createdAt;
   }
-  getTasks(): Task[] {
-    return this.tasks;
-  }
-  getFlows(): Flow[] {
-    return this.flows;
-  }
 
   // Business Rules
   changeName(name: string): void {
@@ -126,18 +103,6 @@ export class Project extends Entity {
 
   updateUrlDocument(url: string): void {
     this.urlDocument = url;
-    this.validate();
-  }
-
-  addTask(task: Task): void {
-    if (task.getProjectId() !== this.id) {
-      throw new Error('Task does not belong to this project');
-    }
-    this.tasks.push(task);
-  }
-
-  addFlow(flow: Flow): void {
-    this.flows.push(flow);
     this.validate();
   }
 }

@@ -1,11 +1,11 @@
 import { Project } from '../../../../domain/entities/project.entity';
 import { IProjectRepository } from '../../../../domain/repositories/IProjectRepository';
 import { ProjectId } from '../../../../domain/shared/entity-ids';
+import { generateNextNumber } from '../../../../domain/shared/sequential-number';
+import { generateId } from '../../../../shared/generate-id';
 
 export interface CreateProjectInput {
-  id: string;
   name: string;
-  projectNumber: string;
   description: string;
   urlDocument?: string;
 }
@@ -14,10 +14,13 @@ export class CreateProjectUseCase {
   constructor(private readonly projectRepository: IProjectRepository) {}
 
   async execute(input: CreateProjectInput): Promise<void> {
+    const lastNumber = await this.projectRepository.findLastProjectNumber();
+    const projectNumber = generateNextNumber(lastNumber);
+
     const project = new Project({
-      id: ProjectId(input.id),
+      id: ProjectId(generateId()),
       name: input.name,
-      projectNumber: input.projectNumber,
+      projectNumber,
       description: input.description,
       urlDocument: input.urlDocument,
     });

@@ -7,11 +7,12 @@ import { randomUUID } from 'crypto';
 const makeRepo = (): jest.Mocked<IProjectRepository> => ({
   findById: jest.fn(),
   findAll: jest.fn(),
+  findLastProjectNumber: jest.fn(),
   save: jest.fn(),
 });
 
 const makeProject = (id: string) =>
-  new Project({ id: ProjectId(id), name: 'P', projectNumber: 'N', description: 'D' });
+  new Project({ id: ProjectId(id), name: 'P', projectNumber: '#20260001', description: 'D' });
 
 describe('ListProjectsUseCase', () => {
   it('returns all projects from repository', async () => {
