@@ -1,0 +1,61 @@
+import { UpdateTaskUseCase } from './UpdateTaskUseCase';
+import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
+import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
+import { TaskId, ProjectId, ApplicantId, UserId } from '../../../../domain/shared/entity-ids';
+import { randomUUID } from 'crypto';
+
+const makeRepo = (): jest.Mocked<ITaskRepository> => ({
+  findById: jest.fn(),
+  findByProjectId: jest.fn(),
+  findLastTaskNumber: jest.fn(),
+  save: jest.fn(),
+  delete: jest.fn(),
+});
+
+const makeTask = (id: string) =>
+  new Task({
+    id: TaskId(id),
+    projectId: ProjectId(randomUUID()),
+    name: 'Original',
+    description: 'Desc original',
+    taskNumber: '#20260001',
+    priority: TaskPriority.BAIXA,
+    status: TaskStatus.BACKLOG,
+    applicantId: ApplicantId(randomUUID()),
+    creatorId: UserId(randomUUID()),
+  });
+
+describe('UpdateTaskUseCase', () => {
+  it('updates name and priority', async () => {
+    const repo = makeRepo();
+    const id = randomUUID();
+    repo.findById.mockResolvedValue(makeTask(id));
+    const sut = new UpdateTaskUseCase(repo);
+
+    await sut.execute({ id, name: 'Novo nome', priority: TaskPriority.ALTA });
+
+    const saved: Task = repo.save.mock.calls[0][0];
+    expect(saved.getName()).toBe('Novo nome');
+    expect(saved.getPriority()).toBe(TaskPriority.ALTA);
+  });
+
+  it('skips undefined fields', async () => {
+    const repo = makeRepo();
+    const id = randomUUID();
+    repo.findById.mockResolvedValue(makeTask(id));
+    const sut = new UpdateTaskUseCase(repo);
+
+    await sut.execute({ id, name: 'Novo' });
+
+    const saved: Task = repo.save.mock.calls[0][0];
+    expect(saved.getDescription()).toBe('Desc original');
+  });
+
+  it('throws when task not found', async () => {
+    const repo = makeRepo();
+    repo.findById.mockResolvedValue(null);
+    const sut = new UpdateTaskUseCase(repo);
+
+    await expect(sut.execute({ id: randomUUID() })).rejects.toThrow('Task not found');
+  });
+});

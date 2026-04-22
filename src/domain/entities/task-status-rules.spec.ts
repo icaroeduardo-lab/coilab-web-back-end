@@ -1,17 +1,11 @@
 import { Task, TaskPriority, TaskStatus } from './task.entity';
 import { DiscoverySubTask, DesignSubTask, SubTaskStatus } from './sub-task.entity';
-import { Applicant } from '../value-objects/applicant.vo';
-import { TaskId, ProjectId, SubTaskId, ApplicantId } from '../shared/entity-ids';
+import { TaskId, ProjectId, SubTaskId, ApplicantId, UserId } from '../shared/entity-ids';
 
 describe('Task Status Transition Rules', () => {
   const userId = ApplicantId('550e8400-e29b-41d4-a716-446655440003');
   const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');
   const deliveryDate = new Date('2026-12-31');
-
-  const applicant = new Applicant({
-    id: ApplicantId('550e8400-e29b-41d4-a716-446655440003'),
-    name: 'John Doe',
-  });
 
   const baseTask = () =>
     new Task({
@@ -19,10 +13,11 @@ describe('Task Status Transition Rules', () => {
       projectId: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
       name: 'Task 01',
       description: 'Desc',
-      taskNumber: 'T-001',
+      taskNumber: '#20260001',
       priority: TaskPriority.MEDIA,
       status: TaskStatus.BACKLOG,
-      applicant,
+      applicantId: ApplicantId('550e8400-e29b-41d4-a716-446655440005'),
+      creatorId: UserId('550e8400-e29b-41d4-a716-446655440006'),
     });
 
   it('should allow checkout if task has no subtasks', () => {

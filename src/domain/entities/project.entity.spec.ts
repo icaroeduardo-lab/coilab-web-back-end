@@ -1,107 +1,26 @@
 import { Project, ProjectStatus } from './project.entity';
-import { Task, TaskPriority, TaskStatus } from './task.entity';
-import { Applicant } from '../value-objects/applicant.vo';
-import { Flow } from '../value-objects/flow.vo';
-import { ProjectId, TaskId, ApplicantId, FlowId } from '../shared/entity-ids';
+import { ProjectId } from '../shared/entity-ids';
 
 describe('Project Entity', () => {
-  const applicant = new Applicant({
-    id: ApplicantId('550e8400-e29b-41d4-a716-446655440003'),
-    name: 'John Doe',
-  });
-
   it('should create a new project with all properties', () => {
-    const flow = new Flow({
-      id: FlowId('550e8400-e29b-41d4-a716-446655440005'),
-      name: 'Initial Flow',
-    });
-
     const project = new Project({
       name: 'Project Alpha',
       id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
-      projectNumber: 'P-001',
+      projectNumber: '#20260001',
       description: 'Test description',
       urlDocument: 'https://example.com/doc',
       status: ProjectStatus.BACKLOG,
       createdAt: new Date(),
-      flows: [flow],
     });
 
     expect(project.getId()).toBe('550e8400-e29b-41d4-a716-446655440000');
-    expect(project.getFlows()).toHaveLength(1);
-    expect(project.getFlows()[0].getName()).toBe('Initial Flow');
-    expect(project.getTasks()).toHaveLength(0);
-  });
-
-  it('should add flow to project', () => {
-    const project = new Project({
-      name: 'Project Alpha',
-      id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
-      projectNumber: 'P-001',
-      description: 'Desc',
-    });
-
-    const flow = new Flow({
-      id: FlowId('550e8400-e29b-41d4-a716-446655440005'),
-      name: 'New Flow',
-    });
-
-    project.addFlow(flow);
-    expect(project.getFlows()).toHaveLength(1);
-  });
-
-  it('should add tasks to project', () => {
-    const project = new Project({
-      name: 'Project Alpha',
-      id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
-      projectNumber: 'P-001',
-      description: 'Desc',
-    });
-
-    const task = new Task({
-      id: TaskId('550e8400-e29b-41d4-a716-446655440001'),
-      projectId: project.getId(),
-      name: 'Task 01',
-      description: 'Desc',
-      taskNumber: 'T-001',
-      priority: TaskPriority.BAIXA,
-      status: TaskStatus.BACKLOG,
-      applicant,
-    });
-
-    project.addTask(task);
-
-    expect(project.getTasks()).toHaveLength(1);
-    expect(project.getTasks()[0].getId()).toBe(task.getId());
-  });
-
-  it('should throw error when adding task from another project', () => {
-    const project = new Project({
-      name: 'Project Alpha',
-      id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
-      projectNumber: 'P-001',
-      description: 'Desc',
-    });
-
-    const task = new Task({
-      id: TaskId('550e8400-e29b-41d4-a716-446655440001'),
-      projectId: ProjectId('550e8400-e29b-41d4-a716-446655440002'),
-      name: 'Task 01',
-      description: 'Desc',
-      taskNumber: 'T-001',
-      priority: TaskPriority.BAIXA,
-      status: TaskStatus.BACKLOG,
-      applicant,
-    });
-
-    expect(() => project.addTask(task)).toThrow('Task does not belong to this project');
   });
 
   it('should change name correctly', () => {
     const project = new Project({
       name: 'Old Name',
       id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
-      projectNumber: 'P-001',
+      projectNumber: '#20260001',
       description: 'Desc',
     });
 
@@ -113,7 +32,7 @@ describe('Project Entity', () => {
     const project = new Project({
       name: 'Old Name',
       id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
-      projectNumber: 'P-001',
+      projectNumber: '#20260001',
       description: 'Desc',
     });
 
@@ -124,7 +43,7 @@ describe('Project Entity', () => {
     const project = new Project({
       name: 'Name',
       id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
-      projectNumber: 'P-001',
+      projectNumber: '#20260001',
       description: 'Desc',
     });
 
@@ -136,13 +55,13 @@ describe('Project Entity', () => {
     const project = new Project({
       name: 'Name',
       id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
-      projectNumber: 'P-001',
+      projectNumber: '#20260001',
       description: 'Some description',
       urlDocument: 'https://example.com/doc',
     });
 
     expect(project.getId()).toBe('550e8400-e29b-41d4-a716-446655440000');
-    expect(project.getProjectNumber()).toBe('P-001');
+    expect(project.getProjectNumber()).toBe('#20260001');
     expect(project.getDescription()).toBe('Some description');
     expect(project.getUrlDocument()).toBe('https://example.com/doc');
     expect(project.getCreatedAt()).toBeInstanceOf(Date);
@@ -152,7 +71,7 @@ describe('Project Entity', () => {
     const project = new Project({
       name: 'Name',
       id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
-      projectNumber: 'P-001',
+      projectNumber: '#20260001',
       description: 'Old desc',
     });
 
@@ -164,7 +83,7 @@ describe('Project Entity', () => {
     const project = new Project({
       name: 'Name',
       id: ProjectId('550e8400-e29b-41d4-a716-446655440000'),
-      projectNumber: 'P-001',
+      projectNumber: '#20260001',
       description: 'Desc',
     });
 

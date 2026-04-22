@@ -1,19 +1,15 @@
 import { Task, TaskPriority, TaskStatus } from './task.entity';
 import { DiscoverySubTask, DesignSubTask, DiagramSubTask, SubTaskStatus } from './sub-task.entity';
-import { Applicant } from '../value-objects/applicant.vo';
 import { Flow } from '../value-objects/flow.vo';
-import { TaskId, ProjectId, SubTaskId, ApplicantId, FlowId } from '../shared/entity-ids';
+import { TaskId, ProjectId, SubTaskId, ApplicantId, UserId, FlowId } from '../shared/entity-ids';
 
 describe('Task Entity', () => {
   const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');
   const userId = ApplicantId('550e8400-e29b-41d4-a716-446655440003');
+  const applicantId = ApplicantId('550e8400-e29b-41d4-a716-446655440005');
+  const creatorId = UserId('550e8400-e29b-41d4-a716-446655440006');
   const projectId = ProjectId('550e8400-e29b-41d4-a716-446655440000');
   const deliveryDate = new Date('2026-12-31');
-
-  const applicant = new Applicant({
-    id: ApplicantId('550e8400-e29b-41d4-a716-446655440003'),
-    name: 'John Doe',
-  });
 
   const discovery = new DiscoverySubTask({
     id: SubTaskId('550e8400-e29b-41d4-a716-446655440008'),
@@ -45,10 +41,11 @@ describe('Task Entity', () => {
       projectId,
       name: 'Task 01',
       description: 'Task description',
-      taskNumber: 'T-001',
+      taskNumber: '#20260001',
       priority: TaskPriority.MEDIA,
       status: TaskStatus.BACKLOG,
-      applicant,
+      applicantId,
+      creatorId,
     });
 
   it('should create a new task with subtasks', () => {
@@ -57,10 +54,11 @@ describe('Task Entity', () => {
       projectId,
       name: 'Task 01',
       description: 'Task description',
-      taskNumber: 'T-001',
+      taskNumber: '#20260001',
       priority: TaskPriority.MEDIA,
       status: TaskStatus.BACKLOG,
-      applicant,
+      applicantId,
+      creatorId,
       subTasks: [discovery, design, diagram],
     });
 
@@ -78,9 +76,10 @@ describe('Task Entity', () => {
     expect(task.getProjectId()).toBe(projectId);
     expect(task.getName()).toBe('Task 01');
     expect(task.getDescription()).toBe('Task description');
-    expect(task.getTaskNumber()).toBe('T-001');
+    expect(task.getTaskNumber()).toBe('#20260001');
     expect(task.getPriority()).toBe(TaskPriority.MEDIA);
-    expect(task.getApplicant().getName()).toBe('John Doe');
+    expect(task.getApplicantId()).toBe(applicantId);
+    expect(task.getCreatorId()).toBe(creatorId);
     expect(task.getCreatedAt()).toBeInstanceOf(Date);
     expect(task.getFlows()).toHaveLength(0);
   });
@@ -105,8 +104,8 @@ describe('Task Entity', () => {
 
   it('should change task number correctly', () => {
     const task = baseTask();
-    task.changeTaskNumber('T-002');
-    expect(task.getTaskNumber()).toBe('T-002');
+    task.changeTaskNumber('#20260002');
+    expect(task.getTaskNumber()).toBe('#20260002');
   });
 
   it('should change priority correctly', () => {
@@ -115,14 +114,11 @@ describe('Task Entity', () => {
     expect(task.getPriority()).toBe(TaskPriority.ALTA);
   });
 
-  it('should change applicant correctly', () => {
+  it('should change applicantId correctly', () => {
     const task = baseTask();
-    const newApplicant = new Applicant({
-      id: ApplicantId('550e8400-e29b-41d4-a716-446655440004'),
-      name: 'Jane Smith',
-    });
-    task.changeApplicant(newApplicant);
-    expect(task.getApplicant().getName()).toBe('Jane Smith');
+    const newApplicantId = ApplicantId('550e8400-e29b-41d4-a716-446655440004');
+    task.changeApplicantId(newApplicantId);
+    expect(task.getApplicantId()).toBe(newApplicantId);
   });
 
   it('should add flow correctly', () => {
