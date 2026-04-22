@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { IsNotEmpty, IsString, IsUUID, MinLength } from 'class-validator';
 import { ValueObject } from './value-object.base';
-import { FlowId } from './entity-ids';
+import { FlowId } from '../shared/entity-ids';
 
 export interface FlowProps {
   id: FlowId;

@@ -11,7 +11,7 @@ import {
 import { Entity } from './entity.base';
 import { Task } from './task.entity';
 import { Flow } from '../value-objects/flow.vo';
-import { ProjectId } from '../value-objects/entity-ids';
+import { ProjectId } from '../shared/entity-ids';
 
 export enum ProjectStatus {
   BACKLOG = 'backlog',

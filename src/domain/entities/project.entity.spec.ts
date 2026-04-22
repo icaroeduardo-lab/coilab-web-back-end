@@ -2,7 +2,7 @@ import { Project, ProjectStatus } from './project.entity';
 import { Task, TaskPriority, TaskStatus } from './task.entity';
 import { Applicant } from '../value-objects/applicant.vo';
 import { Flow } from '../value-objects/flow.vo';
-import { ProjectId, TaskId, ApplicantId, FlowId } from '../value-objects/entity-ids';
+import { ProjectId, TaskId, ApplicantId, FlowId } from '../shared/entity-ids';
 
 describe('Project Entity', () => {
   const applicant = new Applicant({

@@ -12,7 +12,7 @@ import {
 import { Flow } from '../value-objects/flow.vo';
 import { Applicant } from '../value-objects/applicant.vo';
 import { TaskStatus } from './task-status.enum';
-import { ProjectId, TaskId } from '../value-objects/entity-ids';
+import { ProjectId, TaskId } from '../shared/entity-ids';
 
 export { TaskStatus };
 
@@ -220,6 +220,18 @@ export class Task extends Entity {
   addFlow(flow: Flow): void {
     this.flows.push(flow);
     this.validate();
+  }
+
+  assertCanBeDeleted(): void {
+    const terminalStatuses = [
+      SubTaskStatus.NAO_INICIADO,
+      SubTaskStatus.REPROVADO,
+      SubTaskStatus.CANCELADO,
+    ];
+    const allTerminal = this.subTasks.every((s) => terminalStatuses.includes(s.getStatus()));
+    if (allTerminal) return;
+
+    throw new Error('Task não pode ser removida pois possui subtasks ativas');
   }
 
   addSubTask(subTask: SubTask): void {

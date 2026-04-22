@@ -1,11 +1,14 @@
 import 'reflect-metadata';
-import { IsNotEmpty, IsString, IsUrl } from 'class-validator';
+import { IsDate, IsNotEmpty, IsString, IsUrl, IsUUID } from 'class-validator';
 import { ValueObject } from './value-object.base';
+import { ApplicantId } from '../shared/entity-ids';
 
 export interface DiagramProps {
   title: string;
   description: string;
   urlDiagram: string;
+  user: ApplicantId;
+  dateUpload: Date;
 }
 
 export class Diagram extends ValueObject {
@@ -21,11 +24,21 @@ export class Diagram extends ValueObject {
   @IsNotEmpty()
   private readonly urlDiagram: string;
 
+  @IsUUID()
+  @IsNotEmpty()
+  private readonly user: ApplicantId;
+
+  @IsDate()
+  @IsNotEmpty()
+  private readonly dateUpload: Date;
+
   constructor(props: DiagramProps) {
     super();
     this.title = props.title;
     this.description = props.description;
     this.urlDiagram = props.urlDiagram;
+    this.user = props.user;
+    this.dateUpload = props.dateUpload;
     this.validate();
   }
 
@@ -39,5 +52,13 @@ export class Diagram extends ValueObject {
 
   getUrlDiagram(): string {
     return this.urlDiagram;
+  }
+
+  getUser(): ApplicantId {
+    return this.user;
+  }
+
+  getDateUpload(): Date {
+    return this.dateUpload;
   }
 }

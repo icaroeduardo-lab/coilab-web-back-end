@@ -1,9 +1,10 @@
 import { Task, TaskPriority, TaskStatus } from './task.entity';
 import { DiscoverySubTask, DesignSubTask, SubTaskStatus } from './sub-task.entity';
 import { Applicant } from '../value-objects/applicant.vo';
-import { TaskId, ProjectId, SubTaskId, ApplicantId } from '../value-objects/entity-ids';
+import { TaskId, ProjectId, SubTaskId, ApplicantId } from '../shared/entity-ids';
 
 describe('Task Status Transition Rules', () => {
+  const userId = ApplicantId('550e8400-e29b-41d4-a716-446655440003');
   const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');
   const deliveryDate = new Date('2026-12-31');
 
@@ -35,6 +36,7 @@ describe('Task Status Transition Rules', () => {
     task.addSubTask(new DiscoverySubTask({
       id: SubTaskId('550e8400-e29b-41d4-a716-446655440012'),
       taskId,
+      idUser: userId,
       status: SubTaskStatus.AGUARDANDO_CHECKOUT,
       expectedDelivery: deliveryDate,
     }));
@@ -47,6 +49,7 @@ describe('Task Status Transition Rules', () => {
     const subtask = new DiscoverySubTask({
       id: SubTaskId('550e8400-e29b-41d4-a716-446655440013'),
       taskId,
+      idUser: userId,
       status: SubTaskStatus.AGUARDANDO_CHECKOUT,
       expectedDelivery: deliveryDate,
     });
@@ -61,6 +64,7 @@ describe('Task Status Transition Rules', () => {
     task.addSubTask(new DiscoverySubTask({
       id: SubTaskId('550e8400-e29b-41d4-a716-446655440012'),
       taskId,
+      idUser: userId,
       status: SubTaskStatus.EM_PROGRESSO,
       expectedDelivery: deliveryDate,
     }));
@@ -73,12 +77,14 @@ describe('Task Status Transition Rules', () => {
     task.addSubTask(new DiscoverySubTask({
       id: SubTaskId('550e8400-e29b-41d4-a716-446655440013'),
       taskId,
+      idUser: userId,
       status: SubTaskStatus.REPROVADO,
       expectedDelivery: deliveryDate,
     }));
     task.addSubTask(new DiscoverySubTask({
       id: SubTaskId('550e8400-e29b-41d4-a716-446655440014'),
       taskId,
+      idUser: userId,
       status: SubTaskStatus.AGUARDANDO_CHECKOUT,
       expectedDelivery: deliveryDate,
     }));
@@ -91,6 +97,7 @@ describe('Task Status Transition Rules', () => {
     task.addSubTask(new DiscoverySubTask({
       id: SubTaskId('550e8400-e29b-41d4-a716-446655440013'),
       taskId,
+      idUser: userId,
       status: SubTaskStatus.REPROVADO,
       expectedDelivery: deliveryDate,
     }));
@@ -103,6 +110,7 @@ describe('Task Status Transition Rules', () => {
     task.addSubTask(new DesignSubTask({
       id: SubTaskId('550e8400-e29b-41d4-a716-446655440020'),
       taskId,
+      idUser: userId,
       status: SubTaskStatus.EM_PROGRESSO,
       expectedDelivery: deliveryDate,
     }));
@@ -110,6 +118,7 @@ describe('Task Status Transition Rules', () => {
       task.addSubTask(new DesignSubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440021'),
         taskId,
+        idUser: userId,
         status: SubTaskStatus.NAO_INICIADO,
         expectedDelivery: deliveryDate,
       })),
@@ -121,6 +130,7 @@ describe('Task Status Transition Rules', () => {
     task.addSubTask(new DesignSubTask({
       id: SubTaskId('550e8400-e29b-41d4-a716-446655440022'),
       taskId,
+      idUser: userId,
       status: SubTaskStatus.REPROVADO,
       expectedDelivery: deliveryDate,
     }));
@@ -128,6 +138,7 @@ describe('Task Status Transition Rules', () => {
       task.addSubTask(new DesignSubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440023'),
         taskId,
+        idUser: userId,
         status: SubTaskStatus.NAO_INICIADO,
         expectedDelivery: deliveryDate,
       })),
@@ -140,6 +151,7 @@ describe('Task Status Transition Rules', () => {
       task.addSubTask(new DiscoverySubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440024'),
         taskId,
+        idUser: userId,
         status: SubTaskStatus.NAO_INICIADO,
         expectedDelivery: deliveryDate,
       })),
@@ -151,6 +163,7 @@ describe('Task Status Transition Rules', () => {
     task.addSubTask(new DiscoverySubTask({
       id: SubTaskId('550e8400-e29b-41d4-a716-446655440012'),
       taskId,
+      idUser: userId,
       status: SubTaskStatus.EM_PROGRESSO,
       expectedDelivery: deliveryDate,
     }));
