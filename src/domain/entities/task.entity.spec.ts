@@ -6,6 +6,7 @@ import { TaskId, ProjectId, SubTaskId, ApplicantId, FlowId } from '../shared/ent
 
 describe('Task Entity', () => {
   const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');
+  const userId = ApplicantId('550e8400-e29b-41d4-a716-446655440003');
   const projectId = ProjectId('550e8400-e29b-41d4-a716-446655440000');
   const deliveryDate = new Date('2026-12-31');
 
@@ -17,6 +18,7 @@ describe('Task Entity', () => {
   const discovery = new DiscoverySubTask({
     id: SubTaskId('550e8400-e29b-41d4-a716-446655440008'),
     taskId,
+    idUser: userId,
     status: SubTaskStatus.NAO_INICIADO,
     expectedDelivery: deliveryDate,
   });
@@ -24,6 +26,7 @@ describe('Task Entity', () => {
   const design = new DesignSubTask({
     id: SubTaskId('550e8400-e29b-41d4-a716-446655440009'),
     taskId,
+    idUser: userId,
     status: SubTaskStatus.NAO_INICIADO,
     expectedDelivery: deliveryDate,
   });
@@ -31,6 +34,7 @@ describe('Task Entity', () => {
   const diagram = new DiagramSubTask({
     id: SubTaskId('550e8400-e29b-41d4-a716-446655440011'),
     taskId,
+    idUser: userId,
     status: SubTaskStatus.NAO_INICIADO,
     expectedDelivery: deliveryDate,
   });
@@ -143,6 +147,7 @@ describe('Task Entity', () => {
       task.addSubTask(new DiscoverySubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440020'),
         taskId,
+        idUser: userId,
         status: SubTaskStatus.NAO_INICIADO,
         expectedDelivery: deliveryDate,
       }));
@@ -154,6 +159,7 @@ describe('Task Entity', () => {
       task.addSubTask(new DiscoverySubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440021'),
         taskId,
+        idUser: userId,
         status: SubTaskStatus.AGUARDANDO_CHECKOUT,
         expectedDelivery: deliveryDate,
       }));
@@ -167,6 +173,7 @@ describe('Task Entity', () => {
       task.addSubTask(new DiscoverySubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440022'),
         taskId,
+        idUser: userId,
         status: SubTaskStatus.EM_PROGRESSO,
         expectedDelivery: deliveryDate,
       }));
@@ -180,6 +187,7 @@ describe('Task Entity', () => {
       task.addSubTask(new DiscoverySubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440023'),
         taskId,
+        idUser: userId,
         status: SubTaskStatus.AGUARDANDO_CHECKOUT,
         expectedDelivery: deliveryDate,
       }));
@@ -194,6 +202,7 @@ describe('Task Entity', () => {
       task.addSubTask(new DiscoverySubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440026'),
         taskId,
+        idUser: userId,
         status: SubTaskStatus.EM_PROGRESSO,
         expectedDelivery: deliveryDate,
       }));
@@ -206,12 +215,14 @@ describe('Task Entity', () => {
       task.addSubTask(new DiscoverySubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440027'),
         taskId,
+        idUser: userId,
         status: SubTaskStatus.AGUARDANDO_CHECKOUT,
         expectedDelivery: deliveryDate,
       }));
       task.addSubTask(new DesignSubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440028'),
         taskId,
+        idUser: userId,
         status: SubTaskStatus.EM_PROGRESSO,
         expectedDelivery: deliveryDate,
       }));
@@ -225,12 +236,14 @@ describe('Task Entity', () => {
       task.addSubTask(new DiscoverySubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440024'),
         taskId,
+        idUser: userId,
         status: SubTaskStatus.AGUARDANDO_CHECKOUT,
         expectedDelivery: deliveryDate,
       }));
       task.addSubTask(new DesignSubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440025'),
         taskId,
+        idUser: userId,
         status: SubTaskStatus.EM_PROGRESSO,
         expectedDelivery: deliveryDate,
       }));

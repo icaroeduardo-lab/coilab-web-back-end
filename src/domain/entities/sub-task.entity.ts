@@ -11,7 +11,7 @@ import {
 import { Entity } from './entity.base';
 import { Design } from '../value-objects/design.vo';
 import { Diagram } from '../value-objects/diagram.vo';
-import { SubTaskId, TaskId, DesignId } from '../shared/entity-ids';
+import { SubTaskId, TaskId, DesignId, ApplicantId } from '../shared/entity-ids';
 
 export enum Level {
   HIGH = 'Alta',
@@ -26,7 +26,31 @@ export enum Frequency {
   OCCASIONAL = 'Eventual',
 }
 
+export interface DiscoveryFieldEntry<T = string> {
+  value: T;
+  userId: ApplicantId;
+  filledAt: Date;
+}
+
 export interface DiscoveryFormProps {
+  complexity?: DiscoveryFieldEntry<Level>;
+  projectName?: DiscoveryFieldEntry;
+  summary?: DiscoveryFieldEntry;
+  painPoints?: DiscoveryFieldEntry;
+  frequency?: DiscoveryFieldEntry<Frequency>;
+  currentProcess?: DiscoveryFieldEntry;
+  inactionCost?: DiscoveryFieldEntry;
+  volume?: DiscoveryFieldEntry;
+  avgTime?: DiscoveryFieldEntry;
+  humanDependency?: DiscoveryFieldEntry<Level>;
+  rework?: DiscoveryFieldEntry;
+  previousAttempts?: DiscoveryFieldEntry;
+  benchmark?: DiscoveryFieldEntry;
+  institutionalPriority?: DiscoveryFieldEntry<Level>;
+  technicalOpinion?: DiscoveryFieldEntry;
+}
+
+export type DiscoveryFormInput = {
   complexity?: Level;
   projectName?: string;
   summary?: string;
@@ -42,7 +66,7 @@ export interface DiscoveryFormProps {
   benchmark?: string;
   institutionalPriority?: Level;
   technicalOpinion?: string;
-}
+};
 
 export enum SubTaskStatus {
   NAO_INICIADO = 'Não iniciado',
@@ -62,9 +86,11 @@ export enum SubTaskType {
 export interface SubTaskProps {
   id: SubTaskId;
   taskId: TaskId;
+  idUser: ApplicantId;
   status: SubTaskStatus;
   type: SubTaskType;
   expectedDelivery: Date;
+  createdAt?: Date;
   startDate?: Date;
   completionDate?: Date;
   reason?: string;
@@ -79,6 +105,10 @@ export abstract class SubTask extends Entity {
   @IsNotEmpty()
   protected taskId: TaskId;
 
+  @IsUUID()
+  @IsNotEmpty()
+  protected idUser: ApplicantId;
+
   @IsEnum(SubTaskStatus)
   protected status: SubTaskStatus;
 
@@ -87,6 +117,9 @@ export abstract class SubTask extends Entity {
 
   @IsDate()
   protected expectedDelivery: Date;
+
+  @IsDate()
+  protected createdAt: Date;
 
   @IsDate()
   @IsOptional()
@@ -105,9 +138,11 @@ export abstract class SubTask extends Entity {
     super();
     this.id = props.id;
     this.taskId = props.taskId;
+    this.idUser = props.idUser;
     this.status = props.status;
     this.type = props.type;
     this.expectedDelivery = props.expectedDelivery;
+    this.createdAt = props.createdAt ?? new Date();
     this.startDate = props.startDate;
     this.completionDate = props.completionDate;
     this.reason = props.reason;
@@ -121,6 +156,9 @@ export abstract class SubTask extends Entity {
   getTaskId(): TaskId {
     return this.taskId;
   }
+  getIdUser(): ApplicantId {
+    return this.idUser;
+  }
   getStatus(): SubTaskStatus {
     return this.status;
   }
@@ -130,13 +168,15 @@ export abstract class SubTask extends Entity {
   getExpectedDelivery(): Date {
     return this.expectedDelivery;
   }
+  getCreatedAt(): Date {
+    return this.createdAt;
+  }
   getStartDate(): Date | undefined {
     return this.startDate;
   }
   getCompletionDate(): Date | undefined {
     return this.completionDate;
   }
-
   getReason(): string | undefined {
     return this.reason;
   }
@@ -199,21 +239,21 @@ export abstract class SubTask extends Entity {
 }
 
 export class DiscoverySubTask extends SubTask {
-  private complexity?: Level;
-  private projectName?: string;
-  private summary?: string;
-  private painPoints?: string;
-  private frequency?: Frequency;
-  private currentProcess?: string;
-  private inactionCost?: string;
-  private volume?: string;
-  private avgTime?: string;
-  private humanDependency?: Level;
-  private rework?: string;
-  private previousAttempts?: string;
-  private benchmark?: string;
-  private institutionalPriority?: Level;
-  private technicalOpinion?: string;
+  private complexity?: DiscoveryFieldEntry<Level>;
+  private projectName?: DiscoveryFieldEntry;
+  private summary?: DiscoveryFieldEntry;
+  private painPoints?: DiscoveryFieldEntry;
+  private frequency?: DiscoveryFieldEntry<Frequency>;
+  private currentProcess?: DiscoveryFieldEntry;
+  private inactionCost?: DiscoveryFieldEntry;
+  private volume?: DiscoveryFieldEntry;
+  private avgTime?: DiscoveryFieldEntry;
+  private humanDependency?: DiscoveryFieldEntry<Level>;
+  private rework?: DiscoveryFieldEntry;
+  private previousAttempts?: DiscoveryFieldEntry;
+  private benchmark?: DiscoveryFieldEntry;
+  private institutionalPriority?: DiscoveryFieldEntry<Level>;
+  private technicalOpinion?: DiscoveryFieldEntry;
 
   constructor(props: Omit<SubTaskProps, 'type'> & DiscoveryFormProps) {
     super({ ...props, type: SubTaskType.DISCOVERY });
@@ -254,9 +294,14 @@ export class DiscoverySubTask extends SubTask {
     };
   }
 
-  updateForm(data: DiscoveryFormProps): void {
+  updateForm(data: Partial<DiscoveryFormInput>, userId: ApplicantId): void {
     this.assertEditable();
-    Object.assign(this, data);
+    const filledAt = new Date();
+    (Object.entries(data) as [keyof DiscoveryFormInput, unknown][]).forEach(([key, value]) => {
+      if (value !== undefined) {
+        (this as unknown as Record<string, unknown>)[key] = { value, userId, filledAt };
+      }
+    });
   }
 
   override complete(): void {
@@ -282,7 +327,7 @@ export class DiscoverySubTask extends SubTask {
       'institutionalPriority',
       'technicalOpinion',
     ];
-    const missing = fields.filter((f) => !this[f]);
+    const missing = fields.filter((f) => !this[f as keyof this]);
     if (missing.length > 0) {
       throw new Error(`Campos obrigatórios não preenchidos: ${missing.join(', ')}`);
     }
