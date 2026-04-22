@@ -26,17 +26,30 @@ const makeTask = (id: string) =>
   });
 
 describe('AddFlowToTaskUseCase', () => {
-  it('adds flow to task', async () => {
+  it('adds flow id to task', async () => {
     const repo = makeRepo();
     const id = randomUUID();
+    const flowId = randomUUID();
     repo.findById.mockResolvedValue(makeTask(id));
     const sut = new AddFlowToTaskUseCase(repo);
 
-    await sut.execute({ taskId: id, flowId: randomUUID(), flowName: 'Fluxo principal' });
+    await sut.execute({ taskId: id, flowId });
 
     const saved: Task = repo.save.mock.calls[0][0];
-    expect(saved.getFlows()).toHaveLength(1);
-    expect(saved.getFlows()[0].getName()).toBe('Fluxo principal');
+    expect(saved.getFlowIds()).toHaveLength(1);
+    expect(saved.getFlowIds()[0]).toBe(flowId);
+  });
+
+  it('throws when adding duplicate flow id', async () => {
+    const repo = makeRepo();
+    const id = randomUUID();
+    const flowId = randomUUID();
+    const task = makeTask(id);
+    task.addFlowId(flowId as any);
+    repo.findById.mockResolvedValue(task);
+    const sut = new AddFlowToTaskUseCase(repo);
+
+    await expect(sut.execute({ taskId: id, flowId })).rejects.toThrow('Flow já adicionado');
   });
 
   it('throws when task not found', async () => {
@@ -44,8 +57,6 @@ describe('AddFlowToTaskUseCase', () => {
     repo.findById.mockResolvedValue(null);
     const sut = new AddFlowToTaskUseCase(repo);
 
-    await expect(
-      sut.execute({ taskId: randomUUID(), flowId: randomUUID(), flowName: 'F' }),
-    ).rejects.toThrow('Task not found');
+    await expect(sut.execute({ taskId: randomUUID(), flowId: randomUUID() })).rejects.toThrow('Task not found');
   });
 });

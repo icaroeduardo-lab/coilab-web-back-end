@@ -1,14 +1,17 @@
 import { TaskPriority } from '../../../../domain/entities/task.entity';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
-import { TaskId, ApplicantId } from '../../../../domain/shared/entity-ids';
+import { TaskId, ProjectId, ApplicantId, FlowId } from '../../../../domain/shared/entity-ids';
 
 export interface UpdateTaskInput {
   id: string;
   name?: string;
   description?: string;
-  taskNumber?: string;
   priority?: TaskPriority;
+  projectId?: string;
   applicantId?: string;
+  flowIdsToAdd?: string[];
+  flowIdsToRemove?: string[];
+  subTaskIdsToRemove?: string[];
 }
 
 export class UpdateTaskUseCase {
@@ -22,9 +25,24 @@ export class UpdateTaskUseCase {
 
     if (input.name !== undefined) task.changeName(input.name);
     if (input.description !== undefined) task.changeDescription(input.description);
-    if (input.taskNumber !== undefined) task.changeTaskNumber(input.taskNumber);
     if (input.priority !== undefined) task.changePriority(input.priority);
+    if (input.projectId !== undefined) task.changeProjectId(ProjectId(input.projectId));
     if (input.applicantId !== undefined) task.changeApplicantId(ApplicantId(input.applicantId));
+    if (input.flowIdsToAdd) {
+      for (const flowId of input.flowIdsToAdd) {
+        task.addFlowId(FlowId(flowId));
+      }
+    }
+    if (input.flowIdsToRemove) {
+      for (const flowId of input.flowIdsToRemove) {
+        task.removeFlowId(flowId);
+      }
+    }
+    if (input.subTaskIdsToRemove) {
+      for (const subTaskId of input.subTaskIdsToRemove) {
+        task.removeSubTask(subTaskId);
+      }
+    }
 
     await this.taskRepository.save(task);
   }

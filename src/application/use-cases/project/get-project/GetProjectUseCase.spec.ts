@@ -12,10 +12,16 @@ const makeRepo = (): jest.Mocked<IProjectRepository> => ({
 });
 
 const makeProject = (id: string) =>
-  new Project({ id: ProjectId(id), name: 'P', projectNumber: '#20260001', description: 'D' });
+  new Project({
+    id: ProjectId(id),
+    name: 'P',
+    projectNumber: '#20260001',
+    description: 'D',
+    urlDocument: 'https://doc.example.com',
+  });
 
 describe('GetProjectUseCase', () => {
-  it('returns project by id', async () => {
+  it('returns project output with urlDocument', async () => {
     const repo = makeRepo();
     const id = randomUUID();
     repo.findById.mockResolvedValue(makeProject(id));
@@ -23,7 +29,8 @@ describe('GetProjectUseCase', () => {
 
     const result = await sut.execute({ id });
 
-    expect(result.getId()).toBe(id);
+    expect(result.id).toBe(id);
+    expect(result.urlDocument).toBe('https://doc.example.com');
   });
 
   it('throws when project not found', async () => {

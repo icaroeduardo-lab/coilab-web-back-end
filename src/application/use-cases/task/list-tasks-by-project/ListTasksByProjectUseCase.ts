@@ -1,10 +1,22 @@
+import { Task } from '../../../../domain/entities/task.entity';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { IUserRepository } from '../../../../domain/repositories/IUserRepository';
 import { ProjectId } from '../../../../domain/shared/entity-ids';
-import { TaskOutput } from '../shared/task-output';
+import { TaskOutput, SubTaskOutput } from '../shared/task-output';
 
 export interface ListTasksByProjectInput {
   projectId: string;
+}
+
+function mapSubTasks(task: Task): SubTaskOutput[] {
+  return task.getSubTasks().map((s) => ({
+    id: s.getId(),
+    type: s.getType(),
+    status: s.getStatus(),
+    expectedDelivery: s.getExpectedDelivery(),
+    startDate: s.getStartDate(),
+    completionDate: s.getCompletionDate(),
+  }));
 }
 
 export class ListTasksByProjectUseCase {
@@ -31,7 +43,13 @@ export class ListTasksByProjectUseCase {
           priority: task.getPriority(),
           status: task.getStatus(),
           applicantId: task.getApplicantId(),
-          creator: { id: creator.getId(), name: creator.getName(), imageUrl: creator.getImageUrl() },
+          creator: {
+            id: creator.getId(),
+            name: creator.getName(),
+            imageUrl: creator.getImageUrl(),
+          },
+          flowIds: task.getFlowIds(),
+          subTasks: mapSubTasks(task),
           createdAt: task.getCreatedAt(),
         };
       }),

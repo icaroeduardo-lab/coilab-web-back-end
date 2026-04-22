@@ -1,6 +1,5 @@
 import { Task, TaskPriority, TaskStatus } from './task.entity';
 import { DiscoverySubTask, DesignSubTask, DiagramSubTask, SubTaskStatus } from './sub-task.entity';
-import { Flow } from '../value-objects/flow.vo';
 import { TaskId, ProjectId, SubTaskId, ApplicantId, UserId, FlowId } from '../shared/entity-ids';
 
 describe('Task Entity', () => {
@@ -81,7 +80,7 @@ describe('Task Entity', () => {
     expect(task.getApplicantId()).toBe(applicantId);
     expect(task.getCreatorId()).toBe(creatorId);
     expect(task.getCreatedAt()).toBeInstanceOf(Date);
-    expect(task.getFlows()).toHaveLength(0);
+    expect(task.getFlowIds()).toHaveLength(0);
   });
 
   it('should change name correctly', () => {
@@ -102,12 +101,6 @@ describe('Task Entity', () => {
     expect(task.getStatus()).toBe(TaskStatus.EM_EXECUCAO);
   });
 
-  it('should change task number correctly', () => {
-    const task = baseTask();
-    task.changeTaskNumber('#20260002');
-    expect(task.getTaskNumber()).toBe('#20260002');
-  });
-
   it('should change priority correctly', () => {
     const task = baseTask();
     task.changePriority(TaskPriority.ALTA);
@@ -123,13 +116,10 @@ describe('Task Entity', () => {
 
   it('should add flow correctly', () => {
     const task = baseTask();
-    const flow = new Flow({
-      id: FlowId('550e8400-e29b-41d4-a716-446655440005'),
-      name: 'Flow A',
-    });
-    task.addFlow(flow);
-    expect(task.getFlows()).toHaveLength(1);
-    expect(task.getFlows()[0].getName()).toBe('Flow A');
+    const flowId = FlowId('550e8400-e29b-41d4-a716-446655440005');
+    task.addFlowId(flowId);
+    expect(task.getFlowIds()).toHaveLength(1);
+    expect(task.getFlowIds()[0]).toBe(flowId);
   });
 
   describe('assertCanBeDeleted()', () => {
@@ -140,25 +130,29 @@ describe('Task Entity', () => {
 
     it('should allow deletion when all subtasks are NAO_INICIADO', () => {
       const task = baseTask();
-      task.addSubTask(new DiscoverySubTask({
-        id: SubTaskId('550e8400-e29b-41d4-a716-446655440020'),
-        taskId,
-        idUser: userId,
-        status: SubTaskStatus.NAO_INICIADO,
-        expectedDelivery: deliveryDate,
-      }));
+      task.addSubTask(
+        new DiscoverySubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440020'),
+          taskId,
+          idUser: userId,
+          status: SubTaskStatus.NAO_INICIADO,
+          expectedDelivery: deliveryDate,
+        }),
+      );
       expect(() => task.assertCanBeDeleted()).not.toThrow();
     });
 
     it('should allow deletion when all subtasks are REPROVADO regardless of task status', () => {
       const task = baseTask();
-      task.addSubTask(new DiscoverySubTask({
-        id: SubTaskId('550e8400-e29b-41d4-a716-446655440021'),
-        taskId,
-        idUser: userId,
-        status: SubTaskStatus.AGUARDANDO_CHECKOUT,
-        expectedDelivery: deliveryDate,
-      }));
+      task.addSubTask(
+        new DiscoverySubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440021'),
+          taskId,
+          idUser: userId,
+          status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+          expectedDelivery: deliveryDate,
+        }),
+      );
       task.getSubTasks()[0].reject('Motivo de reprovação');
       task.changeStatus(TaskStatus.EM_EXECUCAO);
       expect(() => task.assertCanBeDeleted()).not.toThrow();
@@ -166,13 +160,15 @@ describe('Task Entity', () => {
 
     it('should throw when task is not BACKLOG and has EM_PROGRESSO subtask', () => {
       const task = baseTask();
-      task.addSubTask(new DiscoverySubTask({
-        id: SubTaskId('550e8400-e29b-41d4-a716-446655440022'),
-        taskId,
-        idUser: userId,
-        status: SubTaskStatus.EM_PROGRESSO,
-        expectedDelivery: deliveryDate,
-      }));
+      task.addSubTask(
+        new DiscoverySubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440022'),
+          taskId,
+          idUser: userId,
+          status: SubTaskStatus.EM_PROGRESSO,
+          expectedDelivery: deliveryDate,
+        }),
+      );
       expect(() => task.assertCanBeDeleted()).toThrow(
         'Task não pode ser removida pois possui subtasks ativas',
       );
@@ -180,13 +176,15 @@ describe('Task Entity', () => {
 
     it('should throw when task is not BACKLOG and has APROVADO subtask', () => {
       const task = baseTask();
-      task.addSubTask(new DiscoverySubTask({
-        id: SubTaskId('550e8400-e29b-41d4-a716-446655440023'),
-        taskId,
-        idUser: userId,
-        status: SubTaskStatus.AGUARDANDO_CHECKOUT,
-        expectedDelivery: deliveryDate,
-      }));
+      task.addSubTask(
+        new DiscoverySubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440023'),
+          taskId,
+          idUser: userId,
+          status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+          expectedDelivery: deliveryDate,
+        }),
+      );
       task.getSubTasks()[0].approve();
       expect(() => task.assertCanBeDeleted()).toThrow(
         'Task não pode ser removida pois possui subtasks ativas',
@@ -195,33 +193,39 @@ describe('Task Entity', () => {
 
     it('should allow deletion when all subtasks are CANCELADO', () => {
       const task = baseTask();
-      task.addSubTask(new DiscoverySubTask({
-        id: SubTaskId('550e8400-e29b-41d4-a716-446655440026'),
-        taskId,
-        idUser: userId,
-        status: SubTaskStatus.EM_PROGRESSO,
-        expectedDelivery: deliveryDate,
-      }));
+      task.addSubTask(
+        new DiscoverySubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440026'),
+          taskId,
+          idUser: userId,
+          status: SubTaskStatus.EM_PROGRESSO,
+          expectedDelivery: deliveryDate,
+        }),
+      );
       task.getSubTasks()[0].cancel('Motivo de cancelamento');
       expect(() => task.assertCanBeDeleted()).not.toThrow();
     });
 
     it('should allow deletion when subtasks are mix of REPROVADO and CANCELADO', () => {
       const task = baseTask();
-      task.addSubTask(new DiscoverySubTask({
-        id: SubTaskId('550e8400-e29b-41d4-a716-446655440027'),
-        taskId,
-        idUser: userId,
-        status: SubTaskStatus.AGUARDANDO_CHECKOUT,
-        expectedDelivery: deliveryDate,
-      }));
-      task.addSubTask(new DesignSubTask({
-        id: SubTaskId('550e8400-e29b-41d4-a716-446655440028'),
-        taskId,
-        idUser: userId,
-        status: SubTaskStatus.EM_PROGRESSO,
-        expectedDelivery: deliveryDate,
-      }));
+      task.addSubTask(
+        new DiscoverySubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440027'),
+          taskId,
+          idUser: userId,
+          status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+          expectedDelivery: deliveryDate,
+        }),
+      );
+      task.addSubTask(
+        new DesignSubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440028'),
+          taskId,
+          idUser: userId,
+          status: SubTaskStatus.EM_PROGRESSO,
+          expectedDelivery: deliveryDate,
+        }),
+      );
       task.getSubTasks()[0].reject('Motivo de reprovação');
       task.getSubTasks()[1].cancel('Motivo de cancelamento');
       expect(() => task.assertCanBeDeleted()).not.toThrow();
@@ -229,20 +233,24 @@ describe('Task Entity', () => {
 
     it('should throw when task is not BACKLOG and subtasks are mixed (some REPROVADO, some not)', () => {
       const task = baseTask();
-      task.addSubTask(new DiscoverySubTask({
-        id: SubTaskId('550e8400-e29b-41d4-a716-446655440024'),
-        taskId,
-        idUser: userId,
-        status: SubTaskStatus.AGUARDANDO_CHECKOUT,
-        expectedDelivery: deliveryDate,
-      }));
-      task.addSubTask(new DesignSubTask({
-        id: SubTaskId('550e8400-e29b-41d4-a716-446655440025'),
-        taskId,
-        idUser: userId,
-        status: SubTaskStatus.EM_PROGRESSO,
-        expectedDelivery: deliveryDate,
-      }));
+      task.addSubTask(
+        new DiscoverySubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440024'),
+          taskId,
+          idUser: userId,
+          status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+          expectedDelivery: deliveryDate,
+        }),
+      );
+      task.addSubTask(
+        new DesignSubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440025'),
+          taskId,
+          idUser: userId,
+          status: SubTaskStatus.EM_PROGRESSO,
+          expectedDelivery: deliveryDate,
+        }),
+      );
       task.getSubTasks()[0].reject('Motivo de reprovação');
       expect(() => task.assertCanBeDeleted()).toThrow(
         'Task não pode ser removida pois possui subtasks ativas',
