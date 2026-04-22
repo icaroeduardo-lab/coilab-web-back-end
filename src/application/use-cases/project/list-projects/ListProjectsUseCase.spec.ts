@@ -12,19 +12,24 @@ const makeRepo = (): jest.Mocked<IProjectRepository> => ({
 });
 
 const makeProject = (id: string) =>
-  new Project({ id: ProjectId(id), name: 'P', projectNumber: '#20260001', description: 'D' });
+  new Project({
+    id: ProjectId(id),
+    name: 'P',
+    projectNumber: '#20260001',
+    description: 'D',
+    urlDocument: 'https://doc.example.com',
+  });
 
 describe('ListProjectsUseCase', () => {
-  it('returns all projects from repository', async () => {
+  it('returns all projects without urlDocument', async () => {
     const repo = makeRepo();
-    const projects = [makeProject(randomUUID()), makeProject(randomUUID())];
-    repo.findAll.mockResolvedValue(projects);
+    repo.findAll.mockResolvedValue([makeProject(randomUUID()), makeProject(randomUUID())]);
     const sut = new ListProjectsUseCase(repo);
 
     const result = await sut.execute();
 
     expect(result).toHaveLength(2);
-    expect(repo.findAll).toHaveBeenCalledTimes(1);
+    expect(result[0]).not.toHaveProperty('urlDocument');
   });
 
   it('returns empty array when no projects exist', async () => {
