@@ -6,7 +6,6 @@ import {
   SubTaskStatus,
   SubTaskType,
 } from '../../../../domain/entities/sub-task.entity';
-import { Flow } from '../../../../domain/value-objects/flow.vo';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import {
   TaskId,
@@ -25,10 +24,6 @@ export interface CreateTaskSubTaskInput {
   expectedDelivery: Date;
 }
 
-export interface CreateTaskFlowInput {
-  name: string;
-}
-
 export interface CreateTaskInput {
   projectId: string;
   name: string;
@@ -36,7 +31,7 @@ export interface CreateTaskInput {
   priority: TaskPriority;
   applicantId: string;
   creatorId: string;
-  flows?: CreateTaskFlowInput[];
+  flowIds?: string[];
   subTasks?: CreateTaskSubTaskInput[];
 }
 
@@ -67,10 +62,6 @@ export class CreateTaskUseCase {
     const taskNumber = generateNextNumber(lastNumber);
     const taskId = generateId();
 
-    const flows = (input.flows ?? []).map(
-      (f) => new Flow({ id: FlowId(generateId()), name: f.name }),
-    );
-
     const subTasks = (input.subTasks ?? []).map((s) => buildSubTask(s, taskId));
 
     const task = new Task({
@@ -83,7 +74,7 @@ export class CreateTaskUseCase {
       status: TaskStatus.BACKLOG,
       applicantId: ApplicantId(input.applicantId),
       creatorId: UserId(input.creatorId),
-      flows,
+      flowIds: (input.flowIds ?? []).map((id) => FlowId(id)),
       subTasks,
     });
 

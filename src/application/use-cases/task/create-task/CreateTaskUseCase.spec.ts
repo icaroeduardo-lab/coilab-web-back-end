@@ -60,16 +60,17 @@ describe('CreateTaskUseCase', () => {
     expect(saved.getTaskNumber()).toBe(`#${year}0006`);
   });
 
-  it('creates task with optional flows', async () => {
+  it('creates task with optional flowIds', async () => {
     const taskRepo = makeTaskRepo();
     taskRepo.findLastTaskNumber.mockResolvedValue(null);
     const sut = new CreateTaskUseCase(taskRepo);
+    const flowId = randomUUID();
 
-    await sut.execute({ ...baseInput(), flows: [{ name: 'Fluxo A' }] });
+    await sut.execute({ ...baseInput(), flowIds: [flowId] });
 
     const saved: Task = taskRepo.save.mock.calls[0][0];
-    expect(saved.getFlows()).toHaveLength(1);
-    expect(saved.getFlows()[0].getName()).toBe('Fluxo A');
+    expect(saved.getFlowIds()).toHaveLength(1);
+    expect(saved.getFlowIds()[0]).toBe(flowId);
   });
 
   it('creates task with optional subtasks', async () => {

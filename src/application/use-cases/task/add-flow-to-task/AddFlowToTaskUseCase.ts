@@ -1,11 +1,9 @@
-import { Flow } from '../../../../domain/value-objects/flow.vo';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { TaskId, FlowId } from '../../../../domain/shared/entity-ids';
 
 export interface AddFlowToTaskInput {
   taskId: string;
   flowId: string;
-  flowName: string;
 }
 
 export class AddFlowToTaskUseCase {
@@ -17,7 +15,7 @@ export class AddFlowToTaskUseCase {
       throw new Error(`Task not found: ${input.taskId}`);
     }
 
-    task.addFlow(new Flow({ id: FlowId(input.flowId), name: input.flowName }));
+    task.addFlowId(FlowId(input.flowId));
 
     await this.taskRepository.save(task);
   }
