@@ -1,11 +1,7 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { Level, Frequency } from '../../../domain/entities/sub-task.entity';
 
 export class UpdateDiscoveryFormDto {
-  @IsUUID()
-  @IsNotEmpty()
-  userId: string;
-
   @IsEnum(Level)
   @IsOptional()
   complexity?: Level;
