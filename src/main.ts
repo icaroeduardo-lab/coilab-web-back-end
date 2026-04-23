@@ -2,16 +2,14 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import awsLambdaFastify from '@fastify/aws-lambda';
 import type { Handler } from 'aws-lambda';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './modules/shared/http-exception.filter';
 
 async function bootstrap(): Promise<NestFastifyApplication> {
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-  );
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
   app.setGlobalPrefix('api');
   app.enableCors({
     origin: process.env.CORS_ORIGIN ?? '*',
@@ -20,6 +18,16 @@ async function bootstrap(): Promise<NestFastifyApplication> {
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalFilters(new AllExceptionsFilter());
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Coilab API')
+    .setDescription('API de gestão de projetos de produto digital — Discovery, Design e Diagramação.')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api/docs', app, document);
+
   return app;
 }
 

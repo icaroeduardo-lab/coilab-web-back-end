@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Inject, Param, Patch, Post } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateProjectUseCase } from '../../application/use-cases/project/create-project/CreateProjectUseCase';
 import { GetProjectUseCase } from '../../application/use-cases/project/get-project/GetProjectUseCase';
 import { ListProjectsUseCase } from '../../application/use-cases/project/list-projects/ListProjectsUseCase';
@@ -8,6 +9,8 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ChangeProjectStatusDto } from './dto/change-project-status.dto';
 
+@ApiTags('Projects')
+@ApiBearerAuth()
 @Controller('projects')
 export class ProjectController {
   constructor(
@@ -19,26 +22,42 @@ export class ProjectController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Criar projeto' })
+  @ApiResponse({ status: 201, description: 'Projeto criado com sucesso.' })
+  @ApiResponse({ status: 422, description: 'Dados inválidos.' })
   create(@Body() dto: CreateProjectDto) {
     return this.createProject.execute(dto);
   }
 
   @Get()
+  @ApiOperation({ summary: 'Listar todos os projetos' })
+  @ApiResponse({ status: 200, description: 'Lista de projetos.' })
   list() {
     return this.listProjects.execute();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar projeto por ID' })
+  @ApiParam({ name: 'id', description: 'UUID do projeto' })
+  @ApiResponse({ status: 200, description: 'Projeto encontrado.' })
+  @ApiResponse({ status: 404, description: 'Projeto não encontrado.' })
   get(@Param('id') id: string) {
     return this.getProject.execute({ id });
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar dados do projeto' })
+  @ApiParam({ name: 'id', description: 'UUID do projeto' })
+  @ApiResponse({ status: 200, description: 'Projeto atualizado.' })
   update(@Param('id') id: string, @Body() dto: UpdateProjectDto) {
     return this.updateProject.execute({ id, ...dto });
   }
 
   @Patch(':id/status')
+  @ApiOperation({ summary: 'Alterar status do projeto' })
+  @ApiParam({ name: 'id', description: 'UUID do projeto' })
+  @ApiResponse({ status: 200, description: 'Status alterado.' })
+  @ApiResponse({ status: 422, description: 'Transição de status inválida.' })
   changeProjectStatus(@Param('id') id: string, @Body() dto: ChangeProjectStatusDto) {
     return this.changeStatus.execute({ id, status: dto.status });
   }

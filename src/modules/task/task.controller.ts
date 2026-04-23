@@ -2,6 +2,7 @@ import {
   Body, Controller, Delete, Get, HttpCode,
   Inject, Param, Patch, Post,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateTaskUseCase } from '../../application/use-cases/task/create-task/CreateTaskUseCase';
 import { GetTaskUseCase } from '../../application/use-cases/task/get-task/GetTaskUseCase';
 import { ListAllTasksUseCase } from '../../application/use-cases/task/list-all-tasks/ListAllTasksUseCase';
@@ -23,6 +24,8 @@ import { UpdateDiscoveryFormDto } from './dto/update-discovery-form.dto';
 import { AddDesignDto } from './dto/add-design.dto';
 import { CurrentUser, JwtPayload } from '../auth/current-user.decorator';
 
+@ApiTags('Tasks')
+@ApiBearerAuth()
 @Controller('tasks')
 export class TaskController {
   constructor(
@@ -41,6 +44,9 @@ export class TaskController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Criar tarefa' })
+  @ApiResponse({ status: 201, description: 'Tarefa criada.' })
+  @ApiResponse({ status: 422, description: 'Dados inválidos.' })
   create(@CurrentUser() user: JwtPayload, @Body() dto: CreateTaskDto) {
     return this.createTask.execute({
       ...dto,
@@ -54,38 +60,62 @@ export class TaskController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Listar todas as tarefas' })
+  @ApiResponse({ status: 200, description: 'Lista de tarefas.' })
   list() {
     return this.listAllTasks.execute();
   }
 
   @Get('project/:projectId')
+  @ApiOperation({ summary: 'Listar tarefas por projeto' })
+  @ApiParam({ name: 'projectId', description: 'UUID do projeto' })
+  @ApiResponse({ status: 200, description: 'Tarefas do projeto.' })
   listByProjectId(@Param('projectId') projectId: string) {
     return this.listByProject.execute({ projectId });
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar tarefa por ID' })
+  @ApiParam({ name: 'id', description: 'UUID da tarefa' })
+  @ApiResponse({ status: 200, description: 'Tarefa encontrada.' })
+  @ApiResponse({ status: 404, description: 'Tarefa não encontrada.' })
   get(@Param('id') id: string) {
     return this.getTask.execute({ id });
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar dados da tarefa' })
+  @ApiParam({ name: 'id', description: 'UUID da tarefa' })
+  @ApiResponse({ status: 200, description: 'Tarefa atualizada.' })
   update(@Param('id') id: string, @Body() dto: UpdateTaskDto) {
     return this.updateTask.execute({ id, ...dto });
   }
 
   @Patch(':id/status')
+  @ApiOperation({ summary: 'Alterar status da tarefa' })
+  @ApiParam({ name: 'id', description: 'UUID da tarefa' })
+  @ApiResponse({ status: 200, description: 'Status alterado.' })
+  @ApiResponse({ status: 422, description: 'Transição de status inválida.' })
   changeStatus(@Param('id') id: string, @Body() dto: ChangeTaskStatusDto) {
     return this.changeTaskStatus.execute({ id, status: dto.status });
   }
 
   @Delete(':id')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Remover tarefa' })
+  @ApiParam({ name: 'id', description: 'UUID da tarefa' })
+  @ApiResponse({ status: 204, description: 'Tarefa removida.' })
+  @ApiResponse({ status: 422, description: 'Tarefa não pode ser removida no estado atual.' })
   async remove(@Param('id') id: string) {
     await this.deleteTask.execute({ id });
   }
 
   @Post(':taskId/subtasks')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Adicionar subtarefa à tarefa' })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiResponse({ status: 204, description: 'Subtarefa adicionada.' })
+  @ApiResponse({ status: 422, description: 'Subtarefa inválida para o estado atual.' })
   async addSubTask_(@CurrentUser() user: JwtPayload, @Param('taskId') taskId: string, @Body() dto: AddSubTaskDto) {
     await this.addSubTask.execute({
       taskId,
@@ -97,6 +127,11 @@ export class TaskController {
 
   @Patch(':taskId/subtasks/:subTaskId/status')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Alterar status da subtarefa' })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiParam({ name: 'subTaskId', description: 'UUID da subtarefa' })
+  @ApiResponse({ status: 204, description: 'Status alterado.' })
+  @ApiResponse({ status: 422, description: 'Ação inválida para o estado atual.' })
   async changeSubTaskStatus_(
     @Param('taskId') taskId: string,
     @Param('subTaskId') subTaskId: string,
@@ -107,6 +142,10 @@ export class TaskController {
 
   @Patch(':taskId/subtasks/:subTaskId/discovery')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Preencher/atualizar formulário de Discovery' })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiParam({ name: 'subTaskId', description: 'UUID da subtarefa Discovery' })
+  @ApiResponse({ status: 204, description: 'Formulário atualizado.' })
   async updateDiscovery_(
     @CurrentUser() user: JwtPayload,
     @Param('taskId') taskId: string,
@@ -118,6 +157,11 @@ export class TaskController {
 
   @Post(':taskId/subtasks/:subTaskId/designs')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Adicionar design à subtarefa Design' })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiParam({ name: 'subTaskId', description: 'UUID da subtarefa Design' })
+  @ApiResponse({ status: 204, description: 'Design adicionado.' })
+  @ApiResponse({ status: 422, description: 'Subtarefa já adicionada ou em estado inválido.' })
   async addDesign_(
     @CurrentUser() user: JwtPayload,
     @Param('taskId') taskId: string,
@@ -129,6 +173,11 @@ export class TaskController {
 
   @Delete(':taskId/subtasks/:subTaskId/designs/:designId')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Remover design da subtarefa' })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiParam({ name: 'subTaskId', description: 'UUID da subtarefa Design' })
+  @ApiParam({ name: 'designId', description: 'UUID do design' })
+  @ApiResponse({ status: 204, description: 'Design removido.' })
   async removeDesign_(
     @Param('taskId') taskId: string,
     @Param('subTaskId') subTaskId: string,

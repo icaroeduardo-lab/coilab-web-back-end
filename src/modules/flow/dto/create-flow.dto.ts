@@ -1,6 +1,8 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class CreateFlowDto {
+  @ApiProperty({ example: 'Fluxo de Aprovação', minLength: 3 })
   @IsString()
   @IsNotEmpty()
   @MinLength(3)
