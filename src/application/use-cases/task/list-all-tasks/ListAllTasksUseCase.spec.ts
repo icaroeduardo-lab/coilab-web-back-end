@@ -20,7 +20,9 @@ const makeTaskRepo = (): jest.Mocked<ITaskRepository> => ({
 
 const makeApplicantRepo = (): jest.Mocked<IApplicantRepository> => ({
   findById: jest.fn(),
+  findAll: jest.fn(),
   save: jest.fn(),
+  delete: jest.fn(),
 });
 
 const makeProjectRepo = (): jest.Mocked<IProjectRepository> => ({
