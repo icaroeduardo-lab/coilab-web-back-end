@@ -2,6 +2,7 @@ import { CreateTaskUseCase } from './CreateTaskUseCase';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
 import { SubTaskType } from '../../../../domain/entities/sub-task.entity';
+import { TaskOutput } from '../shared/task-output';
 import { randomUUID } from 'crypto';
 
 const makeTaskRepo = (): jest.Mocked<ITaskRepository> => ({
@@ -28,12 +29,15 @@ describe('CreateTaskUseCase', () => {
     taskRepo.findLastTaskNumber.mockResolvedValue(null);
     const sut = new CreateTaskUseCase(taskRepo);
 
-    await sut.execute(baseInput());
+    const output: TaskOutput = await sut.execute(baseInput());
 
     const saved: Task = taskRepo.save.mock.calls[0][0];
     expect(saved.getStatus()).toBe(TaskStatus.BACKLOG);
     expect(saved.getName()).toBe('Task 1');
     expect(saved.getTaskNumber()).toMatch(/^#\d{8}$/);
+    expect(output.id).toBe(saved.getId());
+    expect(output.name).toBe('Task 1');
+    expect(output.status).toBe(TaskStatus.BACKLOG);
   });
 
   it('stores applicantId and creatorId', async () => {
@@ -55,10 +59,11 @@ describe('CreateTaskUseCase', () => {
     taskRepo.findLastTaskNumber.mockResolvedValue(`#${year}0005`);
     const sut = new CreateTaskUseCase(taskRepo);
 
-    await sut.execute(baseInput());
+    const output = await sut.execute(baseInput());
 
     const saved: Task = taskRepo.save.mock.calls[0][0];
     expect(saved.getTaskNumber()).toBe(`#${year}0006`);
+    expect(output.taskNumber).toBe(`#${year}0006`);
   });
 
   it('creates task with optional flowIds', async () => {

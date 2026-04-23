@@ -17,6 +17,7 @@ import {
 } from '../../../../domain/shared/entity-ids';
 import { generateNextNumber } from '../../../../domain/shared/sequential-number';
 import { generateId } from '../../../../shared/generate-id';
+import { TaskOutput } from '../shared/task-output';
 
 export interface CreateTaskSubTaskInput {
   type: SubTaskType;
@@ -57,7 +58,7 @@ const buildSubTask = (input: CreateTaskSubTaskInput, taskId: string) => {
 export class CreateTaskUseCase {
   constructor(private readonly taskRepository: ITaskRepository) {}
 
-  async execute(input: CreateTaskInput): Promise<void> {
+  async execute(input: CreateTaskInput): Promise<TaskOutput> {
     const lastNumber = await this.taskRepository.findLastTaskNumber();
     const taskNumber = generateNextNumber(lastNumber);
     const taskId = generateId();
@@ -79,5 +80,14 @@ export class CreateTaskUseCase {
     });
 
     await this.taskRepository.save(task);
+
+    return {
+      id: task.getId(),
+      projectId: task.getProjectId(),
+      name: task.getName(),
+      taskNumber: task.getTaskNumber(),
+      priority: task.getPriority(),
+      status: task.getStatus(),
+    };
   }
 }
