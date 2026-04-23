@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: coilab-postgres
+    environment:
+      POSTGRES_USER: coilab
+      POSTGRES_PASSWORD: coilab
+      POSTGRES_DB: coilab
+    ports:
+      - '5432:5432'
+    volumes:
+      - coilab_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  coilab_postgres_data:

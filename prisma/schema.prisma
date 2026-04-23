@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Project {
+  id            String   @id @db.Uuid
+  name          String
+  projectNumber String   @unique
+  description   String
+  urlDocument   String?
+  status        String   @default("backlog")
+  createdAt     DateTime @default(now())
+  tasks         Task[]
+
+  @@map("projects")
+}
+
+model User {
+  id       String  @id @db.Uuid
+  name     String
+  imageUrl String?
+  tasks    Task[]  @relation("creator")
+
+  @@map("users")
+}
+
+model Applicant {
+  id    String @id @db.Uuid
+  name  String
+  tasks Task[] @relation("applicant")
+
+  @@map("applicants")
+}
+
+model Flow {
+  id    String     @id @db.Uuid
+  name  String
+  tasks TaskFlow[]
+
+  @@map("flows")
+}
+
+model Task {
+  id          String    @id @db.Uuid
+  projectId   String    @db.Uuid
+  name        String
+  description String
+  taskNumber  String    @unique
+  priority    String
+  status      String
+  applicantId String    @db.Uuid
+  creatorId   String    @db.Uuid
+  createdAt   DateTime  @default(now())
+  project     Project   @relation(fields: [projectId], references: [id])
+  applicant   Applicant @relation("applicant", fields: [applicantId], references: [id])
+  creator     User      @relation("creator", fields: [creatorId], references: [id])
+  subTasks    SubTask[]
+  flows       TaskFlow[]
+
+  @@map("tasks")
+}
+
+model TaskFlow {
+  taskId String @db.Uuid
+  flowId String @db.Uuid
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  flow   Flow   @relation(fields: [flowId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, flowId])
+  @@map("task_flows")
+}
+
+model SubTask {
+  id               String    @id @db.Uuid
+  taskId           String    @db.Uuid
+  idUser           String    @db.Uuid
+  status           String
+  type             String
+  expectedDelivery DateTime
+  createdAt        DateTime  @default(now())
+  startDate        DateTime?
+  completionDate   DateTime?
+  reason           String?
+  discoveryForm    Json?
+  designs          Json?
+  diagrams         Json?
+  task             Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("sub_tasks")
+}

@@ -78,6 +78,7 @@ web_modules/
 
 # dotenv environment variable files
 .env
+.env.test
 .env.development.local
 .env.test.local
 .env.production.local
@@ -144,3 +145,5 @@ dist
 # End of https://www.toptal.com/developers/gitignore/api/node
 
 .claude/settings.local.json
+
+/src/generated/prisma
