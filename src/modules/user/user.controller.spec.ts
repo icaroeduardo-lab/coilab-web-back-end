@@ -25,8 +25,8 @@ describe('UserController', () => {
   describe('sync', () => {
     it('calls upsertUser.execute with dto', async () => {
       mockUpsert.execute.mockResolvedValue(undefined);
-      const dto = { id: randomUUID(), name: 'John', imageUrl: 'https://img.example.com' };
-      await controller.sync(dto);
+      const dto = { cognitoSub: randomUUID(), name: 'John', imageUrl: 'https://img.example.com' };
+      await controller.sync(dto as never);
       expect(mockUpsert.execute).toHaveBeenCalledWith(dto);
     });
   });

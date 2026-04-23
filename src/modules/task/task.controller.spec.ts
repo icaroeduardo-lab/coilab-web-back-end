@@ -196,10 +196,11 @@ describe('TaskController', () => {
     it('calls addDesign.execute with taskId, subTaskId and dto spread', async () => {
       const taskId = randomUUID();
       const subTaskId = randomUUID();
-      const dto = { userId: randomUUID(), title: 'Tela', description: 'D', urlImage: 'https://img.example.com/a.png' } as never;
+      const userId = randomUUID();
+      const dto = { userId, title: 'Tela', description: 'D', urlImage: 'https://img.example.com/a.png' } as never;
       mockAddDesign.execute.mockResolvedValue(undefined);
       await controller.addDesign_(taskId, subTaskId, dto);
-      expect(mockAddDesign.execute).toHaveBeenCalledWith({ taskId, subTaskId, ...dto });
+      expect(mockAddDesign.execute).toHaveBeenCalledWith({ taskId, subTaskId, userId, title: 'Tela', description: 'D', urlImage: 'https://img.example.com/a.png' });
     });
   });
 

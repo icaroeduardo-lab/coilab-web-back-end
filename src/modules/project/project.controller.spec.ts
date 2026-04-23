@@ -5,7 +5,6 @@ import { GetProjectUseCase } from '../../application/use-cases/project/get-proje
 import { ListProjectsUseCase } from '../../application/use-cases/project/list-projects/ListProjectsUseCase';
 import { UpdateProjectUseCase } from '../../application/use-cases/project/update-project/UpdateProjectUseCase';
 import { ChangeProjectStatusUseCase } from '../../application/use-cases/project/change-project-status/ChangeProjectStatusUseCase';
-import { TaskStatus } from '../../domain/entities/task.entity';
 import { ProjectStatus } from '../../domain/entities/project.entity';
 import { randomUUID } from 'crypto';
 
@@ -79,9 +78,9 @@ describe('ProjectController', () => {
     it('calls changeStatus.execute with id and status', async () => {
       mockChangeStatus.execute.mockResolvedValue(undefined);
       const id = randomUUID();
-      const dto = { status: ProjectStatus.EM_ANDAMENTO };
+      const dto = { status: ProjectStatus.EM_EXECUCAO };
       await controller.changeProjectStatus(id, dto as never);
-      expect(mockChangeStatus.execute).toHaveBeenCalledWith({ id, status: ProjectStatus.EM_ANDAMENTO });
+      expect(mockChangeStatus.execute).toHaveBeenCalledWith({ id, status: ProjectStatus.EM_EXECUCAO });
     });
   });
 });
