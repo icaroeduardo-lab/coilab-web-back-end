@@ -103,7 +103,7 @@ describe('ListAllTasksUseCase', () => {
     const older = new DiscoverySubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(task.getId()),
-      idUser: ApplicantId(randomUUID()),
+      idUser: UserId(randomUUID()),
       status: SubTaskStatus.REPROVADO,
       expectedDelivery: new Date(),
       createdAt: new Date('2026-01-01'),
@@ -111,7 +111,7 @@ describe('ListAllTasksUseCase', () => {
     const newer = new DiscoverySubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(task.getId()),
-      idUser: ApplicantId(randomUUID()),
+      idUser: UserId(randomUUID()),
       status: SubTaskStatus.EM_PROGRESSO,
       expectedDelivery: new Date(),
       createdAt: new Date('2026-03-01'),
@@ -127,6 +127,52 @@ describe('ListAllTasksUseCase', () => {
 
     expect(result[0].subTasks).toHaveLength(1);
     expect(result[0].subTasks[0].type).toBe(SubTaskType.DISCOVERY);
+    expect(result[0].subTasks[0].status).toBe(SubTaskStatus.EM_PROGRESSO);
+  });
+
+  it('keeps newer subtask when older comes second in array', async () => {
+    const taskRepo = makeTaskRepo();
+    const applicantRepo = makeApplicantRepo();
+    const projectRepo = makeProjectRepo();
+    const applicantId = randomUUID();
+    const projectId = randomUUID();
+    const taskId = TaskId(randomUUID());
+    const newer = new DiscoverySubTask({
+      id: SubTaskId(randomUUID()),
+      taskId,
+      idUser: UserId(randomUUID()),
+      status: SubTaskStatus.EM_PROGRESSO,
+      expectedDelivery: new Date(),
+      createdAt: new Date('2026-03-01'),
+    });
+    const older = new DiscoverySubTask({
+      id: SubTaskId(randomUUID()),
+      taskId,
+      idUser: UserId(randomUUID()),
+      status: SubTaskStatus.REPROVADO,
+      expectedDelivery: new Date(),
+      createdAt: new Date('2026-01-01'),
+    });
+    const task = new Task({
+      id: taskId,
+      projectId: ProjectId(projectId),
+      name: 'Task',
+      description: 'Desc',
+      taskNumber: '#20260001',
+      priority: TaskPriority.MEDIA,
+      status: TaskStatus.BACKLOG,
+      applicantId: ApplicantId(applicantId),
+      creatorId: UserId(randomUUID()),
+      subTasks: [newer, older],
+    });
+    taskRepo.findAll.mockResolvedValue([task]);
+    applicantRepo.findById.mockResolvedValue(new Applicant({ id: ApplicantId(applicantId), name: 'Setor' }));
+    projectRepo.findById.mockResolvedValue(new Project({ id: ProjectId(projectId), name: 'P', projectNumber: '#20260001', description: 'D' }));
+    const sut = new ListAllTasksUseCase(taskRepo, applicantRepo, projectRepo);
+
+    const result = await sut.execute();
+
+    expect(result[0].subTasks).toHaveLength(1);
     expect(result[0].subTasks[0].status).toBe(SubTaskStatus.EM_PROGRESSO);
   });
 

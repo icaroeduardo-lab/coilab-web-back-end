@@ -25,7 +25,7 @@ const makeDiscoverySubTask = (id: string) =>
   new DiscoverySubTask({
     id: SubTaskId(id),
     taskId: TaskId(randomUUID()),
-    idUser: ApplicantId(randomUUID()),
+    idUser: UserId(randomUUID()),
     status: SubTaskStatus.EM_PROGRESSO,
     expectedDelivery: new Date(),
   });
@@ -34,7 +34,7 @@ const makeDesignSubTask = (id: string) =>
   new DesignSubTask({
     id: SubTaskId(id),
     taskId: TaskId(randomUUID()),
-    idUser: ApplicantId(randomUUID()),
+    idUser: UserId(randomUUID()),
     status: SubTaskStatus.EM_PROGRESSO,
     expectedDelivery: new Date(),
   });

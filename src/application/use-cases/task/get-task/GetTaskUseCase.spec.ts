@@ -9,7 +9,8 @@ import { User } from '../../../../domain/entities/user.entity';
 import { Applicant } from '../../../../domain/entities/applicant.entity';
 import { Project } from '../../../../domain/entities/project.entity';
 import { Flow } from '../../../../domain/value-objects/flow.vo';
-import { TaskId, ProjectId, ApplicantId, UserId, FlowId } from '../../../../domain/shared/entity-ids';
+import { DiscoverySubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
+import { TaskId, ProjectId, ApplicantId, UserId, FlowId, SubTaskId } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
 const makeTaskRepo = (): jest.Mocked<ITaskRepository> => ({
@@ -92,6 +93,37 @@ describe('GetTaskUseCase', () => {
     expect(result.flows).toHaveLength(1);
     expect(result.flows[0].name).toBe('Fluxo Principal');
     expect(result.subTasks).toEqual([]);
+  });
+
+  it('returns subtasks mapped correctly', async () => {
+    const taskRepo = makeTaskRepo();
+    const userRepo = makeUserRepo();
+    const applicantRepo = makeApplicantRepo();
+    const flowRepo = makeFlowRepo();
+    const projectRepo = makeProjectRepo();
+    const creatorId = randomUUID();
+    const applicantId = randomUUID();
+    const projectId = randomUUID();
+    const task = makeTask(creatorId, applicantId, projectId);
+    task.addSubTask(new DiscoverySubTask({
+      id: SubTaskId(randomUUID()),
+      taskId: task.getId(),
+      idUser: UserId(randomUUID()),
+      status: SubTaskStatus.EM_PROGRESSO,
+      expectedDelivery: new Date('2026-12-31'),
+    }));
+    taskRepo.findById.mockResolvedValue(task);
+    userRepo.findById.mockResolvedValue(new User({ id: UserId(creatorId), name: 'John' }));
+    applicantRepo.findById.mockResolvedValue(new Applicant({ id: ApplicantId(applicantId), name: 'Setor' }));
+    flowRepo.findByIds.mockResolvedValue([]);
+    projectRepo.findById.mockResolvedValue(new Project({ id: ProjectId(projectId), name: 'P', projectNumber: '#20260001', description: 'D' }));
+    const sut = makeSut(taskRepo, userRepo, applicantRepo, flowRepo, projectRepo);
+
+    const result = await sut.execute({ id: randomUUID() });
+
+    expect(result.subTasks).toHaveLength(1);
+    expect(result.subTasks[0].status).toBe(SubTaskStatus.EM_PROGRESSO);
+    expect(result.subTasks[0].expectedDelivery).toBeInstanceOf(Date);
   });
 
   it('throws when task not found', async () => {

@@ -10,9 +10,10 @@ import {
 } from './sub-task.entity';
 import { Design } from '../value-objects/design.vo';
 import { Diagram } from '../value-objects/diagram.vo';
-import { SubTaskId, TaskId, DesignId, ApplicantId } from '../shared/entity-ids';
+import { SubTaskId, TaskId, DesignId, ApplicantId, UserId } from '../shared/entity-ids';
 
-const userId = ApplicantId('550e8400-e29b-41d4-a716-446655440003');
+const userId = UserId('550e8400-e29b-41d4-a716-446655440003');
+const diagramUser = ApplicantId('550e8400-e29b-41d4-a716-446655440003');
 const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');
 
 const entry = <T>(value: T): DiscoveryFieldEntry<T> => ({
@@ -114,7 +115,7 @@ describe('SubTask Entity', () => {
     });
 
     it('should update form fields recording userId and filledAt', () => {
-      const otherUser = ApplicantId('550e8400-e29b-41d4-a716-446655440099');
+      const otherUser = UserId('550e8400-e29b-41d4-a716-446655440099');
       const subTask = new DiscoverySubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440008'),
         taskId,
@@ -128,6 +129,22 @@ describe('SubTask Entity', () => {
       expect(subTask.getForm().projectName?.userId).toBe(otherUser);
       expect(subTask.getForm().projectName?.filledAt).toBeInstanceOf(Date);
       expect(subTask.getForm().complexity?.value).toBe(Level.MEDIUM);
+    });
+
+    it('should skip fields with undefined value in updateForm', () => {
+      const subTask = new DiscoverySubTask({
+        id: SubTaskId('550e8400-e29b-41d4-a716-446655440008'),
+        taskId,
+        idUser: userId,
+        status: SubTaskStatus.EM_PROGRESSO,
+        expectedDelivery: new Date(),
+        projectName: { value: 'Original', userId, filledAt: new Date() },
+      });
+
+      subTask.updateForm({ projectName: undefined, summary: 'Novo' }, userId);
+
+      expect(subTask.getForm().projectName?.value).toBe('Original');
+      expect(subTask.getForm().summary?.value).toBe('Novo');
     });
 
     it('should throw when updating form on locked subtask', () => {
@@ -270,7 +287,7 @@ describe('SubTask Entity', () => {
       title: 'Database Diagram',
       description: 'Desc',
       urlDiagram: 'https://example.com/diagram.png',
-      user: userId,
+      user: diagramUser,
       dateUpload: new Date(),
     });
 
@@ -303,7 +320,7 @@ describe('SubTask Entity', () => {
           title: 'New Diagram',
           description: 'Desc',
           urlDiagram: 'https://example.com/diagram.png',
-          user: userId,
+          user: diagramUser,
           dateUpload: new Date(),
         }),
       );
@@ -315,7 +332,7 @@ describe('SubTask Entity', () => {
         title: 'Database Diagram',
         description: 'Desc',
         urlDiagram: 'https://example.com/diagram.png',
-        user: userId,
+        user: diagramUser,
         dateUpload: new Date(),
       });
 

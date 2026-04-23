@@ -3,7 +3,7 @@ import { DiscoverySubTask, DesignSubTask, SubTaskStatus } from './sub-task.entit
 import { TaskId, ProjectId, SubTaskId, ApplicantId, UserId } from '../shared/entity-ids';
 
 describe('Task Status Transition Rules', () => {
-  const userId = ApplicantId('550e8400-e29b-41d4-a716-446655440003');
+  const userId = UserId('550e8400-e29b-41d4-a716-446655440003');
   const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');
   const deliveryDate = new Date('2026-12-31');
 

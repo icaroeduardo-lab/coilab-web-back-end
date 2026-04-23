@@ -4,7 +4,7 @@ import { TaskId, ProjectId, SubTaskId, ApplicantId, UserId, FlowId } from '../sh
 
 describe('Task Entity', () => {
   const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');
-  const userId = ApplicantId('550e8400-e29b-41d4-a716-446655440003');
+  const userId = UserId('550e8400-e29b-41d4-a716-446655440003');
   const applicantId = ApplicantId('550e8400-e29b-41d4-a716-446655440005');
   const creatorId = UserId('550e8400-e29b-41d4-a716-446655440006');
   const projectId = ProjectId('550e8400-e29b-41d4-a716-446655440000');
@@ -120,6 +120,18 @@ describe('Task Entity', () => {
     task.addFlowId(flowId);
     expect(task.getFlowIds()).toHaveLength(1);
     expect(task.getFlowIds()[0]).toBe(flowId);
+  });
+
+  it('should throw when adding duplicate flowId', () => {
+    const task = baseTask();
+    const flowId = FlowId('550e8400-e29b-41d4-a716-446655440005');
+    task.addFlowId(flowId);
+    expect(() => task.addFlowId(flowId)).toThrow('Flow já adicionado');
+  });
+
+  it('should throw when removing a subtask that does not exist', () => {
+    const task = baseTask();
+    expect(() => task.removeSubTask('non-existent-id')).toThrow('SubTask não encontrada');
   });
 
   describe('assertCanBeDeleted()', () => {

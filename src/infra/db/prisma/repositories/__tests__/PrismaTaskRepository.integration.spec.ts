@@ -157,7 +157,7 @@ describe('PrismaTaskRepository — DiscoverySubTask', () => {
     const subTask = new DiscoverySubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(randomUUID()),
-      idUser: applicantId,
+      idUser: creatorId,
       status: SubTaskStatus.EM_PROGRESSO,
       expectedDelivery: new Date('2026-12-31'),
     });
@@ -179,7 +179,7 @@ describe('PrismaTaskRepository — DiscoverySubTask', () => {
         institutionalPriority: Level.HIGH,
         technicalOpinion: 'Opinião técnica',
       },
-      applicantId,
+      creatorId,
     );
 
     const task = makeTask([subTask]);
@@ -199,7 +199,7 @@ describe('PrismaTaskRepository — DiscoverySubTask', () => {
     const subTask = new DiscoverySubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(randomUUID()),
-      idUser: applicantId,
+      idUser: creatorId,
       status: SubTaskStatus.NAO_INICIADO,
       expectedDelivery: new Date('2026-12-31'),
     });
@@ -227,7 +227,7 @@ describe('PrismaTaskRepository — DesignSubTask', () => {
     const subTask = new DesignSubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(randomUUID()),
-      idUser: applicantId,
+      idUser: creatorId,
       status: SubTaskStatus.EM_PROGRESSO,
       expectedDelivery: new Date('2026-12-31'),
       designs: [design],
@@ -248,7 +248,7 @@ describe('PrismaTaskRepository — DesignSubTask', () => {
     const subTask = new DesignSubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(randomUUID()),
-      idUser: applicantId,
+      idUser: creatorId,
       status: SubTaskStatus.NAO_INICIADO,
       expectedDelivery: new Date('2026-12-31'),
     });
@@ -274,7 +274,7 @@ describe('PrismaTaskRepository — DiagramSubTask', () => {
     const subTask = new DiagramSubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(randomUUID()),
-      idUser: applicantId,
+      idUser: creatorId,
       status: SubTaskStatus.EM_PROGRESSO,
       expectedDelivery: new Date('2026-12-31'),
       diagrams: [diagram],
@@ -296,7 +296,7 @@ describe('PrismaTaskRepository — save syncs subtasks', () => {
     const subTask = new DesignSubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(randomUUID()),
-      idUser: applicantId,
+      idUser: creatorId,
       status: SubTaskStatus.NAO_INICIADO,
       expectedDelivery: new Date('2026-12-31'),
     });

@@ -95,4 +95,18 @@ describe('CreateTaskUseCase', () => {
     const saved: Task = taskRepo.save.mock.calls[0][0];
     expect(saved.getSubTasks()).toHaveLength(2);
   });
+
+  it('creates task with diagram subtask', async () => {
+    const taskRepo = makeTaskRepo();
+    taskRepo.findLastTaskNumber.mockResolvedValue(null);
+    const sut = new CreateTaskUseCase(taskRepo);
+
+    await sut.execute({
+      ...baseInput(),
+      subTasks: [{ type: SubTaskType.DIAGRAM, idUser: randomUUID(), expectedDelivery: new Date() }],
+    });
+
+    const saved: Task = taskRepo.save.mock.calls[0][0];
+    expect(saved.getSubTasks()[0].getType()).toBe(SubTaskType.DIAGRAM);
+  });
 });

@@ -24,7 +24,7 @@ const makeSubTask = (id: string, type = SubTaskType.DIAGRAM) => {
     return new DiscoverySubTask({
       id: SubTaskId(id),
       taskId: TaskId(randomUUID()),
-      idUser: ApplicantId(randomUUID()),
+      idUser: UserId(randomUUID()),
       status: SubTaskStatus.NAO_INICIADO,
       expectedDelivery: new Date(),
     });
@@ -32,7 +32,7 @@ const makeSubTask = (id: string, type = SubTaskType.DIAGRAM) => {
   return new DiagramSubTask({
     id: SubTaskId(id),
     taskId: TaskId(randomUUID()),
-    idUser: ApplicantId(randomUUID()),
+    idUser: UserId(randomUUID()),
     status: SubTaskStatus.NAO_INICIADO,
     expectedDelivery: new Date(),
   });
