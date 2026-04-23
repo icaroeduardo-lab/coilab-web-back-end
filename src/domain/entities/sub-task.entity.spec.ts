@@ -237,6 +237,32 @@ describe('SubTask Entity', () => {
         'Design com id 550e8400-e29b-41d4-a716-446655440099 não encontrado',
       );
     });
+
+    it('should throw on complete when no designs', () => {
+      const subTask = new DesignSubTask({
+        id: SubTaskId('550e8400-e29b-41d4-a716-446655440008'),
+        taskId,
+        idUser: userId,
+        status: SubTaskStatus.EM_PROGRESSO,
+        expectedDelivery: new Date(),
+      });
+
+      expect(() => subTask.complete()).toThrow('É necessário ao menos uma imagem');
+    });
+
+    it('should complete when at least one design exists', () => {
+      const subTask = new DesignSubTask({
+        id: SubTaskId('550e8400-e29b-41d4-a716-446655440008'),
+        taskId,
+        idUser: userId,
+        status: SubTaskStatus.EM_PROGRESSO,
+        expectedDelivery: new Date(),
+        designs: [validDesign],
+      });
+
+      expect(() => subTask.complete()).not.toThrow();
+      expect(subTask.getStatus()).toBe(SubTaskStatus.AGUARDANDO_CHECKOUT);
+    });
   });
 
   it('should create DiagramSubTask with diagrams', () => {
