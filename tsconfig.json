@@ -9,6 +9,7 @@
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false,
     "types": ["jest", "node", "reflect-metadata"],
     "outDir": "./dist",
     "rootDir": "./src"
