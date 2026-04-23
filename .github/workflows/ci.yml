@@ -10,6 +10,21 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: coilab
+          POSTGRES_PASSWORD: coilab
+          POSTGRES_DB: coilab_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v5
 
@@ -24,5 +39,10 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
-      - name: Test with coverage
+      - name: Unit tests with coverage
         run: npx jest --coverage --coverageThreshold='{"global":{"lines":95,"statements":95,"functions":95,"branches":90}}'
+
+      - name: Integration tests
+        run: npm run test:integration
+        env:
+          DATABASE_URL: postgresql://coilab:coilab@localhost:5432/coilab_test

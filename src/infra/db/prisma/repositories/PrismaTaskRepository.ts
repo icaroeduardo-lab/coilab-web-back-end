@@ -97,7 +97,7 @@ function taskToDomain(row: TaskWithRelations): Task {
 
 type JsonInput = Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue;
 
-function serializeSubTask(subTask: SubTask): {
+function serializeSubTask(subTask: SubTask, parentTaskId: string): {
   id: string;
   taskId: string;
   idUser: string;
@@ -114,7 +114,7 @@ function serializeSubTask(subTask: SubTask): {
 } {
   const base = {
     id: subTask.getId(),
-    taskId: subTask.getTaskId(),
+    taskId: parentTaskId,
     idUser: subTask.getIdUser(),
     status: subTask.getStatus(),
     type: subTask.getType(),
@@ -183,7 +183,7 @@ export class PrismaTaskRepository implements ITaskRepository {
   }
 
   async save(task: Task): Promise<void> {
-    const serializedSubTasks = task.getSubTasks().map(serializeSubTask);
+    const serializedSubTasks = task.getSubTasks().map((s) => serializeSubTask(s, task.getId()));
     const flowIds = task.getFlowIds();
 
     await prisma.$transaction(async (tx) => {
