@@ -13,6 +13,11 @@ async function bootstrap(): Promise<NestFastifyApplication> {
     new FastifyAdapter(),
   );
   app.setGlobalPrefix('api');
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN ?? '*',
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalFilters(new AllExceptionsFilter());
   return app;
