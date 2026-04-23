@@ -11,7 +11,7 @@ import {
 import { Entity } from './entity.base';
 import { Design } from '../value-objects/design.vo';
 import { Diagram } from '../value-objects/diagram.vo';
-import { SubTaskId, TaskId, DesignId, ApplicantId, UserId } from '../shared/entity-ids';
+import { SubTaskId, TaskId, DesignId, UserId } from '../shared/entity-ids';
 
 export enum Level {
   HIGH = 'Alta',

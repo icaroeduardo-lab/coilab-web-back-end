@@ -131,6 +131,22 @@ describe('SubTask Entity', () => {
       expect(subTask.getForm().complexity?.value).toBe(Level.MEDIUM);
     });
 
+    it('should skip fields with undefined value in updateForm', () => {
+      const subTask = new DiscoverySubTask({
+        id: SubTaskId('550e8400-e29b-41d4-a716-446655440008'),
+        taskId,
+        idUser: userId,
+        status: SubTaskStatus.EM_PROGRESSO,
+        expectedDelivery: new Date(),
+        projectName: { value: 'Original', userId, filledAt: new Date() },
+      });
+
+      subTask.updateForm({ projectName: undefined, summary: 'Novo' }, userId);
+
+      expect(subTask.getForm().projectName?.value).toBe('Original');
+      expect(subTask.getForm().summary?.value).toBe('Novo');
+    });
+
     it('should throw when updating form on locked subtask', () => {
       const subTask = new DiscoverySubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440008'),

@@ -63,6 +63,23 @@ describe('AddSubTaskToTaskUseCase', () => {
     expect(saved.getSubTasks()[0].getType()).toBe(SubTaskType.DESIGN);
   });
 
+  it('adds diagram subtask to task', async () => {
+    const repo = makeRepo();
+    const taskId = randomUUID();
+    repo.findById.mockResolvedValue(makeTask(taskId));
+    const sut = new AddSubTaskToTaskUseCase(repo);
+
+    await sut.execute({
+      taskId,
+      type: SubTaskType.DIAGRAM,
+      idUser: randomUUID(),
+      expectedDelivery: new Date('2026-12-31'),
+    });
+
+    const saved: Task = repo.save.mock.calls[0][0];
+    expect(saved.getSubTasks()[0].getType()).toBe(SubTaskType.DIAGRAM);
+  });
+
   it('throws when task not found', async () => {
     const repo = makeRepo();
     repo.findById.mockResolvedValue(null);

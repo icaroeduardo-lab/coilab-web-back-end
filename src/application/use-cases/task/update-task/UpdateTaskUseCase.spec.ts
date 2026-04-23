@@ -53,6 +53,31 @@ describe('UpdateTaskUseCase', () => {
     expect(saved.getDescription()).toBe('Desc original');
   });
 
+  it('updates description', async () => {
+    const repo = makeRepo();
+    const id = randomUUID();
+    repo.findById.mockResolvedValue(makeTask(id));
+    const sut = new UpdateTaskUseCase(repo);
+
+    await sut.execute({ id, description: 'Nova descrição' });
+
+    const saved: Task = repo.save.mock.calls[0][0];
+    expect(saved.getDescription()).toBe('Nova descrição');
+  });
+
+  it('updates applicantId', async () => {
+    const repo = makeRepo();
+    const id = randomUUID();
+    repo.findById.mockResolvedValue(makeTask(id));
+    const sut = new UpdateTaskUseCase(repo);
+    const newApplicantId = randomUUID();
+
+    await sut.execute({ id, applicantId: newApplicantId });
+
+    const saved: Task = repo.save.mock.calls[0][0];
+    expect(saved.getApplicantId()).toBe(newApplicantId);
+  });
+
   it('throws when task not found', async () => {
     const repo = makeRepo();
     repo.findById.mockResolvedValue(null);

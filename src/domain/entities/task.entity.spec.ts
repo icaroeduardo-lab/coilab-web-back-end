@@ -122,6 +122,18 @@ describe('Task Entity', () => {
     expect(task.getFlowIds()[0]).toBe(flowId);
   });
 
+  it('should throw when adding duplicate flowId', () => {
+    const task = baseTask();
+    const flowId = FlowId('550e8400-e29b-41d4-a716-446655440005');
+    task.addFlowId(flowId);
+    expect(() => task.addFlowId(flowId)).toThrow('Flow já adicionado');
+  });
+
+  it('should throw when removing a subtask that does not exist', () => {
+    const task = baseTask();
+    expect(() => task.removeSubTask('non-existent-id')).toThrow('SubTask não encontrada');
+  });
+
   describe('assertCanBeDeleted()', () => {
     it('should allow deletion when task has no subtasks', () => {
       const task = baseTask();
