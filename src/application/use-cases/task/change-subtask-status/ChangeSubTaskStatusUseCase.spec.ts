@@ -3,7 +3,7 @@ import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
 import {
   DiscoverySubTask,
-  DesignSubTask,
+  DiagramSubTask,
   SubTaskStatus,
   SubTaskType,
 } from '../../../../domain/entities/sub-task.entity';
@@ -19,7 +19,7 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   delete: jest.fn(),
 });
 
-const makeSubTask = (id: string, type = SubTaskType.DESIGN) => {
+const makeSubTask = (id: string, type = SubTaskType.DIAGRAM) => {
   if (type === SubTaskType.DISCOVERY) {
     return new DiscoverySubTask({
       id: SubTaskId(id),
@@ -29,7 +29,7 @@ const makeSubTask = (id: string, type = SubTaskType.DESIGN) => {
       expectedDelivery: new Date(),
     });
   }
-  return new DesignSubTask({
+  return new DiagramSubTask({
     id: SubTaskId(id),
     taskId: TaskId(randomUUID()),
     idUser: ApplicantId(randomUUID()),
@@ -38,7 +38,7 @@ const makeSubTask = (id: string, type = SubTaskType.DESIGN) => {
   });
 };
 
-const makeTask = (subTasks: (DiscoverySubTask | DesignSubTask)[] = []) =>
+const makeTask = (subTasks: (DiscoverySubTask | DiagramSubTask)[] = []) =>
   new Task({
     id: TaskId(randomUUID()),
     projectId: ProjectId(randomUUID()),
