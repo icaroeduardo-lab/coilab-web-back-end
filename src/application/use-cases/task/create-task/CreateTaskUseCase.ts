@@ -15,6 +15,7 @@ import {
   SubTaskId,
   FlowId,
 } from '../../../../domain/shared/entity-ids';
+
 import { generateNextNumber } from '../../../../domain/shared/sequential-number';
 import { generateId } from '../../../../shared/generate-id';
 import { TaskOutput } from '../shared/task-output';
@@ -40,7 +41,7 @@ const buildSubTask = (input: CreateTaskSubTaskInput, taskId: string) => {
   const base = {
     id: SubTaskId(generateId()),
     taskId: TaskId(taskId),
-    idUser: ApplicantId(input.idUser),
+    idUser: UserId(input.idUser),
     status: SubTaskStatus.NAO_INICIADO,
     expectedDelivery: input.expectedDelivery,
   };

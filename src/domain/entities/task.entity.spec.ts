@@ -4,7 +4,7 @@ import { TaskId, ProjectId, SubTaskId, ApplicantId, UserId, FlowId } from '../sh
 
 describe('Task Entity', () => {
   const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');
-  const userId = ApplicantId('550e8400-e29b-41d4-a716-446655440003');
+  const userId = UserId('550e8400-e29b-41d4-a716-446655440003');
   const applicantId = ApplicantId('550e8400-e29b-41d4-a716-446655440005');
   const creatorId = UserId('550e8400-e29b-41d4-a716-446655440006');
   const projectId = ProjectId('550e8400-e29b-41d4-a716-446655440000');

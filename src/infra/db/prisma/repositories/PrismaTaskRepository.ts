@@ -20,6 +20,7 @@ import {
   FlowId,
   DesignId,
 } from '../../../../domain/shared/entity-ids';
+
 import { prisma } from '../prisma.client';
 import { Prisma } from '../../../../generated/prisma/client';
 import type { Task as PrismaTask, SubTask as PrismaSubTask } from '../../../../generated/prisma/client';
@@ -33,7 +34,7 @@ function subTaskToDomain(row: PrismaSubTask): SubTask {
   const base = {
     id: SubTaskId(row.id),
     taskId: TaskId(row.taskId),
-    idUser: ApplicantId(row.idUser),
+    idUser: UserId(row.idUser),
     status: row.status as SubTaskStatus,
     expectedDelivery: row.expectedDelivery,
     createdAt: row.createdAt,

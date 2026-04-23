@@ -11,7 +11,7 @@ import {
 import { Entity } from './entity.base';
 import { Design } from '../value-objects/design.vo';
 import { Diagram } from '../value-objects/diagram.vo';
-import { SubTaskId, TaskId, DesignId, ApplicantId } from '../shared/entity-ids';
+import { SubTaskId, TaskId, DesignId, ApplicantId, UserId } from '../shared/entity-ids';
 
 export enum Level {
   HIGH = 'Alta',
@@ -28,7 +28,7 @@ export enum Frequency {
 
 export interface DiscoveryFieldEntry<T = string> {
   value: T;
-  userId: ApplicantId;
+  userId: UserId;
   filledAt: Date;
 }
 
@@ -86,7 +86,7 @@ export enum SubTaskType {
 export interface SubTaskProps {
   id: SubTaskId;
   taskId: TaskId;
-  idUser: ApplicantId;
+  idUser: UserId;
   status: SubTaskStatus;
   type: SubTaskType;
   expectedDelivery: Date;
@@ -107,7 +107,7 @@ export abstract class SubTask extends Entity {
 
   @IsUUID()
   @IsNotEmpty()
-  protected idUser: ApplicantId;
+  protected idUser: UserId;
 
   @IsEnum(SubTaskStatus)
   protected status: SubTaskStatus;
@@ -156,7 +156,7 @@ export abstract class SubTask extends Entity {
   getTaskId(): TaskId {
     return this.taskId;
   }
-  getIdUser(): ApplicantId {
+  getIdUser(): UserId {
     return this.idUser;
   }
   getStatus(): SubTaskStatus {
@@ -294,7 +294,7 @@ export class DiscoverySubTask extends SubTask {
     };
   }
 
-  updateForm(data: Partial<DiscoveryFormInput>, userId: ApplicantId): void {
+  updateForm(data: Partial<DiscoveryFormInput>, userId: UserId): void {
     this.assertEditable();
     const filledAt = new Date();
     (Object.entries(data) as [keyof DiscoveryFormInput, unknown][]).forEach(([key, value]) => {

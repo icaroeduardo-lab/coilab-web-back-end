@@ -69,7 +69,7 @@ describe('UpdateTaskUseCase', () => {
     task.addSubTask(new DiscoverySubTask({
       id: SubTaskId(subTaskId),
       taskId: TaskId(id),
-      idUser: ApplicantId(randomUUID()),
+      idUser: UserId(randomUUID()),
       status: SubTaskStatus.NAO_INICIADO,
       expectedDelivery: new Date(),
     }));
@@ -142,7 +142,7 @@ describe('UpdateTaskUseCase', () => {
     task.addSubTask(new DiscoverySubTask({
       id: SubTaskId(subTaskId),
       taskId: TaskId(id),
-      idUser: ApplicantId(randomUUID()),
+      idUser: UserId(randomUUID()),
       status: SubTaskStatus.EM_PROGRESSO,
       expectedDelivery: new Date(),
     }));

@@ -103,7 +103,7 @@ describe('ListAllTasksUseCase', () => {
     const older = new DiscoverySubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(task.getId()),
-      idUser: ApplicantId(randomUUID()),
+      idUser: UserId(randomUUID()),
       status: SubTaskStatus.REPROVADO,
       expectedDelivery: new Date(),
       createdAt: new Date('2026-01-01'),
@@ -111,7 +111,7 @@ describe('ListAllTasksUseCase', () => {
     const newer = new DiscoverySubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(task.getId()),
-      idUser: ApplicantId(randomUUID()),
+      idUser: UserId(randomUUID()),
       status: SubTaskStatus.EM_PROGRESSO,
       expectedDelivery: new Date(),
       createdAt: new Date('2026-03-01'),

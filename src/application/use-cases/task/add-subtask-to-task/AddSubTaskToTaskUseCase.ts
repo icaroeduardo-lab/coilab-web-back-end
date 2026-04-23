@@ -6,7 +6,7 @@ import {
   SubTaskType,
 } from '../../../../domain/entities/sub-task.entity';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
-import { TaskId, ApplicantId, SubTaskId } from '../../../../domain/shared/entity-ids';
+import { TaskId, UserId, SubTaskId } from '../../../../domain/shared/entity-ids';
 import { generateId } from '../../../../shared/generate-id';
 
 export interface AddSubTaskToTaskInput {
@@ -28,7 +28,7 @@ export class AddSubTaskToTaskUseCase {
     const base = {
       id: SubTaskId(generateId()),
       taskId: TaskId(input.taskId),
-      idUser: ApplicantId(input.idUser),
+      idUser: UserId(input.idUser),
       status: SubTaskStatus.NAO_INICIADO,
       expectedDelivery: input.expectedDelivery,
     };

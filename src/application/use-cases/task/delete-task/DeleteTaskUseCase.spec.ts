@@ -47,7 +47,7 @@ describe('DeleteTaskUseCase', () => {
     const subtask = new DiscoverySubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(id),
-      idUser: ApplicantId(randomUUID()),
+      idUser: UserId(randomUUID()),
       status: SubTaskStatus.EM_PROGRESSO,
       expectedDelivery: new Date(),
     });

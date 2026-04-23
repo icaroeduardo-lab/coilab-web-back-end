@@ -4,7 +4,7 @@ import {
   SubTaskType,
 } from '../../../../domain/entities/sub-task.entity';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
-import { TaskId, ApplicantId } from '../../../../domain/shared/entity-ids';
+import { TaskId, UserId } from '../../../../domain/shared/entity-ids';
 
 export interface UpdateDiscoveryFormInput {
   taskId: string;
@@ -31,7 +31,7 @@ export class UpdateDiscoveryFormUseCase {
       throw new Error(`SubTask is not a Discovery type: ${input.subTaskId}`);
     }
 
-    (subTask as DiscoverySubTask).updateForm(input.fields, ApplicantId(input.userId));
+    (subTask as DiscoverySubTask).updateForm(input.fields, UserId(input.userId));
 
     await this.taskRepository.save(task);
   }
