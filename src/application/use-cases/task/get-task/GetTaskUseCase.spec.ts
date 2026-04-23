@@ -33,7 +33,9 @@ const makeApplicantRepo = (): jest.Mocked<IApplicantRepository> => ({
 
 const makeFlowRepo = (): jest.Mocked<IFlowRepository> => ({
   findByIds: jest.fn(),
+  findAll: jest.fn(),
   save: jest.fn(),
+  delete: jest.fn(),
 });
 
 const makeProjectRepo = (): jest.Mocked<IProjectRepository> => ({
