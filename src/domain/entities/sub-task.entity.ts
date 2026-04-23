@@ -353,6 +353,13 @@ export class DesignSubTask extends SubTask {
     this.validate();
   }
 
+  override complete(): void {
+    if (this.designs.length === 0) {
+      throw new Error('É necessário ao menos uma imagem para finalizar o Design');
+    }
+    super.complete();
+  }
+
   removeDesign(id: DesignId): void {
     this.assertEditable();
     const index = this.designs.findIndex((d) => d.getId() === id);
