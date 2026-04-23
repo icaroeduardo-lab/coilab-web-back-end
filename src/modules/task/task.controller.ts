@@ -21,6 +21,7 @@ import { AddSubTaskDto } from './dto/add-subtask.dto';
 import { ChangeSubTaskStatusDto } from './dto/change-subtask-status.dto';
 import { UpdateDiscoveryFormDto } from './dto/update-discovery-form.dto';
 import { AddDesignDto } from './dto/add-design.dto';
+import { CurrentUser, JwtPayload } from '../auth/current-user.decorator';
 
 @Controller('tasks')
 export class TaskController {
@@ -40,11 +41,13 @@ export class TaskController {
   ) {}
 
   @Post()
-  create(@Body() dto: CreateTaskDto) {
+  create(@CurrentUser() user: JwtPayload, @Body() dto: CreateTaskDto) {
     return this.createTask.execute({
       ...dto,
+      creatorId: user.sub,
       subTasks: dto.subTasks?.map((s) => ({
         ...s,
+        idUser: user.sub,
         expectedDelivery: new Date(s.expectedDelivery),
       })),
     });
@@ -83,11 +86,11 @@ export class TaskController {
 
   @Post(':taskId/subtasks')
   @HttpCode(204)
-  async addSubTask_(@Param('taskId') taskId: string, @Body() dto: AddSubTaskDto) {
+  async addSubTask_(@CurrentUser() user: JwtPayload, @Param('taskId') taskId: string, @Body() dto: AddSubTaskDto) {
     await this.addSubTask.execute({
       taskId,
       type: dto.type,
-      idUser: dto.idUser,
+      idUser: user.sub,
       expectedDelivery: new Date(dto.expectedDelivery),
     });
   }
@@ -105,22 +108,23 @@ export class TaskController {
   @Patch(':taskId/subtasks/:subTaskId/discovery')
   @HttpCode(204)
   async updateDiscovery_(
+    @CurrentUser() user: JwtPayload,
     @Param('taskId') taskId: string,
     @Param('subTaskId') subTaskId: string,
     @Body() dto: UpdateDiscoveryFormDto,
   ) {
-    const { userId, ...fields } = dto;
-    await this.updateDiscovery.execute({ taskId, subTaskId, userId, fields });
+    await this.updateDiscovery.execute({ taskId, subTaskId, userId: user.sub, fields: dto });
   }
 
   @Post(':taskId/subtasks/:subTaskId/designs')
   @HttpCode(204)
   async addDesign_(
+    @CurrentUser() user: JwtPayload,
     @Param('taskId') taskId: string,
     @Param('subTaskId') subTaskId: string,
     @Body() dto: AddDesignDto,
   ) {
-    await this.addDesign.execute({ taskId, subTaskId, ...dto });
+    await this.addDesign.execute({ taskId, subTaskId, userId: user.sub, ...dto });
   }
 
   @Delete(':taskId/subtasks/:subTaskId/designs/:designId')

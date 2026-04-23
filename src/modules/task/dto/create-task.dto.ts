@@ -16,10 +16,6 @@ class SubTaskDto {
   @IsEnum(SubTaskType)
   type: SubTaskType;
 
-  @IsUUID()
-  @IsNotEmpty()
-  idUser: string;
-
   @IsDateString()
   expectedDelivery: string;
 }
@@ -43,10 +39,6 @@ export class CreateTaskDto {
   @IsUUID()
   @IsNotEmpty()
   applicantId: string;
-
-  @IsUUID()
-  @IsNotEmpty()
-  creatorId: string;
 
   @IsArray()
   @IsUUID('4', { each: true })

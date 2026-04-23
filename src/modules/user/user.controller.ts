@@ -2,6 +2,7 @@ import { Body, Controller, Get, HttpCode, Inject, Param, Post } from '@nestjs/co
 import { UpsertUserFromCognitoUseCase } from '../../application/use-cases/user/upsert-user-from-cognito/UpsertUserFromCognitoUseCase';
 import { GetUserUseCase } from '../../application/use-cases/user/get-user/GetUserUseCase';
 import { UpsertUserDto } from './dto/upsert-user.dto';
+import { Public } from '../auth/public.decorator';
 
 @Controller('users')
 export class UserController {
@@ -10,6 +11,7 @@ export class UserController {
     @Inject(GetUserUseCase) private readonly getUser: GetUserUseCase,
   ) {}
 
+  @Public()
   @Post('sync')
   @HttpCode(204)
   async sync(@Body() dto: UpsertUserDto) {
