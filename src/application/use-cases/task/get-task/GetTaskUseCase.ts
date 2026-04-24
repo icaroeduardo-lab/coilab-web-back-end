@@ -1,4 +1,5 @@
 import { Task } from '../../../../domain/entities/task.entity';
+import { DesignSubTask } from '../../../../domain/entities/sub-task.entity';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { IUserRepository } from '../../../../domain/repositories/IUserRepository';
 import { IApplicantRepository } from '../../../../domain/repositories/IApplicantRepository';
@@ -12,14 +13,27 @@ export interface GetTaskInput {
 }
 
 function mapSubTasks(task: Task): SubTaskOutput[] {
-  return task.getSubTasks().map((s) => ({
-    id: s.getId(),
-    type: s.getType(),
-    status: s.getStatus(),
-    expectedDelivery: s.getExpectedDelivery(),
-    startDate: s.getStartDate(),
-    completionDate: s.getCompletionDate(),
-  }));
+  return task.getSubTasks().map((s) => {
+    const base: SubTaskOutput = {
+      id: s.getId(),
+      type: s.getType(),
+      status: s.getStatus(),
+      expectedDelivery: s.getExpectedDelivery(),
+      startDate: s.getStartDate(),
+      completionDate: s.getCompletionDate(),
+      reason: s.getReason(),
+    };
+    if (s instanceof DesignSubTask) {
+      base.designs = s.getDesigns().map((d) => ({
+        id: d.getId(),
+        title: d.getTitle(),
+        description: d.getDescription(),
+        urlImage: d.getUrlImage(),
+        dateUpload: d.getDateUpload(),
+      }));
+    }
+    return base;
+  });
 }
 
 export class GetTaskUseCase {

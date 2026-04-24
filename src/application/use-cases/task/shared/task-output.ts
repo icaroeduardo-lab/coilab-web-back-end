@@ -26,6 +26,14 @@ export interface FlowOutput {
   name: string;
 }
 
+export interface DesignOutput {
+  id: string;
+  title: string;
+  description: string;
+  urlImage: string;
+  dateUpload: Date;
+}
+
 export interface SubTaskOutput {
   id: string;
   type: SubTaskType;
@@ -33,6 +41,8 @@ export interface SubTaskOutput {
   expectedDelivery: Date;
   startDate?: Date;
   completionDate?: Date;
+  reason?: string;
+  designs?: DesignOutput[];
 }
 
 export interface ProjectOutput {
