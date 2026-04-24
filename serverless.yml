@@ -4,11 +4,16 @@ provider:
   name: aws
   runtime: nodejs20.x
   region: us-east-1
+  memorySize: 512
+  timeout: 29
   environment:
+    NODE_ENV: production
     DATABASE_URL: ${env:DATABASE_URL}
+    COGNITO_REGION: ${env:COGNITO_REGION}
+    COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}
+    CORS_ORIGIN: ${env:CORS_ORIGIN, '*'}
 
 plugins:
-  - serverless-esbuild
   - serverless-offline
 
 custom:
