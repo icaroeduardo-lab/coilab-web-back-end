@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateApplicantUseCase } from '../../application/use-cases/applicant/create-applicant/CreateApplicantUseCase';
 import { GetApplicantUseCase } from '../../application/use-cases/applicant/get-applicant/GetApplicantUseCase';
 import { ListApplicantsUseCase } from '../../application/use-cases/applicant/list-applicants/ListApplicantsUseCase';
@@ -7,6 +8,8 @@ import { DeleteApplicantUseCase } from '../../application/use-cases/applicant/de
 import { CreateApplicantDto } from './dto/create-applicant.dto';
 import { UpdateApplicantDto } from './dto/update-applicant.dto';
 
+@ApiTags('Applicants')
+@ApiBearerAuth()
 @Controller('applicants')
 export class ApplicantController {
   constructor(
@@ -18,27 +21,43 @@ export class ApplicantController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Criar setor/solicitante' })
+  @ApiResponse({ status: 201, description: 'Solicitante criado com sucesso.' })
+  @ApiResponse({ status: 422, description: 'Dados inválidos.' })
   create(@Body() dto: CreateApplicantDto) {
     return this.createApplicant.execute(dto);
   }
 
   @Get()
+  @ApiOperation({ summary: 'Listar todos os solicitantes' })
+  @ApiResponse({ status: 200, description: 'Lista de solicitantes.' })
   list() {
     return this.listApplicants.execute();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar solicitante por ID' })
+  @ApiParam({ name: 'id', description: 'UUID do solicitante' })
+  @ApiResponse({ status: 200, description: 'Solicitante encontrado.' })
+  @ApiResponse({ status: 404, description: 'Solicitante não encontrado.' })
   get(@Param('id') id: string) {
     return this.getApplicant.execute({ id });
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar nome do solicitante' })
+  @ApiParam({ name: 'id', description: 'UUID do solicitante' })
+  @ApiResponse({ status: 200, description: 'Solicitante atualizado.' })
   update(@Param('id') id: string, @Body() dto: UpdateApplicantDto) {
     return this.updateApplicant.execute({ id, name: dto.name });
   }
 
   @Delete(':id')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Remover solicitante' })
+  @ApiParam({ name: 'id', description: 'UUID do solicitante' })
+  @ApiResponse({ status: 204, description: 'Solicitante removido.' })
+  @ApiResponse({ status: 404, description: 'Solicitante não encontrado.' })
   async remove(@Param('id') id: string) {
     await this.deleteApplicant.execute({ id });
   }
