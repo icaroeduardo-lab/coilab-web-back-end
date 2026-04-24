@@ -14,9 +14,18 @@ export class PrismaApplicantRepository implements IApplicantRepository {
     return row ? toDomain(row) : null;
   }
 
+  async findByIds(ids: ApplicantId[]): Promise<Applicant[]> {
+    const rows = await prisma.applicant.findMany({ where: { id: { in: ids } } });
+    return rows.map(toDomain);
+  }
+
   async findAll(): Promise<Applicant[]> {
     const rows = await prisma.applicant.findMany({ orderBy: { name: 'asc' } });
     return rows.map(toDomain);
+  }
+
+  async count(): Promise<number> {
+    return prisma.applicant.count();
   }
 
   async save(applicant: Applicant): Promise<void> {

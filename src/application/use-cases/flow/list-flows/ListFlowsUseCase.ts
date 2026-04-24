@@ -1,4 +1,5 @@
 import { IFlowRepository } from '../../../../domain/repositories/IFlowRepository';
+import { PaginationInput, PaginatedOutput, toPagination } from '../../../../domain/shared/pagination';
 
 export interface FlowOutput {
   id: string;
@@ -8,8 +9,17 @@ export interface FlowOutput {
 export class ListFlowsUseCase {
   constructor(private readonly flowRepository: IFlowRepository) {}
 
-  async execute(): Promise<FlowOutput[]> {
-    const flows = await this.flowRepository.findAll();
-    return flows.map((f) => ({ id: f.getId(), name: f.getName() }));
+  async execute(input?: Partial<PaginationInput>): Promise<PaginatedOutput<FlowOutput>> {
+    const { page, limit } = toPagination(input?.page, input?.limit);
+
+    const [flows, total] = await Promise.all([
+      this.flowRepository.findAll(),
+      this.flowRepository.count(),
+    ]);
+
+    const sliced = flows.slice((page - 1) * limit, page * limit);
+    const data = sliced.map((f) => ({ id: f.getId(), name: f.getName() }));
+
+    return { data, total, page, limit };
   }
 }

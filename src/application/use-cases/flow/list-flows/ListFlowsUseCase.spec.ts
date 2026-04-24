@@ -7,6 +7,7 @@ import { randomUUID } from 'crypto';
 const makeRepo = (): jest.Mocked<IFlowRepository> => ({
   findByIds: jest.fn(),
   findAll: jest.fn(),
+  count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
 });
@@ -15,26 +16,30 @@ const makeFlow = (name: string) =>
   new Flow({ id: FlowId(randomUUID()), name });
 
 describe('ListFlowsUseCase', () => {
-  it('returns mapped output for all flows', async () => {
+  it('returns paginated output for all flows', async () => {
     const repo = makeRepo();
     const flows = [makeFlow('Discovery'), makeFlow('Design')];
     repo.findAll.mockResolvedValue(flows);
+    repo.count.mockResolvedValue(2);
     const sut = new ListFlowsUseCase(repo);
 
     const result = await sut.execute();
 
-    expect(result).toHaveLength(2);
-    expect(result[0]).toEqual({ id: flows[0].getId(), name: 'Discovery' });
-    expect(result[1]).toEqual({ id: flows[1].getId(), name: 'Design' });
+    expect(result.total).toBe(2);
+    expect(result.data).toHaveLength(2);
+    expect(result.data[0]).toEqual({ id: flows[0].getId(), name: 'Discovery' });
+    expect(result.data[1]).toEqual({ id: flows[1].getId(), name: 'Design' });
   });
 
-  it('returns empty array when no flows', async () => {
+  it('returns empty when no flows', async () => {
     const repo = makeRepo();
     repo.findAll.mockResolvedValue([]);
+    repo.count.mockResolvedValue(0);
     const sut = new ListFlowsUseCase(repo);
 
     const result = await sut.execute();
 
-    expect(result).toEqual([]);
+    expect(result.data).toEqual([]);
+    expect(result.total).toBe(0);
   });
 });

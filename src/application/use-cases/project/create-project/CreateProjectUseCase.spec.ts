@@ -7,6 +7,8 @@ const makeRepo = (): jest.Mocked<IProjectRepository> => ({
   findById: jest.fn(),
   findAll: jest.fn(),
   findLastProjectNumber: jest.fn(),
+  findByIds: jest.fn(),
+  count: jest.fn(),
   save: jest.fn(),
 });
 

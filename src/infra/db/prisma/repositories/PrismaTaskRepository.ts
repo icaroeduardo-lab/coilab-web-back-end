@@ -23,7 +23,10 @@ import {
 
 import { prisma } from '../prisma.client';
 import { Prisma } from '../../../../generated/prisma/client';
-import type { Task as PrismaTask, SubTask as PrismaSubTask } from '../../../../generated/prisma/client';
+import type {
+  Task as PrismaTask,
+  SubTask as PrismaSubTask,
+} from '../../../../generated/prisma/client';
 
 type TaskWithRelations = PrismaTask & {
   subTasks: PrismaSubTask[];
@@ -65,7 +68,9 @@ function subTaskToDomain(row: PrismaSubTask): SubTask {
   }
 
   // DIAGRAM
-  const rawDiagrams = Array.isArray(row.diagrams) ? (row.diagrams as Record<string, unknown>[]) : [];
+  const rawDiagrams = Array.isArray(row.diagrams)
+    ? (row.diagrams as Record<string, unknown>[])
+    : [];
   const diagrams = rawDiagrams.map(
     (d) =>
       new Diagram({
@@ -98,7 +103,10 @@ function taskToDomain(row: TaskWithRelations): Task {
 
 type JsonInput = Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue;
 
-function serializeSubTask(subTask: SubTask, parentTaskId: string): {
+function serializeSubTask(
+  subTask: SubTask,
+  parentTaskId: string,
+): {
   id: string;
   taskId: string;
   idUser: string;
@@ -164,9 +172,17 @@ export class PrismaTaskRepository implements ITaskRepository {
     return row ? taskToDomain(row as TaskWithRelations) : null;
   }
 
-  async findAll(): Promise<Task[]> {
-    const rows = await prisma.task.findMany({ include: taskInclude, orderBy: { createdAt: 'asc' } });
+  async findAll(opts?: { skip?: number; take?: number }): Promise<Task[]> {
+    const rows = await prisma.task.findMany({
+      include: taskInclude,
+      orderBy: { createdAt: 'asc' },
+      ...opts,
+    });
     return rows.map((r) => taskToDomain(r as TaskWithRelations));
+  }
+
+  async count(): Promise<number> {
+    return prisma.task.count();
   }
 
   async findByProjectId(projectId: ProjectId): Promise<Task[]> {

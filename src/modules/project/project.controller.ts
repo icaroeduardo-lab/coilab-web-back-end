@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Inject, Param, Patch, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateProjectUseCase } from '../../application/use-cases/project/create-project/CreateProjectUseCase';
 import { GetProjectUseCase } from '../../application/use-cases/project/get-project/GetProjectUseCase';
 import { ListProjectsUseCase } from '../../application/use-cases/project/list-projects/ListProjectsUseCase';
@@ -30,10 +30,12 @@ export class ProjectController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos os projetos' })
-  @ApiResponse({ status: 200, description: 'Lista de projetos.' })
-  list() {
-    return this.listProjects.execute();
+  @ApiOperation({ summary: 'Listar projetos (paginado)' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
+  @ApiResponse({ status: 200, description: 'Página de projetos.' })
+  list(@Query('page') page?: number, @Query('limit') limit?: number) {
+    return this.listProjects.execute({ page: Number(page), limit: Number(limit) });
   }
 
   @Get(':id')

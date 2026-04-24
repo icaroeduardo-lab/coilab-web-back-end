@@ -22,9 +22,18 @@ export class PrismaProjectRepository implements IProjectRepository {
     return row ? toDomain(row) : null;
   }
 
+  async findByIds(ids: ProjectId[]): Promise<Project[]> {
+    const rows = await prisma.project.findMany({ where: { id: { in: ids } } });
+    return rows.map(toDomain);
+  }
+
   async findAll(): Promise<Project[]> {
     const rows = await prisma.project.findMany({ orderBy: { createdAt: 'asc' } });
     return rows.map(toDomain);
+  }
+
+  async count(): Promise<number> {
+    return prisma.project.count();
   }
 
   async findLastProjectNumber(): Promise<string | null> {
