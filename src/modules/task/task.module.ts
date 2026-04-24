@@ -22,6 +22,8 @@ import { ChangeSubTaskStatusUseCase } from '../../application/use-cases/task/cha
 import { UpdateDiscoveryFormUseCase } from '../../application/use-cases/task/update-discovery-form/UpdateDiscoveryFormUseCase';
 import { AddDesignToSubTaskUseCase } from '../../application/use-cases/task/add-design-to-subtask/AddDesignToSubTaskUseCase';
 import { RemoveDesignFromSubTaskUseCase } from '../../application/use-cases/task/remove-design-from-subtask/RemoveDesignFromSubTaskUseCase';
+import { GetDesignUploadUrlUseCase } from '../../application/use-cases/task/get-design-upload-url/GetDesignUploadUrlUseCase';
+import { S3StorageService } from '../../infra/storage/S3StorageService';
 import { TaskController } from './task.controller';
 
 @Module({
@@ -107,6 +109,13 @@ import { TaskController } from './task.controller';
       provide: RemoveDesignFromSubTaskUseCase,
       useFactory: (repo: ITaskRepository) => new RemoveDesignFromSubTaskUseCase(repo),
       inject: [REPOSITORY_TOKENS.TASK],
+    },
+    S3StorageService,
+    {
+      provide: GetDesignUploadUrlUseCase,
+      useFactory: (repo: ITaskRepository, storage: S3StorageService) =>
+        new GetDesignUploadUrlUseCase(repo, storage),
+      inject: [REPOSITORY_TOKENS.TASK, S3StorageService],
     },
   ],
 })

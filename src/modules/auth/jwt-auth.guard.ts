@@ -3,7 +3,10 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from './public.decorator';
 
-const DEV_USER = { sub: 'dev-user-00000000-0000-0000-0000-000000000000', email: 'dev@coilab.local' };
+const DEV_USER = {
+  sub: 'dev-user-00000000-0000-0000-0000-000000000000',
+  email: 'dev@coilab.local',
+};
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {

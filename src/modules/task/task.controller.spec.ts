@@ -12,6 +12,7 @@ import { ChangeSubTaskStatusUseCase } from '../../application/use-cases/task/cha
 import { UpdateDiscoveryFormUseCase } from '../../application/use-cases/task/update-discovery-form/UpdateDiscoveryFormUseCase';
 import { AddDesignToSubTaskUseCase } from '../../application/use-cases/task/add-design-to-subtask/AddDesignToSubTaskUseCase';
 import { RemoveDesignFromSubTaskUseCase } from '../../application/use-cases/task/remove-design-from-subtask/RemoveDesignFromSubTaskUseCase';
+import { GetDesignUploadUrlUseCase } from '../../application/use-cases/task/get-design-upload-url/GetDesignUploadUrlUseCase';
 import { TaskPriority, TaskStatus } from '../../domain/entities/task.entity';
 import { SubTaskType } from '../../domain/entities/sub-task.entity';
 import { JwtPayload } from '../auth/current-user.decorator';
@@ -29,6 +30,7 @@ const mockChangeSubTaskStatus = { execute: jest.fn() };
 const mockUpdateDiscovery = { execute: jest.fn() };
 const mockAddDesign = { execute: jest.fn() };
 const mockRemoveDesign = { execute: jest.fn() };
+const mockGetDesignUploadUrl = { execute: jest.fn() };
 
 const fakeUser: JwtPayload = { sub: randomUUID(), email: 'user@example.com' };
 
@@ -52,6 +54,7 @@ describe('TaskController', () => {
         { provide: UpdateDiscoveryFormUseCase, useValue: mockUpdateDiscovery },
         { provide: AddDesignToSubTaskUseCase, useValue: mockAddDesign },
         { provide: RemoveDesignFromSubTaskUseCase, useValue: mockRemoveDesign },
+        { provide: GetDesignUploadUrlUseCase, useValue: mockGetDesignUploadUrl },
       ],
     }).compile();
     controller = module.get(TaskController);

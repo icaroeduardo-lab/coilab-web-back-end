@@ -5,6 +5,7 @@ import { GetProjectUseCase } from '../../application/use-cases/project/get-proje
 import { ListProjectsUseCase } from '../../application/use-cases/project/list-projects/ListProjectsUseCase';
 import { UpdateProjectUseCase } from '../../application/use-cases/project/update-project/UpdateProjectUseCase';
 import { ChangeProjectStatusUseCase } from '../../application/use-cases/project/change-project-status/ChangeProjectStatusUseCase';
+import { GetDocumentUploadUrlUseCase } from '../../application/use-cases/project/get-document-upload-url/GetDocumentUploadUrlUseCase';
 import { ProjectStatus } from '../../domain/entities/project.entity';
 import { randomUUID } from 'crypto';
 
@@ -13,6 +14,7 @@ const mockGet = { execute: jest.fn() };
 const mockList = { execute: jest.fn() };
 const mockUpdate = { execute: jest.fn() };
 const mockChangeStatus = { execute: jest.fn() };
+const mockGetDocumentUploadUrl = { execute: jest.fn() };
 
 describe('ProjectController', () => {
   let controller: ProjectController;
@@ -27,6 +29,7 @@ describe('ProjectController', () => {
         { provide: ListProjectsUseCase, useValue: mockList },
         { provide: UpdateProjectUseCase, useValue: mockUpdate },
         { provide: ChangeProjectStatusUseCase, useValue: mockChangeStatus },
+        { provide: GetDocumentUploadUrlUseCase, useValue: mockGetDocumentUploadUrl },
       ],
     }).compile();
     controller = module.get(ProjectController);
