@@ -43,7 +43,10 @@ export class CreateTaskDto {
   @IsEnum(TaskPriority)
   priority: TaskPriority;
 
-  @ApiProperty({ example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', description: 'ID do setor solicitante' })
+  @ApiProperty({
+    example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    description: 'ID do setor solicitante',
+  })
   @IsUUID()
   @IsNotEmpty()
   applicantId: string;

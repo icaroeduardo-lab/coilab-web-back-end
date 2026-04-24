@@ -7,7 +7,13 @@ import {
   SubTaskStatus,
   SubTaskType,
 } from '../../../../domain/entities/sub-task.entity';
-import { TaskId, ProjectId, ApplicantId, UserId, SubTaskId } from '../../../../domain/shared/entity-ids';
+import {
+  TaskId,
+  ProjectId,
+  ApplicantId,
+  UserId,
+  SubTaskId,
+} from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
 const makeRepo = (): jest.Mocked<ITaskRepository> => ({
@@ -141,7 +147,12 @@ describe('ChangeSubTaskStatusUseCase', () => {
     repo.findById.mockResolvedValue(task);
     const sut = new ChangeSubTaskStatusUseCase(repo);
 
-    await sut.execute({ taskId: task.getId(), subTaskId, action: 'cancel', reason: 'Fora de escopo' });
+    await sut.execute({
+      taskId: task.getId(),
+      subTaskId,
+      action: 'cancel',
+      reason: 'Fora de escopo',
+    });
 
     const saved: Task = repo.save.mock.calls[0][0];
     const updated = saved.getSubTasks().find((s) => s.getId() === subTaskId)!;
@@ -158,9 +169,9 @@ describe('ChangeSubTaskStatusUseCase', () => {
     repo.findById.mockResolvedValue(task);
     const sut = new ChangeSubTaskStatusUseCase(repo);
 
-    await expect(sut.execute({ taskId: task.getId(), subTaskId, action: 'reject' })).rejects.toThrow(
-      'reason is required',
-    );
+    await expect(
+      sut.execute({ taskId: task.getId(), subTaskId, action: 'reject' }),
+    ).rejects.toThrow('reason is required');
   });
 
   it('cancel: throws when reason missing', async () => {
@@ -170,9 +181,9 @@ describe('ChangeSubTaskStatusUseCase', () => {
     repo.findById.mockResolvedValue(task);
     const sut = new ChangeSubTaskStatusUseCase(repo);
 
-    await expect(sut.execute({ taskId: task.getId(), subTaskId, action: 'cancel' })).rejects.toThrow(
-      'reason is required',
-    );
+    await expect(
+      sut.execute({ taskId: task.getId(), subTaskId, action: 'cancel' }),
+    ).rejects.toThrow('reason is required');
   });
 
   it('throws when task not found', async () => {

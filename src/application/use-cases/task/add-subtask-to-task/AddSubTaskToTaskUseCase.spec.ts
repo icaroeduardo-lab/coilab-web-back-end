@@ -87,7 +87,12 @@ describe('AddSubTaskToTaskUseCase', () => {
     const sut = new AddSubTaskToTaskUseCase(repo);
 
     await expect(
-      sut.execute({ taskId: randomUUID(), type: SubTaskType.DESIGN, idUser: randomUUID(), expectedDelivery: new Date() }),
+      sut.execute({
+        taskId: randomUUID(),
+        type: SubTaskType.DESIGN,
+        idUser: randomUUID(),
+        expectedDelivery: new Date(),
+      }),
     ).rejects.toThrow('Task not found');
   });
 
@@ -98,13 +103,23 @@ describe('AddSubTaskToTaskUseCase', () => {
     repo.findById.mockResolvedValue(task);
     const sut = new AddSubTaskToTaskUseCase(repo);
 
-    await sut.execute({ taskId, type: SubTaskType.DESIGN, idUser: randomUUID(), expectedDelivery: new Date() });
+    await sut.execute({
+      taskId,
+      type: SubTaskType.DESIGN,
+      idUser: randomUUID(),
+      expectedDelivery: new Date(),
+    });
 
     const taskWithSubTask = repo.save.mock.calls[0][0] as Task;
     repo.findById.mockResolvedValue(taskWithSubTask);
 
     await expect(
-      sut.execute({ taskId, type: SubTaskType.DESIGN, idUser: randomUUID(), expectedDelivery: new Date() }),
+      sut.execute({
+        taskId,
+        type: SubTaskType.DESIGN,
+        idUser: randomUUID(),
+        expectedDelivery: new Date(),
+      }),
     ).rejects.toThrow();
   });
 });

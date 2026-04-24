@@ -42,6 +42,9 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
+      - name: Lint
+        run: npx eslint 'src/**/*.ts' --max-warnings 0
+
       - name: Unit tests with coverage
         run: npx jest --coverage --coverageThreshold='{"global":{"lines":95,"statements":95,"functions":95,"branches":90}}'
 

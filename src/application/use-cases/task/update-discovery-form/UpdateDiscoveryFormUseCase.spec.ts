@@ -5,11 +5,16 @@ import {
   DiscoverySubTask,
   DesignSubTask,
   SubTaskStatus,
-  SubTaskType,
   Level,
   Frequency,
 } from '../../../../domain/entities/sub-task.entity';
-import { TaskId, ProjectId, ApplicantId, UserId, SubTaskId } from '../../../../domain/shared/entity-ids';
+import {
+  TaskId,
+  ProjectId,
+  ApplicantId,
+  UserId,
+  SubTaskId,
+} from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
 const makeRepo = (): jest.Mocked<ITaskRepository> => ({
@@ -82,7 +87,12 @@ describe('UpdateDiscoveryFormUseCase', () => {
     repo.findById.mockResolvedValue(task);
     const sut = new UpdateDiscoveryFormUseCase(repo);
 
-    await sut.execute({ taskId: task.getId(), subTaskId, userId, fields: { projectName: 'CoiLab', summary: 'Resumo' } });
+    await sut.execute({
+      taskId: task.getId(),
+      subTaskId,
+      userId,
+      fields: { projectName: 'CoiLab', summary: 'Resumo' },
+    });
 
     expect(repo.save).toHaveBeenCalledTimes(1);
     const saved: Task = repo.save.mock.calls[0][0];
@@ -134,7 +144,12 @@ describe('UpdateDiscoveryFormUseCase', () => {
     const sut = new UpdateDiscoveryFormUseCase(repo);
 
     await expect(
-      sut.execute({ taskId: task.getId(), subTaskId, userId: randomUUID(), fields: { summary: 'X' } }),
+      sut.execute({
+        taskId: task.getId(),
+        subTaskId,
+        userId: randomUUID(),
+        fields: { summary: 'X' },
+      }),
     ).rejects.toThrow('SubTask is not a Discovery type');
   });
 
@@ -144,7 +159,12 @@ describe('UpdateDiscoveryFormUseCase', () => {
     const sut = new UpdateDiscoveryFormUseCase(repo);
 
     await expect(
-      sut.execute({ taskId: randomUUID(), subTaskId: randomUUID(), userId: randomUUID(), fields: {} }),
+      sut.execute({
+        taskId: randomUUID(),
+        subTaskId: randomUUID(),
+        userId: randomUUID(),
+        fields: {},
+      }),
     ).rejects.toThrow('Task not found');
   });
 
@@ -155,7 +175,12 @@ describe('UpdateDiscoveryFormUseCase', () => {
     const sut = new UpdateDiscoveryFormUseCase(repo);
 
     await expect(
-      sut.execute({ taskId: task.getId(), subTaskId: randomUUID(), userId: randomUUID(), fields: {} }),
+      sut.execute({
+        taskId: task.getId(),
+        subTaskId: randomUUID(),
+        userId: randomUUID(),
+        fields: {},
+      }),
     ).rejects.toThrow('SubTask not found');
   });
 });

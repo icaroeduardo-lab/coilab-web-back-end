@@ -12,8 +12,7 @@ const makeRepo = (): jest.Mocked<IFlowRepository> => ({
   delete: jest.fn(),
 });
 
-const makeFlow = (name: string) =>
-  new Flow({ id: FlowId(randomUUID()), name });
+const makeFlow = (name: string) => new Flow({ id: FlowId(randomUUID()), name });
 
 describe('ListFlowsUseCase', () => {
   it('returns paginated output for all flows', async () => {

@@ -18,7 +18,10 @@ describe('CreateProjectUseCase', () => {
     repo.findLastProjectNumber.mockResolvedValue(null);
     const sut = new CreateProjectUseCase(repo);
 
-    const output: ProjectOutput = await sut.execute({ name: 'CoiLab', description: 'Projeto principal' });
+    const output: ProjectOutput = await sut.execute({
+      name: 'CoiLab',
+      description: 'Projeto principal',
+    });
 
     const saved: Project = repo.save.mock.calls[0][0];
     expect(saved.getStatus()).toBe(ProjectStatus.BACKLOG);

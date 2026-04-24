@@ -62,7 +62,10 @@ beforeEach(async () => {
   creatorId = creator.getId();
 });
 
-const makeTask = (subTasks: (DiscoverySubTask | DesignSubTask | DiagramSubTask)[] = [], flowIds: FlowId[] = []) =>
+const makeTask = (
+  subTasks: (DiscoverySubTask | DesignSubTask | DiagramSubTask)[] = [],
+  flowIds: FlowId[] = [],
+) =>
   new Task({
     id: TaskId(randomUUID()),
     projectId,

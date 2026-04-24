@@ -23,7 +23,10 @@ export class UpdateTaskDto {
   @IsOptional()
   projectId?: string;
 
-  @ApiPropertyOptional({ example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', description: 'ID do setor solicitante' })
+  @ApiPropertyOptional({
+    example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    description: 'ID do setor solicitante',
+  })
   @IsUUID()
   @IsOptional()
   applicantId?: string;

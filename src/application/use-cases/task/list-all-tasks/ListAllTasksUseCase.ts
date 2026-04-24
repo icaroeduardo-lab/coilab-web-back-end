@@ -3,7 +3,11 @@ import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository
 import { IApplicantRepository } from '../../../../domain/repositories/IApplicantRepository';
 import { IProjectRepository } from '../../../../domain/repositories/IProjectRepository';
 import { ApplicantId, ProjectId } from '../../../../domain/shared/entity-ids';
-import { PaginationInput, PaginatedOutput, toPagination } from '../../../../domain/shared/pagination';
+import {
+  PaginationInput,
+  PaginatedOutput,
+  toPagination,
+} from '../../../../domain/shared/pagination';
 import { SubTaskSummaryOutput, TaskListOutput } from '../shared/task-output';
 
 function latestSubTaskPerType(subTasks: SubTask[]): SubTaskSummaryOutput[] {
