@@ -19,6 +19,10 @@ export class PrismaFlowRepository implements IFlowRepository {
     return rows.map(toDomain);
   }
 
+  async count(): Promise<number> {
+    return prisma.flow.count();
+  }
+
   async save(flow: Flow): Promise<void> {
     await prisma.flow.upsert({
       where: { id: flow.getId() },

@@ -1,8 +1,8 @@
 import {
   Body, Controller, Delete, Get, HttpCode,
-  Inject, Param, Patch, Post,
+  Inject, Param, Patch, Post, Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateTaskUseCase } from '../../application/use-cases/task/create-task/CreateTaskUseCase';
 import { GetTaskUseCase } from '../../application/use-cases/task/get-task/GetTaskUseCase';
 import { ListAllTasksUseCase } from '../../application/use-cases/task/list-all-tasks/ListAllTasksUseCase';
@@ -60,10 +60,12 @@ export class TaskController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todas as tarefas' })
-  @ApiResponse({ status: 200, description: 'Lista de tarefas.' })
-  list() {
-    return this.listAllTasks.execute();
+  @ApiOperation({ summary: 'Listar todas as tarefas (paginado)' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
+  @ApiResponse({ status: 200, description: 'Página de tarefas.' })
+  list(@Query('page') page?: number, @Query('limit') limit?: number) {
+    return this.listAllTasks.execute({ page: Number(page), limit: Number(limit) });
   }
 
   @Get('project/:projectId')

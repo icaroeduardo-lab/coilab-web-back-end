@@ -3,6 +3,7 @@ import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository
 import { IApplicantRepository } from '../../../../domain/repositories/IApplicantRepository';
 import { IProjectRepository } from '../../../../domain/repositories/IProjectRepository';
 import { ApplicantId, ProjectId } from '../../../../domain/shared/entity-ids';
+import { PaginationInput, PaginatedOutput, toPagination } from '../../../../domain/shared/pagination';
 import { SubTaskSummaryOutput, TaskListOutput } from '../shared/task-output';
 
 function latestSubTaskPerType(subTasks: SubTask[]): SubTaskSummaryOutput[] {
@@ -23,23 +24,29 @@ export class ListAllTasksUseCase {
     private readonly projectRepository: IProjectRepository,
   ) {}
 
-  async execute(): Promise<TaskListOutput[]> {
-    const tasks = await this.taskRepository.findAll();
+  async execute(input?: Partial<PaginationInput>): Promise<PaginatedOutput<TaskListOutput>> {
+    const { page, limit } = toPagination(input?.page, input?.limit);
+    const skip = (page - 1) * limit;
 
-    const uniqueApplicantIds = [...new Set(tasks.map((t) => t.getApplicantId()))];
-    const uniqueProjectIds = [...new Set(tasks.map((t) => t.getProjectId()))];
-
-    const [applicants, projects] = await Promise.all([
-      Promise.all(
-        uniqueApplicantIds.map((id) => this.applicantRepository.findById(ApplicantId(id))),
-      ),
-      Promise.all(uniqueProjectIds.map((id) => this.projectRepository.findById(ProjectId(id)))),
+    const [tasks, total] = await Promise.all([
+      this.taskRepository.findAll({ skip, take: limit }),
+      this.taskRepository.count(),
     ]);
 
-    const applicantMap = new Map(applicants.filter(Boolean).map((a) => [a!.getId(), a!]));
-    const projectMap = new Map(projects.filter(Boolean).map((p) => [p!.getId(), p!]));
+    if (tasks.length === 0) return { data: [], total, page, limit };
 
-    return tasks.map((task) => {
+    const uniqueApplicantIds = [...new Set(tasks.map((t) => ApplicantId(t.getApplicantId())))];
+    const uniqueProjectIds = [...new Set(tasks.map((t) => ProjectId(t.getProjectId())))];
+
+    const [applicants, projects] = await Promise.all([
+      this.applicantRepository.findByIds(uniqueApplicantIds),
+      this.projectRepository.findByIds(uniqueProjectIds),
+    ]);
+
+    const applicantMap = new Map(applicants.map((a) => [a.getId(), a]));
+    const projectMap = new Map(projects.map((p) => [p.getId(), p]));
+
+    const data = tasks.map((task) => {
       const applicant = applicantMap.get(task.getApplicantId());
       const project = projectMap.get(task.getProjectId());
 
@@ -59,5 +66,7 @@ export class ListAllTasksUseCase {
         subTasks: latestSubTaskPerType(task.getSubTasks()),
       };
     });
+
+    return { data, total, page, limit };
   }
 }

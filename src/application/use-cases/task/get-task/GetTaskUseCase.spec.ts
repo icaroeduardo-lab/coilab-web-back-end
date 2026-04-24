@@ -18,6 +18,7 @@ const makeTaskRepo = (): jest.Mocked<ITaskRepository> => ({
   findAll: jest.fn(),
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
+  count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
 });
@@ -29,7 +30,9 @@ const makeUserRepo = (): jest.Mocked<IUserRepository> => ({
 
 const makeApplicantRepo = (): jest.Mocked<IApplicantRepository> => ({
   findById: jest.fn(),
+  findByIds: jest.fn(),
   findAll: jest.fn(),
+  count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
 });
@@ -37,13 +40,16 @@ const makeApplicantRepo = (): jest.Mocked<IApplicantRepository> => ({
 const makeFlowRepo = (): jest.Mocked<IFlowRepository> => ({
   findByIds: jest.fn(),
   findAll: jest.fn(),
+  count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
 });
 
 const makeProjectRepo = (): jest.Mocked<IProjectRepository> => ({
   findById: jest.fn(),
+  findByIds: jest.fn(),
   findAll: jest.fn(),
+  count: jest.fn(),
   findLastProjectNumber: jest.fn(),
   save: jest.fn(),
 });

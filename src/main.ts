@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -28,7 +28,9 @@ async function bootstrap(): Promise<NestFastifyApplication> {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Coilab API')
-    .setDescription('API de gestão de projetos de produto digital — Discovery, Design e Diagramação.')
+    .setDescription(
+      'API de gestão de projetos de produto digital — Discovery, Design e Diagramação.',
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .build();

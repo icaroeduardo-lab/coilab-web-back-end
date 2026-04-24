@@ -7,12 +7,13 @@ import { randomUUID } from 'crypto';
 const makeRepo = (): jest.Mocked<IApplicantRepository> => ({
   findById: jest.fn(),
   findAll: jest.fn(),
+  findByIds: jest.fn(),
+  count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
 });
 
-const makeApplicant = (id: string) =>
-  new Applicant({ id: ApplicantId(id), name: 'Old Name' });
+const makeApplicant = (id: string) => new Applicant({ id: ApplicantId(id), name: 'Old Name' });
 
 describe('UpdateApplicantUseCase', () => {
   it('updates applicant name', async () => {

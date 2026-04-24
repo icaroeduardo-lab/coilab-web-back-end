@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Post, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateFlowUseCase } from '../../application/use-cases/flow/create-flow/CreateFlowUseCase';
 import { ListFlowsUseCase } from '../../application/use-cases/flow/list-flows/ListFlowsUseCase';
 import { DeleteFlowUseCase } from '../../application/use-cases/flow/delete-flow/DeleteFlowUseCase';
@@ -24,10 +24,12 @@ export class FlowController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos os fluxos' })
-  @ApiResponse({ status: 200, description: 'Lista de fluxos.' })
-  list() {
-    return this.listFlows.execute();
+  @ApiOperation({ summary: 'Listar fluxos (paginado)' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
+  @ApiResponse({ status: 200, description: 'Página de fluxos.' })
+  list(@Query('page') page?: number, @Query('limit') limit?: number) {
+    return this.listFlows.execute({ page: Number(page), limit: Number(limit) });
   }
 
   @Delete(':id')

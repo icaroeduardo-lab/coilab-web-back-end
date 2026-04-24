@@ -8,8 +8,16 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateApplicantUseCase } from '../../application/use-cases/applicant/create-applicant/CreateApplicantUseCase';
 import { GetApplicantUseCase } from '../../application/use-cases/applicant/get-applicant/GetApplicantUseCase';
 import { ListApplicantsUseCase } from '../../application/use-cases/applicant/list-applicants/ListApplicantsUseCase';
@@ -39,10 +47,12 @@ export class ApplicantController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos os solicitantes' })
-  @ApiResponse({ status: 200, description: 'Lista de solicitantes.' })
-  list() {
-    return this.listApplicants.execute();
+  @ApiOperation({ summary: 'Listar solicitantes (paginado)' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
+  @ApiResponse({ status: 200, description: 'Página de solicitantes.' })
+  list(@Query('page') page?: number, @Query('limit') limit?: number) {
+    return this.listApplicants.execute({ page: Number(page), limit: Number(limit) });
   }
 
   @Get(':id')

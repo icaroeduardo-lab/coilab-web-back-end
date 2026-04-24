@@ -28,10 +28,9 @@ describe('JwtAuthGuard', () => {
 
   it('delegates to AuthGuard when route is not public', () => {
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-    const superCanActivate = jest.spyOn(
-      Object.getPrototypeOf(Object.getPrototypeOf(guard)),
-      'canActivate',
-    ).mockReturnValue(true);
+    const superCanActivate = jest
+      .spyOn(Object.getPrototypeOf(Object.getPrototypeOf(guard)), 'canActivate')
+      .mockReturnValue(true);
     const ctx = makeContext(null, null);
     guard.canActivate(ctx);
     expect(superCanActivate).toHaveBeenCalledWith(ctx);
@@ -40,7 +39,9 @@ describe('JwtAuthGuard', () => {
   it('checks IS_PUBLIC_KEY on handler and class', () => {
     const spy = jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
     const ctx = makeContext(null, null);
-    jest.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(guard)), 'canActivate').mockReturnValue(true);
+    jest
+      .spyOn(Object.getPrototypeOf(Object.getPrototypeOf(guard)), 'canActivate')
+      .mockReturnValue(true);
     guard.canActivate(ctx);
     expect(spy).toHaveBeenCalledWith(IS_PUBLIC_KEY, [ctx.getHandler(), ctx.getClass()]);
   });
