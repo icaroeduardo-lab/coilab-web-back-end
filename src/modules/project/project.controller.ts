@@ -12,6 +12,7 @@ import { GetProjectUseCase } from '../../application/use-cases/project/get-proje
 import { ListProjectsUseCase } from '../../application/use-cases/project/list-projects/ListProjectsUseCase';
 import { UpdateProjectUseCase } from '../../application/use-cases/project/update-project/UpdateProjectUseCase';
 import { ChangeProjectStatusUseCase } from '../../application/use-cases/project/change-project-status/ChangeProjectStatusUseCase';
+import { GetDocumentUploadUrlUseCase } from '../../application/use-cases/project/get-document-upload-url/GetDocumentUploadUrlUseCase';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ChangeProjectStatusDto } from './dto/change-project-status.dto';
@@ -26,6 +27,8 @@ export class ProjectController {
     @Inject(ListProjectsUseCase) private readonly listProjects: ListProjectsUseCase,
     @Inject(UpdateProjectUseCase) private readonly updateProject: UpdateProjectUseCase,
     @Inject(ChangeProjectStatusUseCase) private readonly changeStatus: ChangeProjectStatusUseCase,
+    @Inject(GetDocumentUploadUrlUseCase)
+    private readonly getDocumentUploadUrl: GetDocumentUploadUrlUseCase,
   ) {}
 
   @Post()
@@ -60,6 +63,15 @@ export class ProjectController {
   @ApiResponse({ status: 200, description: 'Projeto atualizado.' })
   update(@Param('id') id: string, @Body() dto: UpdateProjectDto) {
     return this.updateProject.execute({ id, ...dto });
+  }
+
+  @Get(':id/documents/upload-url')
+  @ApiOperation({ summary: 'Obter URL pré-assinada para upload de documento do projeto no S3' })
+  @ApiParam({ name: 'id', description: 'UUID do projeto' })
+  @ApiQuery({ name: 'filename', required: true, example: 'brief.pdf' })
+  @ApiResponse({ status: 200, description: 'uploadUrl (PUT direto ao S3) e fileUrl (URL final).' })
+  getDocumentUploadUrl_(@Param('id') id: string, @Query('filename') filename: string) {
+    return this.getDocumentUploadUrl.execute({ projectId: id, filename });
   }
 
   @Patch(':id/status')

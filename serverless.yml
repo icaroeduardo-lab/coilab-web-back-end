@@ -12,6 +12,9 @@ provider:
     COGNITO_REGION: ${env:COGNITO_REGION}
     COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}
     CORS_ORIGIN: ${env:CORS_ORIGIN, '*'}
+    AWS_REGION: ${env:AWS_REGION, 'us-east-1'}
+    BUCKET_DESIGN: ${env:BUCKET_DESIGN}
+    BUCKET_PROJECTS_DOCUMENTS: ${env:BUCKET_PROJECTS_DOCUMENTS}
 
 plugins:
   - serverless-offline

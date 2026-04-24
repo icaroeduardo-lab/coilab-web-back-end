@@ -7,8 +7,8 @@ import { JwtPayload } from './current-user.decorator';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
-    const region = process.env.COGNITO_REGION!;
-    const userPoolId = process.env.COGNITO_USER_POOL_ID!;
+    const region = process.env.COGNITO_REGION ?? 'us-east-1';
+    const userPoolId = process.env.COGNITO_USER_POOL_ID ?? 'local';
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,

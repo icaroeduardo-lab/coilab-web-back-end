@@ -30,6 +30,7 @@ import { ChangeSubTaskStatusUseCase } from '../../application/use-cases/task/cha
 import { UpdateDiscoveryFormUseCase } from '../../application/use-cases/task/update-discovery-form/UpdateDiscoveryFormUseCase';
 import { AddDesignToSubTaskUseCase } from '../../application/use-cases/task/add-design-to-subtask/AddDesignToSubTaskUseCase';
 import { RemoveDesignFromSubTaskUseCase } from '../../application/use-cases/task/remove-design-from-subtask/RemoveDesignFromSubTaskUseCase';
+import { GetDesignUploadUrlUseCase } from '../../application/use-cases/task/get-design-upload-url/GetDesignUploadUrlUseCase';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ChangeTaskStatusDto } from './dto/change-task-status.dto';
@@ -59,6 +60,8 @@ export class TaskController {
     @Inject(AddDesignToSubTaskUseCase) private readonly addDesign: AddDesignToSubTaskUseCase,
     @Inject(RemoveDesignFromSubTaskUseCase)
     private readonly removeDesign: RemoveDesignFromSubTaskUseCase,
+    @Inject(GetDesignUploadUrlUseCase)
+    private readonly getDesignUploadUrl: GetDesignUploadUrlUseCase,
   ) {}
 
   @Post()
@@ -198,6 +201,16 @@ export class TaskController {
     @Body() dto: AddDesignDto,
   ) {
     await this.addDesign.execute({ taskId, subTaskId, userId: user.sub, ...dto });
+  }
+
+  @Get(':taskId/subtasks/:subTaskId/designs/upload-url')
+  @ApiOperation({ summary: 'Obter URL pré-assinada para upload de imagem de design no S3' })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiParam({ name: 'subTaskId', description: 'UUID da subtarefa Design' })
+  @ApiQuery({ name: 'filename', required: true, example: 'tela-login.png' })
+  @ApiResponse({ status: 200, description: 'uploadUrl (PUT direto ao S3) e fileUrl (URL final).' })
+  getDesignUploadUrl_(@Param('taskId') taskId: string, @Query('filename') filename: string) {
+    return this.getDesignUploadUrl.execute({ taskId, filename });
   }
 
   @Delete(':taskId/subtasks/:subTaskId/designs/:designId')
