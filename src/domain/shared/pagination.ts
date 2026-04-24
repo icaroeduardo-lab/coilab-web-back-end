@@ -10,9 +10,8 @@ export interface PaginatedOutput<T> {
   limit: number;
 }
 
-export function toPagination(page = 1, limit = 20): PaginationInput {
-  return {
-    page: Math.max(1, page),
-    limit: Math.min(100, Math.max(1, limit)),
-  };
+export function toPagination(page?: number, limit?: number): PaginationInput {
+  const p = Number.isFinite(page) && page! > 0 ? page! : 1;
+  const l = Number.isFinite(limit) && limit! > 0 ? limit! : 20;
+  return { page: p, limit: Math.min(100, l) };
 }
