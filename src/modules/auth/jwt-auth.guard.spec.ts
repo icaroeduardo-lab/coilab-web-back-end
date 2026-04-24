@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { IS_PUBLIC_KEY } from './public.decorator';
 
-const makeContext = (handlerMeta: unknown, classMeta: unknown): ExecutionContext =>
+const makeContext = (_handlerMeta: unknown, _classMeta: unknown): ExecutionContext =>
   ({
     getHandler: () => ({}),
     getClass: () => ({}),

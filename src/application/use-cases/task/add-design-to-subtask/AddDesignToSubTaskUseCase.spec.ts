@@ -5,9 +5,14 @@ import {
   DesignSubTask,
   DiscoverySubTask,
   SubTaskStatus,
-  SubTaskType,
 } from '../../../../domain/entities/sub-task.entity';
-import { TaskId, ProjectId, ApplicantId, UserId, SubTaskId } from '../../../../domain/shared/entity-ids';
+import {
+  TaskId,
+  ProjectId,
+  ApplicantId,
+  UserId,
+  SubTaskId,
+} from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
 const makeRepo = (): jest.Mocked<ITaskRepository> => ({
@@ -95,7 +100,9 @@ describe('AddDesignToSubTaskUseCase', () => {
     repo.findById.mockResolvedValue(null);
     const sut = new AddDesignToSubTaskUseCase(repo);
 
-    await expect(sut.execute(validInput(randomUUID(), randomUUID()))).rejects.toThrow('Task not found');
+    await expect(sut.execute(validInput(randomUUID(), randomUUID()))).rejects.toThrow(
+      'Task not found',
+    );
   });
 
   it('throws when subtask not found', async () => {
@@ -104,6 +111,8 @@ describe('AddDesignToSubTaskUseCase', () => {
     repo.findById.mockResolvedValue(task);
     const sut = new AddDesignToSubTaskUseCase(repo);
 
-    await expect(sut.execute(validInput(task.getId(), randomUUID()))).rejects.toThrow('SubTask not found');
+    await expect(sut.execute(validInput(task.getId(), randomUUID()))).rejects.toThrow(
+      'SubTask not found',
+    );
   });
 });

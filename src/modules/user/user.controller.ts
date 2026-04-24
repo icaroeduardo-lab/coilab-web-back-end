@@ -16,7 +16,10 @@ export class UserController {
   @Public()
   @Post('sync')
   @HttpCode(204)
-  @ApiOperation({ summary: 'Sincronizar usuário do Cognito (chamado pelo trigger pós-confirmação)', description: 'Endpoint público — sem autenticação.' })
+  @ApiOperation({
+    summary: 'Sincronizar usuário do Cognito (chamado pelo trigger pós-confirmação)',
+    description: 'Endpoint público — sem autenticação.',
+  })
   @ApiResponse({ status: 204, description: 'Usuário sincronizado.' })
   async sync(@Body() dto: UpsertUserDto) {
     await this.upsertUser.execute(dto);

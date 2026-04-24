@@ -6,8 +6,7 @@ import { truncateAll } from '../../test/truncate';
 
 const repo = new PrismaApplicantRepository();
 
-const makeApplicant = (name = 'João') =>
-  new Applicant({ id: ApplicantId(randomUUID()), name });
+const makeApplicant = (name = 'João') => new Applicant({ id: ApplicantId(randomUUID()), name });
 
 beforeEach(truncateAll);
 

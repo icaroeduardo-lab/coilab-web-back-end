@@ -80,7 +80,10 @@ describe('ProjectController', () => {
       const id = randomUUID();
       const dto = { status: ProjectStatus.EM_EXECUCAO };
       await controller.changeProjectStatus(id, dto as never);
-      expect(mockChangeStatus.execute).toHaveBeenCalledWith({ id, status: ProjectStatus.EM_EXECUCAO });
+      expect(mockChangeStatus.execute).toHaveBeenCalledWith({
+        id,
+        status: ProjectStatus.EM_EXECUCAO,
+      });
     });
   });
 });

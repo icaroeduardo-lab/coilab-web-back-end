@@ -14,7 +14,13 @@ const makeRepo = (): jest.Mocked<IProjectRepository> => ({
 });
 
 const makeProject = (id: string) =>
-  new Project({ id: ProjectId(id), name: 'P', projectNumber: '#20260001', description: 'D', urlDocument: 'https://doc.example.com' });
+  new Project({
+    id: ProjectId(id),
+    name: 'P',
+    projectNumber: '#20260001',
+    description: 'D',
+    urlDocument: 'https://doc.example.com',
+  });
 
 describe('ListProjectsUseCase', () => {
   it('returns paginated projects without urlDocument', async () => {

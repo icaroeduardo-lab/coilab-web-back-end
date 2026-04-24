@@ -59,7 +59,14 @@ describe('TaskController', () => {
 
   describe('create', () => {
     it('calls createTask.execute with mapped dto and creatorId from token', async () => {
-      const output = { id: randomUUID(), name: 'Task 1', taskNumber: '#20260001', priority: TaskPriority.MEDIA, status: TaskStatus.BACKLOG, projectId: randomUUID() };
+      const output = {
+        id: randomUUID(),
+        name: 'Task 1',
+        taskNumber: '#20260001',
+        priority: TaskPriority.MEDIA,
+        status: TaskStatus.BACKLOG,
+        projectId: randomUUID(),
+      };
       mockCreateTask.execute.mockResolvedValue(output);
       const dto = {
         projectId: randomUUID(),
@@ -69,7 +76,9 @@ describe('TaskController', () => {
         applicantId: randomUUID(),
       } as never;
       const result = await controller.create(fakeUser, dto);
-      expect(mockCreateTask.execute).toHaveBeenCalledWith(expect.objectContaining({ name: 'Task 1', creatorId: fakeUser.sub }));
+      expect(mockCreateTask.execute).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Task 1', creatorId: fakeUser.sub }),
+      );
       expect(result).toBe(output);
     });
 
@@ -139,7 +148,10 @@ describe('TaskController', () => {
       const dto = { status: TaskStatus.EM_EXECUCAO } as never;
       mockChangeTaskStatus.execute.mockResolvedValue(undefined);
       await controller.changeStatus(id, dto);
-      expect(mockChangeTaskStatus.execute).toHaveBeenCalledWith({ id, status: TaskStatus.EM_EXECUCAO });
+      expect(mockChangeTaskStatus.execute).toHaveBeenCalledWith({
+        id,
+        status: TaskStatus.EM_EXECUCAO,
+      });
     });
   });
 
@@ -174,7 +186,12 @@ describe('TaskController', () => {
       const dto = { action: 'start' as const } as never;
       mockChangeSubTaskStatus.execute.mockResolvedValue(undefined);
       await controller.changeSubTaskStatus_(taskId, subTaskId, dto);
-      expect(mockChangeSubTaskStatus.execute).toHaveBeenCalledWith({ taskId, subTaskId, action: 'start', reason: undefined });
+      expect(mockChangeSubTaskStatus.execute).toHaveBeenCalledWith({
+        taskId,
+        subTaskId,
+        action: 'start',
+        reason: undefined,
+      });
     });
   });
 
@@ -198,10 +215,21 @@ describe('TaskController', () => {
     it('calls addDesign.execute with userId from token and dto spread', async () => {
       const taskId = randomUUID();
       const subTaskId = randomUUID();
-      const dto = { title: 'Tela', description: 'D', urlImage: 'https://img.example.com/a.png' } as never;
+      const dto = {
+        title: 'Tela',
+        description: 'D',
+        urlImage: 'https://img.example.com/a.png',
+      } as never;
       mockAddDesign.execute.mockResolvedValue(undefined);
       await controller.addDesign_(fakeUser, taskId, subTaskId, dto);
-      expect(mockAddDesign.execute).toHaveBeenCalledWith({ taskId, subTaskId, userId: fakeUser.sub, title: 'Tela', description: 'D', urlImage: 'https://img.example.com/a.png' });
+      expect(mockAddDesign.execute).toHaveBeenCalledWith({
+        taskId,
+        subTaskId,
+        userId: fakeUser.sub,
+        title: 'Tela',
+        description: 'D',
+        urlImage: 'https://img.example.com/a.png',
+      });
     });
   });
 

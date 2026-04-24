@@ -2,7 +2,14 @@ import { UpdateTaskUseCase } from './UpdateTaskUseCase';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
 import { DiscoverySubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
-import { TaskId, ProjectId, ApplicantId, UserId, SubTaskId, FlowId } from '../../../../domain/shared/entity-ids';
+import {
+  TaskId,
+  ProjectId,
+  ApplicantId,
+  UserId,
+  SubTaskId,
+  FlowId,
+} from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
 const makeRepo = (): jest.Mocked<ITaskRepository> => ({
@@ -92,13 +99,15 @@ describe('UpdateTaskUseCase', () => {
     const id = randomUUID();
     const task = makeTask(id);
     const subTaskId = randomUUID();
-    task.addSubTask(new DiscoverySubTask({
-      id: SubTaskId(subTaskId),
-      taskId: TaskId(id),
-      idUser: UserId(randomUUID()),
-      status: SubTaskStatus.NAO_INICIADO,
-      expectedDelivery: new Date(),
-    }));
+    task.addSubTask(
+      new DiscoverySubTask({
+        id: SubTaskId(subTaskId),
+        taskId: TaskId(id),
+        idUser: UserId(randomUUID()),
+        status: SubTaskStatus.NAO_INICIADO,
+        expectedDelivery: new Date(),
+      }),
+    );
     repo.findById.mockResolvedValue(task);
     const sut = new UpdateTaskUseCase(repo);
 
@@ -157,7 +166,9 @@ describe('UpdateTaskUseCase', () => {
     repo.findById.mockResolvedValue(makeTask(id));
     const sut = new UpdateTaskUseCase(repo);
 
-    await expect(sut.execute({ id, flowIdsToRemove: [randomUUID()] })).rejects.toThrow('Flow não encontrado');
+    await expect(sut.execute({ id, flowIdsToRemove: [randomUUID()] })).rejects.toThrow(
+      'Flow não encontrado',
+    );
   });
 
   it('throws when removing subtask with EM_PROGRESSO status', async () => {
@@ -165,13 +176,15 @@ describe('UpdateTaskUseCase', () => {
     const id = randomUUID();
     const task = makeTask(id);
     const subTaskId = randomUUID();
-    task.addSubTask(new DiscoverySubTask({
-      id: SubTaskId(subTaskId),
-      taskId: TaskId(id),
-      idUser: UserId(randomUUID()),
-      status: SubTaskStatus.EM_PROGRESSO,
-      expectedDelivery: new Date(),
-    }));
+    task.addSubTask(
+      new DiscoverySubTask({
+        id: SubTaskId(subTaskId),
+        taskId: TaskId(id),
+        idUser: UserId(randomUUID()),
+        status: SubTaskStatus.EM_PROGRESSO,
+        expectedDelivery: new Date(),
+      }),
+    );
     repo.findById.mockResolvedValue(task);
     const sut = new UpdateTaskUseCase(repo);
 

@@ -58,7 +58,10 @@ describe('AllExceptionsFilter', () => {
 
   it('maps "não pode" error to 422', () => {
     const reply = makeReply();
-    filter.catch(new Error('Subtask com status "Aprovado" não pode ser modificada'), makeHost(reply));
+    filter.catch(
+      new Error('Subtask com status "Aprovado" não pode ser modificada'),
+      makeHost(reply),
+    );
     expect(reply.status).toHaveBeenCalledWith(HttpStatus.UNPROCESSABLE_ENTITY);
   });
 

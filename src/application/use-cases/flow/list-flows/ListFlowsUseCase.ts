@@ -1,5 +1,9 @@
 import { IFlowRepository } from '../../../../domain/repositories/IFlowRepository';
-import { PaginationInput, PaginatedOutput, toPagination } from '../../../../domain/shared/pagination';
+import {
+  PaginationInput,
+  PaginatedOutput,
+  toPagination,
+} from '../../../../domain/shared/pagination';
 
 export interface FlowOutput {
   id: string;

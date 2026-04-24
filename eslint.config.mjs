@@ -20,6 +20,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['dist/**', 'node_modules/**', 'jest.config.js', 'eslint.config.js'],
+    ignores: ['dist/**', 'node_modules/**', 'src/generated/**', 'jest.config.js', 'eslint.config.js'],
   },
 );

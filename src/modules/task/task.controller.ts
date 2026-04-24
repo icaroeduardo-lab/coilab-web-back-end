@@ -1,8 +1,23 @@
 import {
-  Body, Controller, Delete, Get, HttpCode,
-  Inject, Param, Patch, Post, Query,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateTaskUseCase } from '../../application/use-cases/task/create-task/CreateTaskUseCase';
 import { GetTaskUseCase } from '../../application/use-cases/task/get-task/GetTaskUseCase';
 import { ListAllTasksUseCase } from '../../application/use-cases/task/list-all-tasks/ListAllTasksUseCase';
@@ -37,10 +52,13 @@ export class TaskController {
     @Inject(ChangeTaskStatusUseCase) private readonly changeTaskStatus: ChangeTaskStatusUseCase,
     @Inject(DeleteTaskUseCase) private readonly deleteTask: DeleteTaskUseCase,
     @Inject(AddSubTaskToTaskUseCase) private readonly addSubTask: AddSubTaskToTaskUseCase,
-    @Inject(ChangeSubTaskStatusUseCase) private readonly changeSubTaskStatus: ChangeSubTaskStatusUseCase,
-    @Inject(UpdateDiscoveryFormUseCase) private readonly updateDiscovery: UpdateDiscoveryFormUseCase,
+    @Inject(ChangeSubTaskStatusUseCase)
+    private readonly changeSubTaskStatus: ChangeSubTaskStatusUseCase,
+    @Inject(UpdateDiscoveryFormUseCase)
+    private readonly updateDiscovery: UpdateDiscoveryFormUseCase,
     @Inject(AddDesignToSubTaskUseCase) private readonly addDesign: AddDesignToSubTaskUseCase,
-    @Inject(RemoveDesignFromSubTaskUseCase) private readonly removeDesign: RemoveDesignFromSubTaskUseCase,
+    @Inject(RemoveDesignFromSubTaskUseCase)
+    private readonly removeDesign: RemoveDesignFromSubTaskUseCase,
   ) {}
 
   @Post()
@@ -118,7 +136,11 @@ export class TaskController {
   @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
   @ApiResponse({ status: 204, description: 'Subtarefa adicionada.' })
   @ApiResponse({ status: 422, description: 'Subtarefa inválida para o estado atual.' })
-  async addSubTask_(@CurrentUser() user: JwtPayload, @Param('taskId') taskId: string, @Body() dto: AddSubTaskDto) {
+  async addSubTask_(
+    @CurrentUser() user: JwtPayload,
+    @Param('taskId') taskId: string,
+    @Body() dto: AddSubTaskDto,
+  ) {
     await this.addSubTask.execute({
       taskId,
       type: dto.type,
@@ -139,7 +161,12 @@ export class TaskController {
     @Param('subTaskId') subTaskId: string,
     @Body() dto: ChangeSubTaskStatusDto,
   ) {
-    await this.changeSubTaskStatus.execute({ taskId, subTaskId, action: dto.action, reason: dto.reason });
+    await this.changeSubTaskStatus.execute({
+      taskId,
+      subTaskId,
+      action: dto.action,
+      reason: dto.reason,
+    });
   }
 
   @Patch(':taskId/subtasks/:subTaskId/discovery')

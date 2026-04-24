@@ -1,5 +1,9 @@
 import { IProjectRepository } from '../../../../domain/repositories/IProjectRepository';
-import { PaginationInput, PaginatedOutput, toPagination } from '../../../../domain/shared/pagination';
+import {
+  PaginationInput,
+  PaginatedOutput,
+  toPagination,
+} from '../../../../domain/shared/pagination';
 import { ProjectListOutput } from '../shared/project-output';
 
 export class ListProjectsUseCase {

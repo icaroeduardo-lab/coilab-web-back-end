@@ -386,19 +386,22 @@ describe('SubTask Entity', () => {
       );
     });
 
-    it.each(lockedStatuses)('should throw when trying to removeDesign with status "%s"', (status) => {
-      const subTask = new DesignSubTask({
-        id: SubTaskId('550e8400-e29b-41d4-a716-446655440008'),
-        taskId,
-        idUser: userId,
-        status,
-        expectedDelivery: new Date(),
-      });
+    it.each(lockedStatuses)(
+      'should throw when trying to removeDesign with status "%s"',
+      (status) => {
+        const subTask = new DesignSubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440008'),
+          taskId,
+          idUser: userId,
+          status,
+          expectedDelivery: new Date(),
+        });
 
-      expect(() => subTask.removeDesign(DesignId('550e8400-e29b-41d4-a716-446655440099'))).toThrow(
-        `Subtask com status "${status}" não pode ser modificada`,
-      );
-    });
+        expect(() =>
+          subTask.removeDesign(DesignId('550e8400-e29b-41d4-a716-446655440099')),
+        ).toThrow(`Subtask com status "${status}" não pode ser modificada`);
+      },
+    );
 
     it('should allow addDesign when status is NAO_INICIADO', () => {
       const subTask = new DesignSubTask({
