@@ -1,9 +1,11 @@
 import { HttpException, HttpStatus, ArgumentsHost } from '@nestjs/common';
 import { AllExceptionsFilter } from './http-exception.filter';
 
+const fakeRequest = { method: 'GET', url: '/api/test' };
+
 function makeHost(reply: object): ArgumentsHost {
   return {
-    switchToHttp: () => ({ getResponse: () => reply }),
+    switchToHttp: () => ({ getResponse: () => reply, getRequest: () => fakeRequest }),
   } as unknown as ArgumentsHost;
 }
 
