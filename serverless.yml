@@ -16,13 +16,11 @@ provider:
 plugins:
   - serverless-offline
 
-custom:
+build:
   esbuild:
     bundle: true
     minify: false
     sourcemap: true
-    target: node20
-    platform: node
     exclude:
       - '@aws-sdk/*'
 
