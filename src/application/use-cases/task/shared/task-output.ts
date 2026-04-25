@@ -34,6 +34,24 @@ export interface DesignOutput {
   dateUpload: Date;
 }
 
+export interface DiscoveryFormOutput {
+  complexity?: string;
+  projectName?: string;
+  summary?: string;
+  painPoints?: string;
+  frequency?: string;
+  currentProcess?: string;
+  inactionCost?: string;
+  volume?: string;
+  avgTime?: string;
+  humanDependency?: string;
+  rework?: string;
+  previousAttempts?: string;
+  benchmark?: string;
+  institutionalPriority?: string;
+  technicalOpinion?: string;
+}
+
 export interface SubTaskOutput {
   id: string;
   type: SubTaskType;
@@ -43,6 +61,7 @@ export interface SubTaskOutput {
   completionDate?: Date;
   reason?: string;
   designs?: DesignOutput[];
+  discoveryForm?: DiscoveryFormOutput;
 }
 
 export interface ProjectOutput {

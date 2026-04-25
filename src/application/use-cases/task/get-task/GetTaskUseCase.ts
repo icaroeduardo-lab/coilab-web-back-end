@@ -1,5 +1,5 @@
 import { Task } from '../../../../domain/entities/task.entity';
-import { DesignSubTask } from '../../../../domain/entities/sub-task.entity';
+import { DesignSubTask, DiscoverySubTask } from '../../../../domain/entities/sub-task.entity';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { IUserRepository } from '../../../../domain/repositories/IUserRepository';
 import { IApplicantRepository } from '../../../../domain/repositories/IApplicantRepository';
@@ -31,6 +31,26 @@ function mapSubTasks(task: Task): SubTaskOutput[] {
         urlImage: d.getUrlImage(),
         dateUpload: d.getDateUpload(),
       }));
+    }
+    if (s instanceof DiscoverySubTask) {
+      const form = s.getForm();
+      base.discoveryForm = {
+        complexity: form.complexity?.value,
+        projectName: form.projectName?.value,
+        summary: form.summary?.value,
+        painPoints: form.painPoints?.value,
+        frequency: form.frequency?.value,
+        currentProcess: form.currentProcess?.value,
+        inactionCost: form.inactionCost?.value,
+        volume: form.volume?.value,
+        avgTime: form.avgTime?.value,
+        humanDependency: form.humanDependency?.value,
+        rework: form.rework?.value,
+        previousAttempts: form.previousAttempts?.value,
+        benchmark: form.benchmark?.value,
+        institutionalPriority: form.institutionalPriority?.value,
+        technicalOpinion: form.technicalOpinion?.value,
+      };
     }
     return base;
   });
