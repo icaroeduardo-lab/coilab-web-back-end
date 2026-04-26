@@ -188,11 +188,11 @@ export class TaskController {
   }
 
   @Post(':taskId/subtasks/:subTaskId/designs')
-  @HttpCode(204)
+  @HttpCode(201)
   @ApiOperation({ summary: 'Adicionar design à subtarefa Design' })
   @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
   @ApiParam({ name: 'subTaskId', description: 'UUID da subtarefa Design' })
-  @ApiResponse({ status: 204, description: 'Design adicionado.' })
+  @ApiResponse({ status: 201, description: 'Design adicionado.' })
   @ApiResponse({ status: 422, description: 'Subtarefa já adicionada ou em estado inválido.' })
   async addDesign_(
     @CurrentUser() user: JwtPayload,
@@ -200,7 +200,7 @@ export class TaskController {
     @Param('subTaskId') subTaskId: string,
     @Body() dto: AddDesignDto,
   ) {
-    await this.addDesign.execute({ taskId, subTaskId, userId: user.sub, ...dto });
+    return this.addDesign.execute({ taskId, subTaskId, userId: user.sub, ...dto });
   }
 
   @Get(':taskId/subtasks/:subTaskId/designs/upload-url')

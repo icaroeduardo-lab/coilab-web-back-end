@@ -302,6 +302,12 @@ export class DiscoverySubTask extends SubTask {
         (this as unknown as Record<string, unknown>)[key] = { value, userId, filledAt };
       }
     });
+    const effectiveComplexity = data.complexity ?? this.complexity?.value;
+    if (effectiveComplexity === Level.LOW) {
+      this.rework = undefined;
+      this.previousAttempts = undefined;
+      this.benchmark = undefined;
+    }
   }
 
   override complete(): void {
@@ -310,7 +316,7 @@ export class DiscoverySubTask extends SubTask {
   }
 
   private assertFormComplete(): void {
-    const fields: (keyof DiscoveryFormProps)[] = [
+    const baseFields: (keyof DiscoveryFormProps)[] = [
       'complexity',
       'projectName',
       'summary',
@@ -321,13 +327,13 @@ export class DiscoverySubTask extends SubTask {
       'volume',
       'avgTime',
       'humanDependency',
-      'rework',
-      'previousAttempts',
-      'benchmark',
       'institutionalPriority',
       'technicalOpinion',
     ];
-    const missing = fields.filter((f) => !this[f as keyof this]);
+    const complexFields: (keyof DiscoveryFormProps)[] = ['rework', 'previousAttempts', 'benchmark'];
+    const isComplex = this.complexity?.value === Level.HIGH;
+    const required = isComplex ? [...baseFields, ...complexFields] : baseFields;
+    const missing = required.filter((f) => !this[f as keyof this]);
     if (missing.length > 0) {
       throw new Error(`Campos obrigatórios não preenchidos: ${missing.join(', ')}`);
     }
