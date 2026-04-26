@@ -330,11 +330,7 @@ export class DiscoverySubTask extends SubTask {
       'institutionalPriority',
       'technicalOpinion',
     ];
-    const complexFields: (keyof DiscoveryFormProps)[] = [
-      'rework',
-      'previousAttempts',
-      'benchmark',
-    ];
+    const complexFields: (keyof DiscoveryFormProps)[] = ['rework', 'previousAttempts', 'benchmark'];
     const isComplex = this.complexity?.value === Level.HIGH;
     const required = isComplex ? [...baseFields, ...complexFields] : baseFields;
     const missing = required.filter((f) => !this[f as keyof this]);

@@ -1,5 +1,9 @@
 import { Task } from '../../../../domain/entities/task.entity';
-import { DesignSubTask, DiscoverySubTask } from '../../../../domain/entities/sub-task.entity';
+import {
+  DesignSubTask,
+  DiscoverySubTask,
+  DiscoveryFieldEntry,
+} from '../../../../domain/entities/sub-task.entity';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { IUserRepository } from '../../../../domain/repositories/IUserRepository';
 import { IApplicantRepository } from '../../../../domain/repositories/IApplicantRepository';
@@ -23,10 +27,21 @@ function collectDiscoveryUserIds(task: Task): Set<string> {
     if (!(s instanceof DiscoverySubTask)) continue;
     const form = s.getForm();
     const fields = [
-      form.complexity, form.projectName, form.summary, form.painPoints,
-      form.frequency, form.currentProcess, form.inactionCost, form.volume,
-      form.avgTime, form.humanDependency, form.rework, form.previousAttempts,
-      form.benchmark, form.institutionalPriority, form.technicalOpinion,
+      form.complexity,
+      form.projectName,
+      form.summary,
+      form.painPoints,
+      form.frequency,
+      form.currentProcess,
+      form.inactionCost,
+      form.volume,
+      form.avgTime,
+      form.humanDependency,
+      form.rework,
+      form.previousAttempts,
+      form.benchmark,
+      form.institutionalPriority,
+      form.technicalOpinion,
     ];
     for (const f of fields) {
       if (f?.userId) ids.add(f.userId);
@@ -57,7 +72,7 @@ function mapSubTasks(task: Task, userMap: Map<string, User>): SubTaskOutput[] {
     }
     if (s instanceof DiscoverySubTask) {
       const form = s.getForm();
-      const mapField = (f?: { value: any; userId: string; filledAt?: Date }) => {
+      const mapField = (f?: DiscoveryFieldEntry<string>) => {
         if (!f) return undefined;
         const user = userMap.get(f.userId);
         return {
