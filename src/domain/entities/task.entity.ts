@@ -109,7 +109,49 @@ export class Task extends Entity {
     this.validate();
   }
 
+  private groupSubTasksByType(): Record<SubTaskType, SubTask[]> {
+    return this.subTasks.reduce(
+      (acc, sub) => {
+        const type = sub.getType();
+        if (!acc[type]) acc[type] = [];
+        acc[type].push(sub);
+        return acc;
+      },
+      {} as Record<SubTaskType, SubTask[]>,
+    );
+  }
+
+  private checkoutConditionsMet(): boolean {
+    if (this.subTasks.length === 0) return false;
+    const groups = this.groupSubTasksByType();
+    return Object.values(groups).every((group) => {
+      const allTerminal = group.every(
+        (s) =>
+          s.getStatus() === SubTaskStatus.AGUARDANDO_CHECKOUT ||
+          s.getStatus() === SubTaskStatus.APROVADO ||
+          s.getStatus() === SubTaskStatus.REPROVADO ||
+          s.getStatus() === SubTaskStatus.CANCELADO,
+      );
+      const hasReprovado = group.some((s) => s.getStatus() === SubTaskStatus.REPROVADO);
+      const hasAwaiting = group.some((s) => s.getStatus() === SubTaskStatus.AGUARDANDO_CHECKOUT);
+      // if any REPROVADO in group, must have a replacement AGUARDANDO_CHECKOUT
+      return allTerminal && (!hasReprovado || hasAwaiting);
+    });
+  }
+
   private applyStatusRules(): void {
+    // All NAO_INICIADO → BACKLOG
+    if (this.subTasks.length > 0) {
+      const allNotStarted = this.subTasks.every(
+        (s) => s.getStatus() === SubTaskStatus.NAO_INICIADO,
+      );
+      if (allNotStarted) {
+        this.status = TaskStatus.BACKLOG;
+        return;
+      }
+    }
+
+    // BACKLOG → EM_EXECUCAO when any subtask starts
     if (this.status === TaskStatus.BACKLOG) {
       const hasAnyInProgress = this.subTasks.some(
         (s) => s.getStatus() === SubTaskStatus.EM_PROGRESSO,
@@ -119,34 +161,18 @@ export class Task extends Entity {
       }
     }
 
-    if (this.status === TaskStatus.CHECKOUT) {
-      if (this.subTasks.length === 0) return;
+    // EM_EXECUCAO/BACKLOG → CHECKOUT using grouped rules:
+    // every type must be all-terminal; if any REPROVADO, needs replacement AGUARDANDO_CHECKOUT
+    if (
+      (this.status === TaskStatus.EM_EXECUCAO || this.status === TaskStatus.BACKLOG) &&
+      this.checkoutConditionsMet()
+    ) {
+      this.status = TaskStatus.CHECKOUT;
+    }
 
-      const groupedByType = this.subTasks.reduce(
-        (acc, sub) => {
-          const type = sub.getType();
-          if (!acc[type]) acc[type] = [];
-          acc[type].push(sub);
-          return acc;
-        },
-        {} as Record<SubTaskType, SubTask[]>,
-      );
-
-      const canCheckout = Object.values(groupedByType).every((group) => {
-        const allTerminal = group.every(
-          (s) =>
-            s.getStatus() === SubTaskStatus.AGUARDANDO_CHECKOUT ||
-            s.getStatus() === SubTaskStatus.APROVADO ||
-            s.getStatus() === SubTaskStatus.REPROVADO,
-        );
-        const hasReprovado = group.some((s) => s.getStatus() === SubTaskStatus.REPROVADO);
-        const hasAwaiting = group.some((s) => s.getStatus() === SubTaskStatus.AGUARDANDO_CHECKOUT);
-        return allTerminal && (!hasReprovado || hasAwaiting);
-      });
-
-      if (!canCheckout) {
-        this.status = TaskStatus.EM_EXECUCAO;
-      }
+    // CHECKOUT → EM_EXECUCAO when conditions no longer met
+    if (this.status === TaskStatus.CHECKOUT && !this.checkoutConditionsMet()) {
+      this.status = TaskStatus.EM_EXECUCAO;
     }
   }
 

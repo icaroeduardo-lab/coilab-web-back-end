@@ -5,14 +5,37 @@ import { IUserRepository } from '../../../../domain/repositories/IUserRepository
 import { IApplicantRepository } from '../../../../domain/repositories/IApplicantRepository';
 import { IFlowRepository } from '../../../../domain/repositories/IFlowRepository';
 import { IProjectRepository } from '../../../../domain/repositories/IProjectRepository';
-import { TaskId } from '../../../../domain/shared/entity-ids';
-import { TaskDetailOutput, SubTaskOutput } from '../shared/task-output';
+import { TaskId, UserId } from '../../../../domain/shared/entity-ids';
+import { TaskDetailOutput, SubTaskOutput, DiscoveryUserOutput } from '../shared/task-output';
+import { User } from '../../../../domain/entities/user.entity';
 
 export interface GetTaskInput {
   id: string;
 }
 
-function mapSubTasks(task: Task): SubTaskOutput[] {
+function toUserOutput(user: User): DiscoveryUserOutput {
+  return { id: user.getId(), name: user.getName(), imageUrl: user.getImageUrl() };
+}
+
+function collectDiscoveryUserIds(task: Task): Set<string> {
+  const ids = new Set<string>();
+  for (const s of task.getSubTasks()) {
+    if (!(s instanceof DiscoverySubTask)) continue;
+    const form = s.getForm();
+    const fields = [
+      form.complexity, form.projectName, form.summary, form.painPoints,
+      form.frequency, form.currentProcess, form.inactionCost, form.volume,
+      form.avgTime, form.humanDependency, form.rework, form.previousAttempts,
+      form.benchmark, form.institutionalPriority, form.technicalOpinion,
+    ];
+    for (const f of fields) {
+      if (f?.userId) ids.add(f.userId);
+    }
+  }
+  return ids;
+}
+
+function mapSubTasks(task: Task, userMap: Map<string, User>): SubTaskOutput[] {
   return task.getSubTasks().map((s) => {
     const base: SubTaskOutput = {
       id: s.getId(),
@@ -34,22 +57,31 @@ function mapSubTasks(task: Task): SubTaskOutput[] {
     }
     if (s instanceof DiscoverySubTask) {
       const form = s.getForm();
+      const mapField = (f?: { value: any; userId: string; filledAt?: Date }) => {
+        if (!f) return undefined;
+        const user = userMap.get(f.userId);
+        return {
+          value: String(f.value),
+          user: user ? toUserOutput(user) : { id: f.userId, name: 'Desconhecido' },
+          filledAt: f.filledAt,
+        };
+      };
       base.discoveryForm = {
-        complexity: form.complexity?.value,
-        projectName: form.projectName?.value,
-        summary: form.summary?.value,
-        painPoints: form.painPoints?.value,
-        frequency: form.frequency?.value,
-        currentProcess: form.currentProcess?.value,
-        inactionCost: form.inactionCost?.value,
-        volume: form.volume?.value,
-        avgTime: form.avgTime?.value,
-        humanDependency: form.humanDependency?.value,
-        rework: form.rework?.value,
-        previousAttempts: form.previousAttempts?.value,
-        benchmark: form.benchmark?.value,
-        institutionalPriority: form.institutionalPriority?.value,
-        technicalOpinion: form.technicalOpinion?.value,
+        complexity: mapField(form.complexity),
+        projectName: mapField(form.projectName),
+        summary: mapField(form.summary),
+        painPoints: mapField(form.painPoints),
+        frequency: mapField(form.frequency),
+        currentProcess: mapField(form.currentProcess),
+        inactionCost: mapField(form.inactionCost),
+        volume: mapField(form.volume),
+        avgTime: mapField(form.avgTime),
+        humanDependency: mapField(form.humanDependency),
+        rework: mapField(form.rework),
+        previousAttempts: mapField(form.previousAttempts),
+        benchmark: mapField(form.benchmark),
+        institutionalPriority: mapField(form.institutionalPriority),
+        technicalOpinion: mapField(form.technicalOpinion),
       };
     }
     return base;
@@ -71,16 +103,24 @@ export class GetTaskUseCase {
       throw new Error(`Task not found: ${input.id}`);
     }
 
-    const [creator, applicant, flows, project] = await Promise.all([
+    const discoveryUserIds = collectDiscoveryUserIds(task);
+
+    const [creator, applicant, flows, project, ...discoveryUsers] = await Promise.all([
       this.userRepository.findById(task.getCreatorId()),
       this.applicantRepository.findById(task.getApplicantId()),
       this.flowRepository.findByIds(task.getFlowIds()),
       this.projectRepository.findById(task.getProjectId()),
+      ...[...discoveryUserIds].map((uid) => this.userRepository.findById(uid as UserId)),
     ]);
 
     if (!creator) throw new Error(`Creator not found: ${task.getCreatorId()}`);
     if (!applicant) throw new Error(`Applicant not found: ${task.getApplicantId()}`);
     if (!project) throw new Error(`Project not found: ${task.getProjectId()}`);
+
+    const userMap = new Map<string, User>();
+    for (const u of discoveryUsers) {
+      if (u) userMap.set(u.getId(), u);
+    }
 
     return {
       id: task.getId(),
@@ -93,7 +133,7 @@ export class GetTaskUseCase {
       applicant: { id: applicant.getId(), name: applicant.getName() },
       creator: { id: creator.getId(), name: creator.getName(), imageUrl: creator.getImageUrl() },
       flows: flows.map((f) => ({ id: f.getId(), name: f.getName() })),
-      subTasks: mapSubTasks(task),
+      subTasks: mapSubTasks(task, userMap),
       createdAt: task.getCreatedAt(),
     };
   }

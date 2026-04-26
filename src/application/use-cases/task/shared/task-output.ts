@@ -34,22 +34,34 @@ export interface DesignOutput {
   dateUpload: Date;
 }
 
+export interface DiscoveryUserOutput {
+  id: string;
+  name: string;
+  imageUrl?: string;
+}
+
+export interface DiscoveryFieldOutput {
+  value: string;
+  user: DiscoveryUserOutput;
+  filledAt?: Date;
+}
+
 export interface DiscoveryFormOutput {
-  complexity?: string;
-  projectName?: string;
-  summary?: string;
-  painPoints?: string;
-  frequency?: string;
-  currentProcess?: string;
-  inactionCost?: string;
-  volume?: string;
-  avgTime?: string;
-  humanDependency?: string;
-  rework?: string;
-  previousAttempts?: string;
-  benchmark?: string;
-  institutionalPriority?: string;
-  technicalOpinion?: string;
+  complexity?: DiscoveryFieldOutput;
+  projectName?: DiscoveryFieldOutput;
+  summary?: DiscoveryFieldOutput;
+  painPoints?: DiscoveryFieldOutput;
+  frequency?: DiscoveryFieldOutput;
+  currentProcess?: DiscoveryFieldOutput;
+  inactionCost?: DiscoveryFieldOutput;
+  volume?: DiscoveryFieldOutput;
+  avgTime?: DiscoveryFieldOutput;
+  humanDependency?: DiscoveryFieldOutput;
+  rework?: DiscoveryFieldOutput;
+  previousAttempts?: DiscoveryFieldOutput;
+  benchmark?: DiscoveryFieldOutput;
+  institutionalPriority?: DiscoveryFieldOutput;
+  technicalOpinion?: DiscoveryFieldOutput;
 }
 
 export interface SubTaskOutput {
