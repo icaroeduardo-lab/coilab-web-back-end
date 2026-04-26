@@ -4,8 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from './public.decorator';
 
 const DEV_USER = {
-  sub: 'dev-user-00000000-0000-0000-0000-000000000000',
-  email: 'dev@coilab.local',
+  sub: 'f7d7a53c-62de-4f55-9b5e-80170dd84acd',
 };
 
 @Injectable()
