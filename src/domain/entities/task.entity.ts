@@ -122,7 +122,7 @@ export class Task extends Entity {
   }
 
   private checkoutConditionsMet(): boolean {
-    if (this.subTasks.length === 0) return false;
+    if (this.subTasks.length === 0) return true;
     const groups = this.groupSubTasksByType();
     return Object.values(groups).every((group) => {
       const allTerminal = group.every(
@@ -161,10 +161,10 @@ export class Task extends Entity {
       }
     }
 
-    // EM_EXECUCAO/BACKLOG → CHECKOUT using grouped rules:
-    // every type must be all-terminal; if any REPROVADO, needs replacement AGUARDANDO_CHECKOUT
+    // EM_EXECUCAO/BACKLOG → CHECKOUT: subtasks must exist and all meet grouped conditions
     if (
       (this.status === TaskStatus.EM_EXECUCAO || this.status === TaskStatus.BACKLOG) &&
+      this.subTasks.length > 0 &&
       this.checkoutConditionsMet()
     ) {
       this.status = TaskStatus.CHECKOUT;
