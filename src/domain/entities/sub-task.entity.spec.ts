@@ -188,6 +188,86 @@ describe('SubTask Entity', () => {
 
       expect(() => subTask.complete()).toThrow('Campos obrigatórios não preenchidos:');
     });
+
+    describe('complexity-conditional fields (rework, previousAttempts, benchmark)', () => {
+      const lowComplexityForm = {
+        complexity: entry(Level.LOW),
+        projectName: entry('Coilab'),
+        summary: entry('Resumo'),
+        painPoints: entry('Dores'),
+        frequency: entry(Frequency.DAILY),
+        currentProcess: entry('Processo'),
+        inactionCost: entry('R$ 1.000'),
+        volume: entry('100/dia'),
+        avgTime: entry('10min'),
+        humanDependency: entry(Level.MEDIUM),
+        institutionalPriority: entry(Level.LOW),
+        technicalOpinion: entry('Viável'),
+      };
+
+      it('should complete with LOW complexity without rework/previousAttempts/benchmark', () => {
+        const subTask = new DiscoverySubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440060'),
+          taskId,
+          idUser: userId,
+          status: SubTaskStatus.EM_PROGRESSO,
+          expectedDelivery: new Date(),
+          ...lowComplexityForm,
+        });
+
+        expect(() => subTask.complete()).not.toThrow();
+        expect(subTask.getStatus()).toBe(SubTaskStatus.AGUARDANDO_CHECKOUT);
+      });
+
+      it('should throw when completing with HIGH complexity missing rework/previousAttempts/benchmark', () => {
+        const subTask = new DiscoverySubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440061'),
+          taskId,
+          idUser: userId,
+          status: SubTaskStatus.EM_PROGRESSO,
+          expectedDelivery: new Date(),
+          ...lowComplexityForm,
+          complexity: entry(Level.HIGH),
+        });
+
+        expect(() => subTask.complete()).toThrow('Campos obrigatórios não preenchidos:');
+      });
+
+      it('should clear rework/previousAttempts/benchmark when updating complexity to LOW', () => {
+        const subTask = new DiscoverySubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440062'),
+          taskId,
+          idUser: userId,
+          status: SubTaskStatus.EM_PROGRESSO,
+          expectedDelivery: new Date(),
+          ...fullDiscoveryForm,
+        });
+
+        subTask.updateForm({ complexity: Level.LOW }, userId);
+
+        expect(subTask.getForm().rework).toBeUndefined();
+        expect(subTask.getForm().previousAttempts).toBeUndefined();
+        expect(subTask.getForm().benchmark).toBeUndefined();
+        expect(subTask.getForm().complexity?.value).toBe(Level.LOW);
+      });
+
+      it('should not clear rework/previousAttempts/benchmark when updating other fields on HIGH complexity', () => {
+        const subTask = new DiscoverySubTask({
+          id: SubTaskId('550e8400-e29b-41d4-a716-446655440063'),
+          taskId,
+          idUser: userId,
+          status: SubTaskStatus.EM_PROGRESSO,
+          expectedDelivery: new Date(),
+          ...fullDiscoveryForm,
+        });
+
+        subTask.updateForm({ summary: 'Novo resumo' }, userId);
+
+        expect(subTask.getForm().rework?.value).toBe('20% das entregas');
+        expect(subTask.getForm().previousAttempts?.value).toBe('Tentativa com Jira');
+        expect(subTask.getForm().benchmark?.value).toBe('Linear, Jira');
+      });
+    });
   });
 
   const validDesign = new Design({

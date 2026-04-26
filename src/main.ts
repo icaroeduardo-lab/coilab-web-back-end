@@ -55,6 +55,6 @@ export const handler: Handler = async (event, context, callback) => {
 
 if (require.main === module) {
   bootstrap().then((app) => {
-    app.listen(3000, '0.0.0.0').then(() => logger.log('Server running on http://localhost:3000'));
+    app.listen(3001, '0.0.0.0').then(() => logger.log('Server running on http://localhost:3001'));
   });
 }

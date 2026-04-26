@@ -16,7 +16,7 @@ export interface AddDesignToSubTaskInput {
 export class AddDesignToSubTaskUseCase {
   constructor(private readonly taskRepository: ITaskRepository) {}
 
-  async execute(input: AddDesignToSubTaskInput): Promise<void> {
+  async execute(input: AddDesignToSubTaskInput): Promise<{ id: string }> {
     const task = await this.taskRepository.findById(TaskId(input.taskId));
     if (!task) {
       throw new Error(`Task not found: ${input.taskId}`);
@@ -31,8 +31,9 @@ export class AddDesignToSubTaskUseCase {
       throw new Error(`SubTask is not a Design type: ${input.subTaskId}`);
     }
 
+    const designId = generateId();
     const design = new Design({
-      id: DesignId(generateId()),
+      id: DesignId(designId),
       title: input.title,
       description: input.description,
       urlImage: input.urlImage,
@@ -43,5 +44,6 @@ export class AddDesignToSubTaskUseCase {
     (subTask as DesignSubTask).addDesign(design);
 
     await this.taskRepository.save(task);
+    return { id: designId };
   }
 }
