@@ -5,6 +5,9 @@ import { IS_PUBLIC_KEY } from './public.decorator';
 
 const DEV_USER = {
   sub: 'f7d7a53c-62de-4f55-9b5e-80170dd84acd',
+  name: 'Dev User',
+  email: 'dev@example.com',
+  picture: 'https://img.example.com/avatar.jpg',
 };
 
 @Injectable()
@@ -13,18 +16,22 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super();
   }
 
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
     if (isPublic) return true;
 
-    if (process.env.NODE_ENV === 'development') {
-      context.switchToHttp().getRequest().user = DEV_USER;
+    const request = context.switchToHttp().getRequest();
+    const hasToken = !!request.headers.authorization;
+
+    if (process.env.NODE_ENV === 'development' && !hasToken) {
+      request.user = DEV_USER;
       return true;
     }
 
-    return super.canActivate(context);
+    const result = await super.canActivate(context);
+    return result as boolean;
   }
 }

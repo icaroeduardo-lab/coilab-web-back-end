@@ -8,6 +8,7 @@ function toDomain(row: PrismaUser): User {
   return new User({
     id: UserId(row.id),
     name: row.name,
+    email: row.email,
     imageUrl: row.imageUrl ?? undefined,
   });
 }
@@ -21,8 +22,17 @@ export class PrismaUserRepository implements IUserRepository {
   async save(user: User): Promise<void> {
     await prisma.user.upsert({
       where: { id: user.getId() },
-      create: { id: user.getId(), name: user.getName(), imageUrl: user.getImageUrl() },
-      update: { name: user.getName(), imageUrl: user.getImageUrl() },
+      create: {
+        id: user.getId(),
+        name: user.getName(),
+        email: user.getEmail(),
+        imageUrl: user.getImageUrl(),
+      },
+      update: {
+        name: user.getName(),
+        email: user.getEmail(),
+        imageUrl: user.getImageUrl(),
+      },
     });
   }
 }

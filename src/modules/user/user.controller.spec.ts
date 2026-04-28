@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UpsertUserFromCognitoUseCase } from '../../application/use-cases/user/upsert-user-from-cognito/UpsertUserFromCognitoUseCase';
-import { GetUserUseCase } from '../../application/use-cases/user/get-user/GetUserUseCase';
+import { JwtPayload } from '../auth/current-user.decorator';
 import { randomUUID } from 'crypto';
 
 const mockUpsert = { execute: jest.fn() };
-const mockGetUser = { execute: jest.fn() };
 
 describe('UserController', () => {
   let controller: UserController;
@@ -14,31 +13,77 @@ describe('UserController', () => {
     jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UserController],
-      providers: [
-        { provide: UpsertUserFromCognitoUseCase, useValue: mockUpsert },
-        { provide: GetUserUseCase, useValue: mockGetUser },
-      ],
+      providers: [{ provide: UpsertUserFromCognitoUseCase, useValue: mockUpsert }],
     }).compile();
     controller = module.get(UserController);
   });
 
-  describe('sync', () => {
-    it('calls upsertUser.execute with dto', async () => {
-      mockUpsert.execute.mockResolvedValue(undefined);
-      const dto = { cognitoSub: randomUUID(), name: 'John', imageUrl: 'https://img.example.com' };
-      await controller.sync(dto as never);
-      expect(mockUpsert.execute).toHaveBeenCalledWith(dto);
-    });
-  });
+  describe('me', () => {
+    it('upserts user with name, email and picture from ID token claims', async () => {
+      const sub = randomUUID();
+      const payload: JwtPayload = {
+        sub,
+        name: 'João Silva',
+        email: 'joao.silva@email.com',
+        picture: 'https://img.example.com/avatar.jpg',
+      };
+      const output = {
+        id: sub,
+        name: 'João Silva',
+        email: 'joao.silva@email.com',
+        imageUrl: 'https://img.example.com/avatar.jpg',
+      };
+      mockUpsert.execute.mockResolvedValue(output);
 
-  describe('get', () => {
-    it('calls getUser.execute with id and returns result', async () => {
-      const id = randomUUID();
-      const output = { id, name: 'John' };
-      mockGetUser.execute.mockResolvedValue(output);
-      const result = await controller.get(id);
-      expect(mockGetUser.execute).toHaveBeenCalledWith({ id });
+      const result = await controller.me(payload);
+
+      expect(mockUpsert.execute).toHaveBeenCalledWith({
+        cognitoSub: sub,
+        name: 'João Silva',
+        email: 'joao.silva@email.com',
+        imageUrl: 'https://img.example.com/avatar.jpg',
+      });
       expect(result).toBe(output);
+    });
+
+    it('falls back to email when name claim absent', async () => {
+      const sub = randomUUID();
+      const payload = { sub, email: 'joao.silva@email.com' } as JwtPayload;
+
+      mockUpsert.execute.mockResolvedValue({ 
+        id: sub, 
+        name: 'joao.silva@email.com',
+        email: 'joao.silva@email.com' 
+      });
+
+      await controller.me(payload);
+
+      expect(mockUpsert.execute).toHaveBeenCalledWith({
+        cognitoSub: sub,
+        name: 'joao.silva@email.com',
+        email: 'joao.silva@email.com',
+        imageUrl: undefined,
+      });
+    });
+
+    it('falls back to sub when name and email both absent', async () => {
+      const sub = randomUUID();
+      const payload = { sub } as JwtPayload;
+
+      mockUpsert.execute.mockResolvedValue({ 
+        id: sub, 
+        name: sub,
+        email: undefined
+      });
+
+      await controller.me(payload);
+
+      expect(mockUpsert.execute).toHaveBeenCalledWith({
+        cognitoSub: sub,
+        name: sub,
+        email: undefined,
+        imageUrl: undefined,
+      });
     });
   });
 });

@@ -13,13 +13,16 @@ describe('GetUserUseCase', () => {
   it('returns user by id', async () => {
     const repo = makeRepo();
     const id = randomUUID();
-    repo.findById.mockResolvedValue(new User({ id: UserId(id), name: 'John' }));
+    repo.findById.mockResolvedValue(
+      new User({ id: UserId(id), name: 'John', email: 'john@example.com' }),
+    );
     const sut = new GetUserUseCase(repo);
 
     const result = await sut.execute({ id });
 
     expect(result.getId()).toBe(id);
     expect(result.getName()).toBe('John');
+    expect(result.getEmail()).toBe('john@example.com');
   });
 
   it('throws when user not found', async () => {
