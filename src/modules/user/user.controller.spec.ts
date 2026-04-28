@@ -50,10 +50,10 @@ describe('UserController', () => {
       const sub = randomUUID();
       const payload = { sub, email: 'joao.silva@email.com' } as JwtPayload;
 
-      mockUpsert.execute.mockResolvedValue({ 
-        id: sub, 
+      mockUpsert.execute.mockResolvedValue({
+        id: sub,
         name: 'joao.silva@email.com',
-        email: 'joao.silva@email.com' 
+        email: 'joao.silva@email.com',
       });
 
       await controller.me(payload);
@@ -70,10 +70,10 @@ describe('UserController', () => {
       const sub = randomUUID();
       const payload = { sub } as JwtPayload;
 
-      mockUpsert.execute.mockResolvedValue({ 
-        id: sub, 
+      mockUpsert.execute.mockResolvedValue({
+        id: sub,
         name: sub,
-        email: undefined
+        email: undefined,
       });
 
       await controller.me(payload);

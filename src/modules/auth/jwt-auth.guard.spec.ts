@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { IS_PUBLIC_KEY } from './public.decorator';
 
-const makeContext = (headers: any = {}): ExecutionContext =>
+const makeContext = (headers: Record<string, string> = {}): ExecutionContext =>
   ({
     getHandler: () => ({}),
     getClass: () => ({}),
@@ -54,20 +54,20 @@ describe('JwtAuthGuard', () => {
   it('injects DEV_USER in development when no token is present', async () => {
     process.env.NODE_ENV = 'development';
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-    const request = { headers: {} } as any;
+    const request: { headers: Record<string, string>; user?: { name: string } } = { headers: {} };
     const ctx = {
       getHandler: () => ({}),
       getClass: () => ({}),
       switchToHttp: () => ({
         getRequest: () => request,
       }),
-    } as any;
+    } as unknown as ExecutionContext;
 
     const result = await guard.canActivate(ctx);
 
     expect(result).toBe(true);
     expect(request.user).toBeDefined();
-    expect(request.user.name).toBe('Dev User');
+    expect(request.user?.name).toBe('Dev User');
     process.env.NODE_ENV = 'test';
   });
 });

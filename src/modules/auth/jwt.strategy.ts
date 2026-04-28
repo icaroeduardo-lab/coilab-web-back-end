@@ -23,21 +23,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: any): JwtPayload {
+  validate(payload: Record<string, unknown>): JwtPayload {
     return {
-      sub: payload.sub,
-      email: payload.email,
-      name:
-        payload.name ||
+      sub: payload.sub as string,
+      email: payload.email as string,
+      name: (payload.name ||
         payload.given_name ||
         payload.nickname ||
         payload.preferred_username ||
-        payload.email,
-      picture:
-        payload.picture ||
+        payload.email) as string,
+      picture: (payload.picture ||
         payload.profile ||
         payload['custom:picture'] ||
-        payload['custom:image_url'],
+        payload['custom:image_url']) as string | undefined,
     };
   }
 }
