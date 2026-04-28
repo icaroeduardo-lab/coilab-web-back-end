@@ -57,7 +57,11 @@ beforeEach(async () => {
   await applicantRepo.save(applicant);
   applicantId = applicant.getId();
 
-  const creator = new User({ id: UserId(randomUUID()), name: 'Criador' });
+  const creator = new User({
+    id: UserId(randomUUID()),
+    name: 'Criador',
+    email: 'criador@example.com',
+  });
   await userRepo.save(creator);
   creatorId = creator.getId();
 });
