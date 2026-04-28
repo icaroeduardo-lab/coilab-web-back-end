@@ -2,7 +2,87 @@
 
 ## Visão Geral
 
-O domínio é organizado em três agregados principais: **Project**, **Task** e **SubTask**. Uma Task pertence a um Project; uma SubTask pertence a uma Task. O ciclo de vida de cada entidade segue regras de status que são aplicadas e validadas dentro das próprias classes de domínio.
+O domínio é organizado em quatro agregados principais: **Project**, **Task**, **SubTask** e **User**, além das entidades de suporte **Applicant** e **Flow**. Uma Task pertence a um Project; uma SubTask pertence a uma Task. O ciclo de vida de cada entidade segue regras de status aplicadas e validadas dentro das próprias classes de domínio.
+
+Flows são referenciados apenas por ID dentro da Task — o join com nome/dados é feito na camada de use cases quando necessário.
+
+---
+
+## Numeração sequencial
+
+Projects e Tasks recebem um número sequencial gerado automaticamente no formato `#YYYYnnnn`:
+
+- `YYYY` = ano atual
+- `nnnn` = contador sequencial zero-padded (0001, 0002, …)
+
+O número é **imutável** após a criação. Exemplos: `#20260001`, `#20260002`.
+
+---
+
+## Paginação
+
+Use cases de listagem retornam `PaginatedOutput<T>`:
+
+```typescript
+interface PaginatedOutput<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
+```
+
+Defaults: `page = 1`, `limit = 20`, máximo `limit = 100`.
+
+---
+
+## Applicant
+
+Representa o setor ou departamento solicitante de uma Task.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `id` | `ApplicantId` | Identificador único (UUID) |
+| `name` | `string` | Nome do setor/departamento |
+
+### Regras
+
+- `changeName(name)` — atualiza o nome.
+- Applicant pode ser deletado sem restrições de negócio no domínio.
+
+---
+
+## Flow
+
+Representa um fluxo de trabalho que pode ser associado a Tasks.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `id` | `FlowId` | Identificador único (UUID) |
+| `name` | `string` | Nome do fluxo |
+
+### Regras
+
+- Flow pode ser deletado sem restrições de negócio no domínio.
+- Tasks armazenam apenas `FlowId[]` — o nome é resolvido via join no use case.
+- Não é possível adicionar o mesmo `FlowId` duas vezes a uma Task (`addFlowId` lança erro se duplicado).
+
+---
+
+## User
+
+Representa um usuário do sistema autenticado via AWS Cognito (SSO Google).
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `id` | `UserId` | UUID igual ao `sub` do Cognito |
+| `name` | `string` | Nome do usuário |
+| `imageUrl` | `string?` | URL do avatar (opcional) |
+
+### Regras
+
+- O `id` é diretamente o `cognitoSub` — não há campo separado de provedor OAuth.
+- `syncProfile(name, imageUrl?)` — atualiza nome e avatar. Chamado no login/refresh do token Cognito.
 
 ---
 
@@ -21,7 +101,9 @@ O domínio é organizado em três agregados principais: **Project**, **Task** e 
 
 - Todo projeto nasce com status `backlog`.
 - A transição de status é livre — sem restrições automáticas no domínio.
-- Uma Task só pode ser adicionada ao projeto se o `projectId` da Task corresponder ao `id` do Project.
+- `projectNumber` é imutável após a criação.
+- `urlDocument` é opcional; pode ser atualizado a qualquer momento.
+- Upload de documento via URL pré-assinada S3 (bucket: `BUCKET_PROJECTS_DOCUMENTS`). Key: `{projectNumber}/{uuid}{ext}`.
 
 ---
 
@@ -38,40 +120,69 @@ O domínio é organizado em três agregados principais: **Project**, **Task** e 
 | `Testes` | Em fase de testes |
 | `Concluído` | Finalizada |
 
+### Campos principais
+
+| Campo | Tipo | Imutável? | Descrição |
+|---|---|---|---|
+| `taskNumber` | `string` | Sim | Número sequencial (`#YYYYnnnn`), gerado na criação |
+| `projectId` | `ProjectId` | Não | Projeto ao qual a task pertence |
+| `applicantId` | `ApplicantId` | Não | Setor solicitante |
+| `creatorId` | `UserId` | Sim | Usuário que criou a task |
+| `flowIds` | `FlowId[]` | Não | IDs dos flows associados (sem dados de join) |
+
 ### Regras de transição automática
 
 **Backlog → Em Execução**
-- Ocorre automaticamente ao adicionar uma subtask com status `Em progresso`, ou ao chamar `changeStatus(EM_EXECUCAO)`.
+Ocorre ao chamar `changeStatus(EM_EXECUCAO)`.
 
 **Checkout — validação ao entrar no status**
 - Se a Task não tiver subtasks: checkout permitido sem restrições.
-- Se tiver subtasks, cada tipo de subtask (`Discovery`, `Design`, `Diagram`) é avaliado separadamente:
+- Se tiver subtasks, cada tipo (`Discovery`, `Design`, `Diagram`) é avaliado separadamente:
   - Todas as subtasks do tipo devem estar em `Aguardando Checkout`, `Aprovado` ou `Reprovado`.
   - Se alguma estiver `Reprovado`, deve existir outra do mesmo tipo em `Aguardando Checkout` (substituta).
-  - Se qualquer uma das condições falhar, o status reverte automaticamente para `Em Execução`.
+  - Se qualquer condição falhar, o status reverte automaticamente para `Em Execução`.
+
+> Após qualquer mudança de status de uma SubTask, o use case chama `task.changeStatus(task.getStatus())` para re-avaliar as regras de Checkout.
 
 ### Regra de adição de subtasks
 
-- Só é possível adicionar uma segunda subtask do mesmo tipo se a anterior estiver com status `Reprovado`.
+- Só é possível adicionar segunda subtask do mesmo tipo se a anterior estiver com status `Reprovado`.
 - Tentativa de adicionar subtask de tipo já existente e não reprovada lança erro.
 
-### Regra de remoção (assertCanBeDeleted)
+### Regra de remoção de subtask individual (removeSubTask)
 
-A Task só pode ser removida se **todas** as suas subtasks estiverem em um dos estados terminais sem trabalho ativo:
+Subtask pode ser removida da Task apenas se estiver em:
 
-| Status permitido | Motivo |
-|---|---|
-| `Não iniciado` | Nenhum trabalho foi iniciado |
-| `Reprovado` | Entrega rejeitada, sem continuidade |
-| `Cancelado` | Trabalho abandonado explicitamente |
+| Status permitido |
+|---|
+| `Não iniciado` |
+| `Reprovado` |
+| `Cancelado` |
 
-Se qualquer subtask estiver em `Em progresso`, `Aguardando Checkout` ou `Aprovado`, a remoção é bloqueada com erro.
+Status bloqueantes: `Em progresso`, `Aguardando Checkout`, `Aprovado`.
+
+### Regra de deleção da Task (assertCanBeDeleted)
+
+Task só pode ser deletada se **todas** as subtasks estiverem em status terminal sem trabalho ativo:
+
+| Status permitido |
+|---|
+| `Não iniciado` |
+| `Reprovado` |
+| `Cancelado` |
+
+### Regra de flows
+
+- Não é possível adicionar o mesmo `FlowId` duas vezes (`addFlowId` lança erro se duplicado).
+- `removeFlowId` lança erro se o ID não existir na lista.
+
+### Upload de designs
+
+Uploads de imagens de Design são feitos via URL pré-assinada S3 (bucket: `BUCKET_DESIGN`). Key: `{taskNumber}/{uuid}{ext}`.
 
 ---
 
 ## SubTask
-
-Todas as subtasks compartilham a mesma base de campos e comportamentos.
 
 ### Campos base
 
@@ -79,13 +190,13 @@ Todas as subtasks compartilham a mesma base de campos e comportamentos.
 |---|---|---|
 | `id` | `SubTaskId` | Identificador único |
 | `taskId` | `TaskId` | Task à qual pertence |
-| `idUser` | `ApplicantId` | Usuário que criou a subtask |
+| `idUser` | `UserId` | Usuário que criou a subtask |
 | `status` | `SubTaskStatus` | Status atual |
 | `type` | `SubTaskType` | `Discovery`, `Design` ou `Diagram` |
 | `expectedDelivery` | `Date` | Data prevista de entrega |
 | `createdAt` | `Date` | Data/hora de criação |
-| `startDate` | `Date?` | Data/hora de início (preenchida ao chamar `start()`) |
-| `completionDate` | `Date?` | Data/hora de conclusão (preenchida ao chamar `complete()`) |
+| `startDate` | `Date?` | Preenchida ao chamar `start()` |
+| `completionDate` | `Date?` | Preenchida ao chamar `complete()` |
 | `reason` | `string?` | Motivo de reprovação ou cancelamento |
 
 ### Status
@@ -95,25 +206,25 @@ Todas as subtasks compartilham a mesma base de campos e comportamentos.
 | `Não iniciado` | Subtask criada, sem início |
 | `Em progresso` | Trabalho em andamento |
 | `Aguardando Checkout` | Entrega submetida para revisão |
-| `Aprovado` | Entrega aprovada pelo revisor |
+| `Aprovado` | Entrega aprovada |
 | `Reprovado` | Entrega rejeitada — motivo obrigatório |
 | `Cancelado` | Abandonada — motivo obrigatório |
 
-### Transições de status
+### Transições de status (actions)
 
-```
-Não iniciado → Em progresso        (start)
-Em progresso → Aguardando Checkout (complete)
-Aguardando Checkout → Aprovado     (approve)
-Aguardando Checkout → Reprovado    (reject — motivo obrigatório)
-Qualquer* → Cancelado              (cancel — motivo obrigatório)
-```
+| Action | Transição | Requer `reason` |
+|---|---|---|
+| `start` | Não iniciado → Em progresso | Não |
+| `complete` | Em progresso → Aguardando Checkout | Não |
+| `approve` | Aguardando Checkout → Aprovado | Não |
+| `reject` | Aguardando Checkout → Reprovado | Sim |
+| `cancel` | Qualquer → Cancelado | Sim |
 
-> `cancel()` é bloqueado se a subtask já estiver `Aprovado`.
+> `cancel` é bloqueado se a subtask já estiver `Aprovado`.
 
 ### Trava de edição (assertEditable)
 
-Subtasks com status `Aguardando Checkout`, `Aprovado`, `Reprovado` ou `Cancelado` são **somente leitura**. Qualquer tentativa de modificar campos (ex: `updateForm`, `addDesign`) lança erro.
+Subtasks com status `Aguardando Checkout`, `Aprovado`, `Reprovado` ou `Cancelado` são **somente leitura**. Tentativas de modificar campos lançam erro.
 
 ---
 
@@ -121,49 +232,39 @@ Subtasks com status `Aguardando Checkout`, `Aprovado`, `Reprovado` ou `Cancelado
 
 Formulário estruturado de levantamento. Cada campo registra o **último** usuário que o preencheu e o timestamp.
 
-### Campos do formulário
-
-| Campo | Tipo do valor | Descrição |
-|---|---|---|
-| `complexity` | `Level` | Complexidade estimada (Alta / Média / Baixa) |
-| `projectName` | `string` | Nome do projeto |
-| `summary` | `string` | Resumo do problema |
-| `painPoints` | `string` | Pontos de dor |
-| `frequency` | `Frequency` | Frequência de ocorrência |
-| `currentProcess` | `string` | Como o processo ocorre hoje |
-| `inactionCost` | `string` | Custo de não resolver |
-| `volume` | `string` | Volume de ocorrências |
-| `avgTime` | `string` | Tempo médio por ocorrência |
-| `humanDependency` | `Level` | Grau de dependência humana |
-| `rework` | `string` | Existe retrabalho? |
-| `previousAttempts` | `string` | Tentativas anteriores de solução |
-| `benchmark` | `string` | Referências de mercado |
-| `institutionalPriority` | `Level` | Prioridade institucional |
-| `technicalOpinion` | `string` | Opinião técnica |
-
-Cada campo é armazenado como:
-
 ```typescript
-{
-  value: T         // valor preenchido
-  userId: ApplicantId  // quem preencheu
-  filledAt: Date   // quando foi preenchido
+interface DiscoveryFieldEntry<T> {
+  value: T;
+  userId: UserId;   // join com User feito no GetTaskUseCase
+  filledAt: Date;
 }
 ```
 
-### Enums de suporte
+### Campos do formulário
 
-**Level**
-- `Alta`, `Média`, `Baixa`
-
-**Frequency**
-- `Diária`, `Semanal`, `Mensal`, `Eventual`
+| Campo | Tipo do valor |
+|---|---|
+| `complexity` | `Level` (Alta / Média / Baixa) |
+| `projectName` | `string` |
+| `summary` | `string` |
+| `painPoints` | `string` |
+| `frequency` | `Frequency` (Diária / Semanal / Mensal / Eventual) |
+| `currentProcess` | `string` |
+| `inactionCost` | `string` |
+| `volume` | `string` |
+| `avgTime` | `string` |
+| `humanDependency` | `Level` |
+| `rework` | `string` |
+| `previousAttempts` | `string` |
+| `benchmark` | `string` |
+| `institutionalPriority` | `Level` |
+| `technicalOpinion` | `string` |
 
 ### Regras
 
-- `updateForm(data, userId)` — atualiza apenas os campos informados. Campos omitidos não são alterados.
-- Bloqueado se a subtask não for editável (status travado).
-- `complete()` — verifica se **todos** os 15 campos estão preenchidos antes de avançar para `Aguardando Checkout`. Campos faltantes são listados no erro.
+- `updateForm(data, userId)` — atualiza apenas os campos informados. Bloqueado se subtask não for editável.
+- `complete()` — verifica se **todos** os 15 campos estão preenchidos antes de avançar. Campos faltantes são listados no erro.
+- No `GetTaskUseCase`, todos os `userId` dos campos preenchidos são coletados e resolvidos em paralelo via `IUserRepository`.
 
 ---
 
@@ -171,16 +272,14 @@ Cada campo é armazenado como:
 
 Gerencia imagens de design vinculadas à subtask.
 
-### Rastreio por imagem
-
 Cada `Design` armazena:
 
 | Campo | Tipo | Descrição |
 |---|---|---|
 | `id` | `DesignId` | Identificador único |
 | `title` | `string` | Título descritivo |
-| `description` | `string` | Descrição da imagem |
-| `urlImage` | `string` | URL da imagem (deve ser URL válida) |
+| `description` | `string` | Descrição |
+| `urlImage` | `string` | URL da imagem (S3) |
 | `user` | `ApplicantId` | Usuário que fez o upload |
 | `dateUpload` | `Date` | Data/hora do upload |
 
@@ -193,9 +292,7 @@ Cada `Design` armazena:
 
 ## DiagramSubTask
 
-Gerencia diagramas (ex: fluxo, ER) vinculados à subtask.
-
-### Rastreio por diagrama
+Gerencia diagramas vinculados à subtask.
 
 Cada `Diagram` armazena:
 
@@ -203,7 +300,7 @@ Cada `Diagram` armazena:
 |---|---|---|
 | `title` | `string` | Título do diagrama |
 | `description` | `string` | Descrição |
-| `urlDiagram` | `string` | URL do diagrama (deve ser URL válida) |
+| `urlDiagram` | `string` | URL do diagrama |
 | `user` | `ApplicantId` | Usuário que fez o upload |
 | `dateUpload` | `Date` | Data/hora do upload |
 
@@ -233,6 +330,7 @@ Todos os IDs são branded types — strings com tipo nominal em compile time, se
 | `ProjectId` | `ProjectId(uuid)` |
 | `TaskId` | `TaskId(uuid)` |
 | `SubTaskId` | `SubTaskId(uuid)` |
+| `UserId` | `UserId(uuid)` |
 | `ApplicantId` | `ApplicantId(uuid)` |
 | `FlowId` | `FlowId(uuid)` |
 | `DesignId` | `DesignId(uuid)` |

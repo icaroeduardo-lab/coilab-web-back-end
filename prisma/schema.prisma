@@ -23,6 +23,7 @@ model Project {
 model User {
   id       String  @id @db.Uuid
   name     String
+  email    String
   imageUrl String?
   tasks    Task[]  @relation("creator")
 

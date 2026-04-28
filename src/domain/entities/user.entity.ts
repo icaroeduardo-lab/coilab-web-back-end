@@ -6,6 +6,7 @@ import { UserId } from '../shared/entity-ids';
 export interface UserProps {
   id: UserId;
   name: string;
+  email: string;
   imageUrl?: string;
 }
 
@@ -19,6 +20,10 @@ export class User extends Entity {
   private name: string;
 
   @IsString()
+  @IsNotEmpty()
+  private email: string;
+
+  @IsString()
   @IsOptional()
   private imageUrl?: string;
 
@@ -26,6 +31,7 @@ export class User extends Entity {
     super();
     this.id = props.id;
     this.name = props.name;
+    this.email = props.email;
     this.imageUrl = props.imageUrl;
     this.validate();
   }
@@ -36,12 +42,16 @@ export class User extends Entity {
   getName(): string {
     return this.name;
   }
+  getEmail(): string {
+    return this.email;
+  }
   getImageUrl(): string | undefined {
     return this.imageUrl;
   }
 
-  syncProfile(name: string, imageUrl?: string): void {
+  syncProfile(name: string, email: string, imageUrl?: string): void {
     this.name = name;
+    this.email = email;
     this.imageUrl = imageUrl;
     this.validate();
   }

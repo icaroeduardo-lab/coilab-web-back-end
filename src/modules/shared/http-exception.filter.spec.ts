@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, ArgumentsHost } from '@nestjs/common';
+import { HttpException, HttpStatus, ArgumentsHost, Logger } from '@nestjs/common';
 import { AllExceptionsFilter } from './http-exception.filter';
 
 const fakeRequest = { method: 'GET', url: '/api/test' };
@@ -17,6 +17,14 @@ function makeReply() {
 
 describe('AllExceptionsFilter', () => {
   let filter: AllExceptionsFilter;
+
+  beforeAll(() => {
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
 
   beforeEach(() => {
     filter = new AllExceptionsFilter();

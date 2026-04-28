@@ -32,7 +32,11 @@ const mockAddDesign = { execute: jest.fn() };
 const mockRemoveDesign = { execute: jest.fn() };
 const mockGetDesignUploadUrl = { execute: jest.fn() };
 
-const fakeUser: JwtPayload = { sub: randomUUID(), email: 'user@example.com' };
+const fakeUser: JwtPayload = {
+  sub: randomUUID(),
+  email: 'user@example.com',
+  name: 'Test User',
+};
 
 describe('TaskController', () => {
   let controller: TaskController;

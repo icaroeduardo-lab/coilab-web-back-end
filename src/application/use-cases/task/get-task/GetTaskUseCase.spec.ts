@@ -97,7 +97,12 @@ describe('GetTaskUseCase', () => {
     task.addFlowId(FlowId(flowId));
     taskRepo.findById.mockResolvedValue(task);
     userRepo.findById.mockResolvedValue(
-      new User({ id: UserId(creatorId), name: 'John Doe', imageUrl: 'https://img.example.com' }),
+      new User({
+        id: UserId(creatorId),
+        name: 'John Doe',
+        email: 'john@example.com',
+        imageUrl: 'https://img.example.com',
+      }),
     );
     applicantRepo.findById.mockResolvedValue(
       new Applicant({ id: ApplicantId(applicantId), name: 'Setor TI' }),
@@ -146,7 +151,9 @@ describe('GetTaskUseCase', () => {
       }),
     );
     taskRepo.findById.mockResolvedValue(task);
-    userRepo.findById.mockResolvedValue(new User({ id: UserId(creatorId), name: 'John' }));
+    userRepo.findById.mockResolvedValue(
+      new User({ id: UserId(creatorId), name: 'John', email: 'john@example.com' }),
+    );
     applicantRepo.findById.mockResolvedValue(
       new Applicant({ id: ApplicantId(applicantId), name: 'Setor' }),
     );
@@ -215,7 +222,9 @@ describe('GetTaskUseCase', () => {
     const projectRepo = makeProjectRepo();
     const creatorId = randomUUID();
     taskRepo.findById.mockResolvedValue(makeTask(creatorId, randomUUID(), randomUUID()));
-    userRepo.findById.mockResolvedValue(new User({ id: UserId(creatorId), name: 'John' }));
+    userRepo.findById.mockResolvedValue(
+      new User({ id: UserId(creatorId), name: 'John', email: 'john@example.com' }),
+    );
     applicantRepo.findById.mockResolvedValue(null);
     flowRepo.findByIds.mockResolvedValue([]);
     projectRepo.findById.mockResolvedValue(
@@ -240,7 +249,9 @@ describe('GetTaskUseCase', () => {
     const creatorId = randomUUID();
     const applicantId = randomUUID();
     taskRepo.findById.mockResolvedValue(makeTask(creatorId, applicantId, randomUUID()));
-    userRepo.findById.mockResolvedValue(new User({ id: UserId(creatorId), name: 'John' }));
+    userRepo.findById.mockResolvedValue(
+      new User({ id: UserId(creatorId), name: 'John', email: 'john@example.com' }),
+    );
     applicantRepo.findById.mockResolvedValue(
       new Applicant({ id: ApplicantId(applicantId), name: 'Setor' }),
     );
