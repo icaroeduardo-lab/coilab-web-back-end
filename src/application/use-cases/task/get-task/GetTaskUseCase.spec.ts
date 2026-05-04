@@ -92,7 +92,7 @@ describe('GetTaskUseCase', () => {
     const creatorId = randomUUID();
     const applicantId = 1;
     const projectId = randomUUID();
-    const flowId = randomUUID();
+    const flowId = 1;
     const task = makeTask(creatorId, applicantId, projectId);
     task.addFlowId(FlowId(flowId));
     taskRepo.findById.mockResolvedValue(task);

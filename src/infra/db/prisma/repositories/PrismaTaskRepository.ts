@@ -43,7 +43,7 @@ const ID_TO_STATUS: Record<number, TaskStatus> = Object.fromEntries(
 
 type TaskWithRelations = PrismaTask & {
   subTasks: PrismaSubTask[];
-  flows: { flowId: string }[];
+  flows: { flowId: number }[];
 };
 
 function subTaskToDomain(row: PrismaSubTask): SubTask {

@@ -116,7 +116,7 @@ describe('Task Entity', () => {
 
   it('should add flow correctly', () => {
     const task = baseTask();
-    const flowId = FlowId('550e8400-e29b-41d4-a716-446655440005');
+    const flowId = FlowId(1);
     task.addFlowId(flowId);
     expect(task.getFlowIds()).toHaveLength(1);
     expect(task.getFlowIds()[0]).toBe(flowId);
@@ -124,7 +124,7 @@ describe('Task Entity', () => {
 
   it('should throw when adding duplicate flowId', () => {
     const task = baseTask();
-    const flowId = FlowId('550e8400-e29b-41d4-a716-446655440005');
+    const flowId = FlowId(1);
     task.addFlowId(flowId);
     expect(() => task.addFlowId(flowId)).toThrow('Flow já adicionado');
   });

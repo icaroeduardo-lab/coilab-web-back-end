@@ -2,7 +2,7 @@ import { ListFlowsUseCase } from './ListFlowsUseCase';
 import { IFlowRepository } from '../../../../domain/repositories/IFlowRepository';
 import { Flow } from '../../../../domain/value-objects/flow.vo';
 import { FlowId } from '../../../../domain/shared/entity-ids';
-import { randomUUID } from 'crypto';
+let nextId = 1;
 
 const makeRepo = (): jest.Mocked<IFlowRepository> => ({
   findByIds: jest.fn(),
@@ -12,7 +12,7 @@ const makeRepo = (): jest.Mocked<IFlowRepository> => ({
   delete: jest.fn(),
 });
 
-const makeFlow = (name: string) => new Flow({ id: FlowId(randomUUID()), name });
+const makeFlow = (name: string) => new Flow({ id: FlowId(nextId++), name });
 
 describe('ListFlowsUseCase', () => {
   it('returns paginated output for all flows', async () => {

@@ -30,12 +30,12 @@ export class UpdateTaskUseCase {
     if (input.applicantId !== undefined) task.changeApplicantId(ApplicantId(Number(input.applicantId)));
     if (input.flowIdsToAdd) {
       for (const flowId of input.flowIdsToAdd) {
-        task.addFlowId(FlowId(flowId));
+        task.addFlowId(FlowId(Number(flowId)));
       }
     }
     if (input.flowIdsToRemove) {
       for (const flowId of input.flowIdsToRemove) {
-        task.removeFlowId(flowId);
+        task.removeFlowId(FlowId(Number(flowId)));
       }
     }
     if (input.subTaskIdsToRemove) {

@@ -76,7 +76,7 @@ export class CreateTaskUseCase {
       status: TaskStatus.BACKLOG,
       applicantId: ApplicantId(Number(input.applicantId)),
       creatorId: UserId(input.creatorId),
-      flowIds: (input.flowIds ?? []).map((id) => FlowId(id)),
+      flowIds: (input.flowIds ?? []).map((id) => FlowId(Number(id))),
       subTasks,
     });
 

@@ -46,7 +46,7 @@ model Applicant {
 }
 
 model Flow {
-  id    String     @id @db.Uuid
+  id    Int        @id @default(autoincrement())
   name  String
   tasks TaskFlow[]
 
@@ -80,7 +80,7 @@ model Task {
 
 model TaskFlow {
   taskId String @db.Uuid
-  flowId String @db.Uuid
+  flowId Int
   task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
   flow   Flow   @relation(fields: [flowId], references: [id], onDelete: Cascade)
 

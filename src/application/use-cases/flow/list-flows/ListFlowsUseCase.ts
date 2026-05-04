@@ -6,7 +6,7 @@ import {
 } from '../../../../domain/shared/pagination';
 
 export interface FlowOutput {
-  id: string;
+  id: number;
   name: string;
 }
 

@@ -23,12 +23,17 @@ export class PrismaFlowRepository implements IFlowRepository {
     return prisma.flow.count();
   }
 
-  async save(flow: Flow): Promise<void> {
-    await prisma.flow.upsert({
-      where: { id: flow.getId() },
-      create: { id: flow.getId(), name: flow.getName() },
-      update: { name: flow.getName() },
+  async save(flow: Flow): Promise<Flow> {
+    const id = flow.getId();
+    if (id === 0) {
+      const row = await prisma.flow.create({ data: { name: flow.getName() } });
+      return toDomain(row);
+    }
+    const row = await prisma.flow.update({
+      where: { id },
+      data: { name: flow.getName() },
     });
+    return toDomain(row);
   }
 
   async delete(id: FlowId): Promise<void> {

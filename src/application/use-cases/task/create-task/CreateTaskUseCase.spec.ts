@@ -71,13 +71,13 @@ describe('CreateTaskUseCase', () => {
     const taskRepo = makeTaskRepo();
     taskRepo.findLastTaskNumber.mockResolvedValue(null);
     const sut = new CreateTaskUseCase(taskRepo);
-    const flowId = randomUUID();
 
-    await sut.execute({ ...baseInput(), flowIds: [flowId] });
+    await sut.execute({ ...baseInput(), flowIds: ['1', '2'] });
 
     const saved: Task = taskRepo.save.mock.calls[0][0];
-    expect(saved.getFlowIds()).toHaveLength(1);
-    expect(saved.getFlowIds()[0]).toBe(flowId);
+    expect(saved.getFlowIds()).toHaveLength(2);
+    expect(saved.getFlowIds()[0]).toBe(1);
+    expect(saved.getFlowIds()[1]).toBe(2);
   });
 
   it('creates task with optional subtasks', async () => {

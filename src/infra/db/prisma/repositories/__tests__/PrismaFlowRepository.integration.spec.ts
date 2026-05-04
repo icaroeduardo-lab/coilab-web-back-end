@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { PrismaFlowRepository } from '../PrismaFlowRepository';
 import { Flow } from '../../../../../domain/value-objects/flow.vo';
 import { FlowId } from '../../../../../domain/shared/entity-ids';
@@ -6,29 +5,27 @@ import { truncateAll } from '../../test/truncate';
 
 const repo = new PrismaFlowRepository();
 
-const makeFlow = (name = 'Flow A') => new Flow({ id: FlowId(randomUUID()), name });
+const makeFlow = (name = 'Flow A') => new Flow({ id: FlowId(0), name });
 
 beforeEach(truncateAll);
 
 describe('PrismaFlowRepository', () => {
   it('saves and retrieves flows by ids', async () => {
-    const flow = makeFlow();
-    await repo.save(flow);
+    const saved = await repo.save(makeFlow());
 
-    const found = await repo.findByIds([flow.getId()]);
+    const found = await repo.findByIds([saved.getId()]);
     expect(found).toHaveLength(1);
-    expect(found[0].getId()).toBe(flow.getId());
+    expect(found[0].getId()).toBe(saved.getId());
   });
 
   it('findByIds returns empty array for unknown ids', async () => {
-    const result = await repo.findByIds([FlowId(randomUUID())]);
+    const result = await repo.findByIds([FlowId(99999)]);
     expect(result).toHaveLength(0);
   });
 
   it('upsert updates existing flow', async () => {
-    const flow = makeFlow('Nome Antigo');
-    await repo.save(flow);
-    const updated = new Flow({ id: flow.getId(), name: 'Nome Novo' });
+    const saved = await repo.save(makeFlow('Nome Antigo'));
+    const updated = new Flow({ id: saved.getId(), name: 'Nome Novo' });
     await repo.save(updated);
 
     const all = await repo.findAll();

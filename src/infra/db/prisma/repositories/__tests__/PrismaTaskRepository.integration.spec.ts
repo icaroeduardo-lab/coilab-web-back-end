@@ -147,8 +147,7 @@ describe('PrismaTaskRepository — basic', () => {
   });
 
   it('saves and retrieves task with flows', async () => {
-    const flow = new Flow({ id: FlowId(randomUUID()), name: 'Flow A' });
-    await flowRepo.save(flow);
+    const flow = await flowRepo.save(new Flow({ id: FlowId(0), name: 'Flow A' }));
 
     const task = makeTask([], [flow.getId()]);
     await taskRepo.save(task);

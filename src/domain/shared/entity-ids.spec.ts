@@ -7,7 +7,6 @@ describe('Typed Entity IDs', () => {
     ['ProjectId', ProjectId],
     ['TaskId', TaskId],
     ['SubTaskId', SubTaskId],
-    ['FlowId', FlowId],
     ['DesignId', DesignId],
   ] as const)('%s accepts valid UUID', (_, factory) => {
     expect(() => factory(validUuid)).not.toThrow();
@@ -18,7 +17,6 @@ describe('Typed Entity IDs', () => {
     ['ProjectId', ProjectId],
     ['TaskId', TaskId],
     ['SubTaskId', SubTaskId],
-    ['FlowId', FlowId],
     ['DesignId', DesignId],
   ] as const)('%s throws on invalid UUID', (name, factory) => {
     expect(() => factory('not-a-uuid')).toThrow(

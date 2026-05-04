@@ -22,7 +22,7 @@ export interface ApplicantOutput {
 }
 
 export interface FlowOutput {
-  id: string;
+  id: number;
   name: string;
 }
 

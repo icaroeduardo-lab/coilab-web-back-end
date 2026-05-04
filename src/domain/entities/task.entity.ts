@@ -86,7 +86,8 @@ export class Task extends Entity {
   private subTasks: SubTask[];
 
   @IsArray()
-  @IsUUID('4', { each: true })
+  @IsInt({ each: true })
+  @Min(0, { each: true })
   private flowIds: FlowId[];
 
   @IsDate()
@@ -264,8 +265,8 @@ export class Task extends Entity {
     this.validate();
   }
 
-  removeFlowId(flowId: string): void {
-    const exists = this.flowIds.includes(flowId as FlowId);
+  removeFlowId(flowId: FlowId): void {
+    const exists = this.flowIds.includes(flowId);
     if (!exists) {
       throw new Error(`Flow não encontrado: ${flowId}`);
     }
