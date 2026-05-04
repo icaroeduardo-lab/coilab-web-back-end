@@ -26,16 +26,18 @@ async function bootstrap(): Promise<NestFastifyApplication> {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('Coilab API')
-    .setDescription(
-      'API de gestão de projetos de produto digital — Discovery, Design e Diagramação.',
-    )
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api/docs', app, document);
+  if (process.env.NODE_ENV !== 'production') {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('Coilab API')
+      .setDescription(
+        'API de gestão de projetos de produto digital — Discovery, Design e Diagramação.',
+      )
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api/docs', app, document);
+  }
 
   return app;
 }
@@ -43,12 +45,17 @@ async function bootstrap(): Promise<NestFastifyApplication> {
 let cachedHandler: Handler;
 
 export const handler: Handler = async (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
   if (!cachedHandler) {
     const app = await bootstrap();
     await app.init();
     logger.log('Lambda cold start — app initialized');
+    // decorateRequest: false — skips adding the awsLambda decorator to Fastify requests,
+    // which would fail because Fastify rejects decorators after app.init() starts the app.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cachedHandler = awsLambdaFastify(app.getHttpAdapter().getInstance() as any);
+    cachedHandler = awsLambdaFastify(app.getHttpAdapter().getInstance() as any, {
+      decorateRequest: false,
+    });
   }
   return cachedHandler(event, context, callback);
 };

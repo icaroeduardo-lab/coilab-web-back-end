@@ -1,9 +1,17 @@
 import { Controller, Get, Inject } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiExtraModels,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { UpsertUserFromCognitoUseCase } from '../../application/use-cases/user/upsert-user-from-cognito/UpsertUserFromCognitoUseCase';
 import { CurrentUser, JwtPayload } from '../auth/current-user.decorator';
 import { UserResponseDto } from './dto/user-response.dto';
 
+@ApiExtraModels(UserResponseDto)
 @ApiTags('Users')
 @ApiBearerAuth()
 @Controller('users')
@@ -14,7 +22,7 @@ export class UserController {
 
   @Get('me')
   @ApiOperation({ summary: 'Retorna o usuário autenticado, criando-o caso não exista' })
-  @ApiResponse({ status: 200, type: UserResponseDto })
+  @ApiResponse({ status: 200, schema: { $ref: getSchemaPath(UserResponseDto) } })
   me(@CurrentUser() user: JwtPayload) {
     return this.upsertUser.execute({
       cognitoSub: user.sub,
