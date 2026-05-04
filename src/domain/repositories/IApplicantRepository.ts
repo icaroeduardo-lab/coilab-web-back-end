@@ -6,6 +6,6 @@ export interface IApplicantRepository {
   findByIds(ids: ApplicantId[]): Promise<Applicant[]>;
   findAll(): Promise<Applicant[]>;
   count(): Promise<number>;
-  save(applicant: Applicant): Promise<void>;
+  save(applicant: Applicant): Promise<Applicant>;
   delete(id: ApplicantId): Promise<void>;
 }

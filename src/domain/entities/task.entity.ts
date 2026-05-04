@@ -3,6 +3,8 @@ import {
   IsNotEmpty,
   IsString,
   IsUUID,
+  IsInt,
+  Min,
   IsDate,
   IsEnum,
   IsArray,
@@ -72,8 +74,8 @@ export class Task extends Entity {
   @IsEnum(TaskStatus)
   private status: TaskStatus;
 
-  @IsUUID()
-  @IsNotEmpty()
+  @IsInt()
+  @Min(0)
   private applicantId: ApplicantId;
 
   @IsUUID()

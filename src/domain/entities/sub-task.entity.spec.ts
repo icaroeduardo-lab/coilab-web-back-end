@@ -10,10 +10,10 @@ import {
 } from './sub-task.entity';
 import { Design } from '../value-objects/design.vo';
 import { Diagram } from '../value-objects/diagram.vo';
-import { SubTaskId, TaskId, DesignId, ApplicantId, UserId } from '../shared/entity-ids';
+import { SubTaskId, TaskId, DesignId, UserId } from '../shared/entity-ids';
 
 const userId = UserId('550e8400-e29b-41d4-a716-446655440003');
-const diagramUser = ApplicantId('550e8400-e29b-41d4-a716-446655440003');
+const diagramUser = UserId('550e8400-e29b-41d4-a716-446655440003');
 const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');
 
 const entry = <T>(value: T): DiscoveryFieldEntry<T> => ({
@@ -275,7 +275,7 @@ describe('SubTask Entity', () => {
     title: 'Mobile Home',
     description: 'Desc',
     urlImage: 'https://example.com/img.png',
-    user: ApplicantId('550e8400-e29b-41d4-a716-446655440003'),
+    user: UserId('550e8400-e29b-41d4-a716-446655440003'),
     dateUpload: new Date('2026-04-21'),
   });
 

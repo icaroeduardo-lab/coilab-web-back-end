@@ -38,7 +38,7 @@ model TaskStatus {
 }
 
 model Applicant {
-  id    String @id @db.Uuid
+  id    Int    @id @default(autoincrement())
   name  String
   tasks Task[] @relation("applicant")
 
@@ -61,7 +61,7 @@ model Task {
   taskNumber  String    @unique
   priority    String
   statusId    Int
-  applicantId String    @db.Uuid
+  applicantId Int
   creatorId   String    @db.Uuid
   createdAt   DateTime  @default(now())
   project     Project   @relation(fields: [projectId], references: [id])

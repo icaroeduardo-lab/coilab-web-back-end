@@ -53,9 +53,9 @@ beforeEach(async () => {
   await projectRepo.save(project);
   projectId = project.getId();
 
-  const applicant = new Applicant({ id: ApplicantId(randomUUID()), name: 'Solicitante' });
-  await applicantRepo.save(applicant);
-  applicantId = applicant.getId();
+  const applicant = new Applicant({ id: ApplicantId(0), name: 'Solicitante' });
+  const savedApplicant = await applicantRepo.save(applicant);
+  applicantId = savedApplicant.getId();
 
   const creator = new User({
     id: UserId(randomUUID()),
@@ -227,7 +227,7 @@ describe('PrismaTaskRepository — DesignSubTask', () => {
       title: 'Tela Inicial',
       description: 'Layout da home',
       urlImage: 'https://example.com/img.png',
-      user: applicantId,
+      user: creatorId,
       dateUpload: new Date('2026-01-15'),
     });
 
@@ -274,7 +274,7 @@ describe('PrismaTaskRepository — DiagramSubTask', () => {
       title: 'Fluxo Principal',
       description: 'Diagrama do fluxo',
       urlDiagram: 'https://example.com/diagram.png',
-      user: applicantId,
+      user: creatorId,
       dateUpload: new Date('2026-01-15'),
     });
 
@@ -315,7 +315,7 @@ describe('PrismaTaskRepository — save syncs subtasks', () => {
       title: 'Nova Imagem',
       description: 'Desc',
       urlImage: 'https://example.com/new.png',
-      user: applicantId,
+      user: creatorId,
       dateUpload: new Date(),
     });
     subTask.start();

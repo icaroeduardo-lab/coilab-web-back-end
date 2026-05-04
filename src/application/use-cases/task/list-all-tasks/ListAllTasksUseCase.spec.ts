@@ -47,7 +47,7 @@ const makeProjectRepo = (): jest.Mocked<IProjectRepository> => ({
   save: jest.fn(),
 });
 
-const makeApplicant = (id: string) => new Applicant({ id: ApplicantId(id), name: 'Setor TI' });
+const makeApplicant = (id: number) => new Applicant({ id: ApplicantId(id), name: 'Setor TI' });
 const makeProject = (id: string) =>
   new Project({
     id: ProjectId(id),
@@ -56,7 +56,7 @@ const makeProject = (id: string) =>
     description: 'D',
   });
 
-const makeTask = (applicantId: string, projectId: string) =>
+const makeTask = (applicantId: number, projectId: string) =>
   new Task({
     id: TaskId(randomUUID()),
     projectId: ProjectId(projectId),
@@ -74,7 +74,7 @@ describe('ListAllTasksUseCase', () => {
     const taskRepo = makeTaskRepo();
     const applicantRepo = makeApplicantRepo();
     const projectRepo = makeProjectRepo();
-    const applicantId = randomUUID();
+    const applicantId = 1;
     const projectId = randomUUID();
     const tasks = [makeTask(applicantId, projectId), makeTask(applicantId, projectId)];
     taskRepo.findAll.mockResolvedValue(tasks);
@@ -124,9 +124,8 @@ describe('ListAllTasksUseCase', () => {
     const taskRepo = makeTaskRepo();
     const applicantRepo = makeApplicantRepo();
     const projectRepo = makeProjectRepo();
-    const applicantId = randomUUID();
     const projectId = randomUUID();
-    taskRepo.findAll.mockResolvedValue([makeTask(applicantId, projectId)]);
+    taskRepo.findAll.mockResolvedValue([makeTask(1, projectId)]);
     taskRepo.count.mockResolvedValue(1);
     applicantRepo.findByIds.mockResolvedValue([]);
     projectRepo.findByIds.mockResolvedValue([makeProject(projectId)]);
@@ -139,11 +138,10 @@ describe('ListAllTasksUseCase', () => {
     const taskRepo = makeTaskRepo();
     const applicantRepo = makeApplicantRepo();
     const projectRepo = makeProjectRepo();
-    const applicantId = randomUUID();
     const projectId = randomUUID();
-    taskRepo.findAll.mockResolvedValue([makeTask(applicantId, projectId)]);
+    taskRepo.findAll.mockResolvedValue([makeTask(1, projectId)]);
     taskRepo.count.mockResolvedValue(1);
-    applicantRepo.findByIds.mockResolvedValue([makeApplicant(applicantId)]);
+    applicantRepo.findByIds.mockResolvedValue([makeApplicant(1)]);
     projectRepo.findByIds.mockResolvedValue([]);
     const sut = new ListAllTasksUseCase(taskRepo, applicantRepo, projectRepo);
 
@@ -154,9 +152,8 @@ describe('ListAllTasksUseCase', () => {
     const taskRepo = makeTaskRepo();
     const applicantRepo = makeApplicantRepo();
     const projectRepo = makeProjectRepo();
-    const applicantId = randomUUID();
     const projectId = randomUUID();
-    const task = makeTask(applicantId, projectId);
+    const task = makeTask(1, projectId);
     const older = new DiscoverySubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(task.getId()),
@@ -177,7 +174,7 @@ describe('ListAllTasksUseCase', () => {
     task.addSubTask(newer);
     taskRepo.findAll.mockResolvedValue([task]);
     taskRepo.count.mockResolvedValue(1);
-    applicantRepo.findByIds.mockResolvedValue([makeApplicant(applicantId)]);
+    applicantRepo.findByIds.mockResolvedValue([makeApplicant(1)]);
     projectRepo.findByIds.mockResolvedValue([makeProject(projectId)]);
     const sut = new ListAllTasksUseCase(taskRepo, applicantRepo, projectRepo);
 
@@ -192,7 +189,6 @@ describe('ListAllTasksUseCase', () => {
     const taskRepo = makeTaskRepo();
     const applicantRepo = makeApplicantRepo();
     const projectRepo = makeProjectRepo();
-    const applicantId = randomUUID();
     const projectId = randomUUID();
     const taskId = TaskId(randomUUID());
     const newer = new DiscoverySubTask({
@@ -219,13 +215,13 @@ describe('ListAllTasksUseCase', () => {
       taskNumber: '#20260001',
       priority: TaskPriority.MEDIA,
       status: TaskStatus.BACKLOG,
-      applicantId: ApplicantId(applicantId),
+      applicantId: ApplicantId(1),
       creatorId: UserId(randomUUID()),
       subTasks: [newer, older],
     });
     taskRepo.findAll.mockResolvedValue([task]);
     taskRepo.count.mockResolvedValue(1);
-    applicantRepo.findByIds.mockResolvedValue([makeApplicant(applicantId)]);
+    applicantRepo.findByIds.mockResolvedValue([makeApplicant(1)]);
     projectRepo.findByIds.mockResolvedValue([makeProject(projectId)]);
     const sut = new ListAllTasksUseCase(taskRepo, applicantRepo, projectRepo);
 

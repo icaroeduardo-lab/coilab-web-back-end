@@ -5,7 +5,7 @@ import { TaskId, ProjectId, SubTaskId, ApplicantId, UserId, FlowId } from '../sh
 describe('Task Entity', () => {
   const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');
   const userId = UserId('550e8400-e29b-41d4-a716-446655440003');
-  const applicantId = ApplicantId('550e8400-e29b-41d4-a716-446655440005');
+  const applicantId = ApplicantId(1);
   const creatorId = UserId('550e8400-e29b-41d4-a716-446655440006');
   const projectId = ProjectId('550e8400-e29b-41d4-a716-446655440000');
   const deliveryDate = new Date('2026-12-31');
@@ -109,7 +109,7 @@ describe('Task Entity', () => {
 
   it('should change applicantId correctly', () => {
     const task = baseTask();
-    const newApplicantId = ApplicantId('550e8400-e29b-41d4-a716-446655440004');
+    const newApplicantId = ApplicantId(2);
     task.changeApplicantId(newApplicantId);
     expect(task.getApplicantId()).toBe(newApplicantId);
   });

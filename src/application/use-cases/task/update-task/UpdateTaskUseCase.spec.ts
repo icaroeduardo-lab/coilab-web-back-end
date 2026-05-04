@@ -31,7 +31,7 @@ const makeTask = (id: string) =>
     taskNumber: '#20260001',
     priority: TaskPriority.BAIXA,
     status: TaskStatus.BACKLOG,
-    applicantId: ApplicantId(randomUUID()),
+    applicantId: ApplicantId(1),
     creatorId: UserId(randomUUID()),
   });
 
@@ -78,12 +78,12 @@ describe('UpdateTaskUseCase', () => {
     const id = randomUUID();
     repo.findById.mockResolvedValue(makeTask(id));
     const sut = new UpdateTaskUseCase(repo);
-    const newApplicantId = randomUUID();
+    const newApplicantId = '2';
 
     await sut.execute({ id, applicantId: newApplicantId });
 
     const saved: Task = repo.save.mock.calls[0][0];
-    expect(saved.getApplicantId()).toBe(newApplicantId);
+    expect(saved.getApplicantId()).toBe(2);
   });
 
   it('throws when task not found', async () => {

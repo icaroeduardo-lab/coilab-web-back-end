@@ -17,7 +17,7 @@ export interface CreatorOutput {
 }
 
 export interface ApplicantOutput {
-  id: string;
+  id: number;
   name: string;
 }
 

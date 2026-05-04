@@ -1,12 +1,12 @@
 import { Diagram } from './diagram.vo';
-import { ApplicantId } from '../shared/entity-ids';
+import { UserId } from '../shared/entity-ids';
 
 describe('Diagram Value Object', () => {
   const validProps = {
     title: 'Database Diagram',
     description: 'Entity relationship diagram',
     urlDiagram: 'https://example.com/diagram.png',
-    user: ApplicantId('550e8400-e29b-41d4-a716-446655440003'),
+    user: UserId('550e8400-e29b-41d4-a716-446655440003'),
     dateUpload: new Date('2026-04-21'),
   };
 

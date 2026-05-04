@@ -28,12 +28,17 @@ export class PrismaApplicantRepository implements IApplicantRepository {
     return prisma.applicant.count();
   }
 
-  async save(applicant: Applicant): Promise<void> {
-    await prisma.applicant.upsert({
-      where: { id: applicant.getId() },
-      create: { id: applicant.getId(), name: applicant.getName() },
-      update: { name: applicant.getName() },
+  async save(applicant: Applicant): Promise<Applicant> {
+    const id = applicant.getId();
+    if (id === 0) {
+      const row = await prisma.applicant.create({ data: { name: applicant.getName() } });
+      return toDomain(row);
+    }
+    const row = await prisma.applicant.update({
+      where: { id },
+      data: { name: applicant.getName() },
     });
+    return toDomain(row);
   }
 
   async delete(id: ApplicantId): Promise<void> {

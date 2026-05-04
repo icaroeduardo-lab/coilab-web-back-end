@@ -7,7 +7,6 @@ describe('Typed Entity IDs', () => {
     ['ProjectId', ProjectId],
     ['TaskId', TaskId],
     ['SubTaskId', SubTaskId],
-    ['ApplicantId', ApplicantId],
     ['FlowId', FlowId],
     ['DesignId', DesignId],
   ] as const)('%s accepts valid UUID', (_, factory) => {
@@ -19,12 +18,30 @@ describe('Typed Entity IDs', () => {
     ['ProjectId', ProjectId],
     ['TaskId', TaskId],
     ['SubTaskId', SubTaskId],
-    ['ApplicantId', ApplicantId],
     ['FlowId', FlowId],
     ['DesignId', DesignId],
   ] as const)('%s throws on invalid UUID', (name, factory) => {
     expect(() => factory('not-a-uuid')).toThrow(
       `Invalid ${name}: "not-a-uuid" is not a valid UUID`,
     );
+  });
+
+  describe('ApplicantId', () => {
+    it('accepts valid positive integer', () => {
+      expect(() => ApplicantId(1)).not.toThrow();
+      expect(ApplicantId(1)).toBe(1);
+    });
+
+    it('accepts zero', () => {
+      expect(() => ApplicantId(0)).not.toThrow();
+    });
+
+    it('throws on negative integer', () => {
+      expect(() => ApplicantId(-1)).toThrow('Invalid ApplicantId');
+    });
+
+    it('throws on non-integer', () => {
+      expect(() => ApplicantId(1.5)).toThrow('Invalid ApplicantId');
+    });
   });
 });

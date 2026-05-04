@@ -74,7 +74,7 @@ export class CreateTaskUseCase {
       taskNumber,
       priority: input.priority,
       status: TaskStatus.BACKLOG,
-      applicantId: ApplicantId(input.applicantId),
+      applicantId: ApplicantId(Number(input.applicantId)),
       creatorId: UserId(input.creatorId),
       flowIds: (input.flowIds ?? []).map((id) => FlowId(id)),
       subTasks,

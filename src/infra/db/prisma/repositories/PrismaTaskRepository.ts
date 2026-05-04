@@ -73,7 +73,7 @@ function subTaskToDomain(row: PrismaSubTask): SubTask {
           title: d.title as string,
           description: d.description as string,
           urlImage: d.urlImage as string,
-          user: ApplicantId(d.user as string),
+          user: UserId(d.user as string),
           dateUpload: new Date(d.dateUpload as string),
         }),
     );
@@ -90,7 +90,7 @@ function subTaskToDomain(row: PrismaSubTask): SubTask {
         title: d.title as string,
         description: d.description as string,
         urlDiagram: d.urlDiagram as string,
-        user: ApplicantId(d.user as string),
+        user: UserId(d.user as string),
         dateUpload: new Date(d.dateUpload as string),
       }),
   );

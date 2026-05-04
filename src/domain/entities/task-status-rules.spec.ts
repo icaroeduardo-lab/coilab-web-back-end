@@ -16,7 +16,7 @@ describe('Task Status Transition Rules', () => {
       taskNumber: '#20260001',
       priority: TaskPriority.MEDIA,
       status: TaskStatus.BACKLOG,
-      applicantId: ApplicantId('550e8400-e29b-41d4-a716-446655440005'),
+      applicantId: ApplicantId(1),
       creatorId: UserId('550e8400-e29b-41d4-a716-446655440006'),
     });
 

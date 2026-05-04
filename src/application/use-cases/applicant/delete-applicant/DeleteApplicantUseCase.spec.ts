@@ -2,7 +2,6 @@ import { DeleteApplicantUseCase } from './DeleteApplicantUseCase';
 import { IApplicantRepository } from '../../../../domain/repositories/IApplicantRepository';
 import { Applicant } from '../../../../domain/entities/applicant.entity';
 import { ApplicantId } from '../../../../domain/shared/entity-ids';
-import { randomUUID } from 'crypto';
 
 const makeRepo = (): jest.Mocked<IApplicantRepository> => ({
   findById: jest.fn(),
@@ -13,18 +12,17 @@ const makeRepo = (): jest.Mocked<IApplicantRepository> => ({
   delete: jest.fn(),
 });
 
-const makeApplicant = (id: string) => new Applicant({ id: ApplicantId(id), name: 'John Doe' });
+const makeApplicant = (id: number) => new Applicant({ id: ApplicantId(id), name: 'John Doe' });
 
 describe('DeleteApplicantUseCase', () => {
   it('deletes applicant by id', async () => {
     const repo = makeRepo();
-    const id = randomUUID();
-    repo.findById.mockResolvedValue(makeApplicant(id));
+    repo.findById.mockResolvedValue(makeApplicant(1));
     const sut = new DeleteApplicantUseCase(repo);
 
-    await sut.execute({ id });
+    await sut.execute({ id: '1' });
 
-    expect(repo.delete).toHaveBeenCalledWith(id);
+    expect(repo.delete).toHaveBeenCalledWith(1);
   });
 
   it('throws when not found', async () => {
@@ -32,7 +30,7 @@ describe('DeleteApplicantUseCase', () => {
     repo.findById.mockResolvedValue(null);
     const sut = new DeleteApplicantUseCase(repo);
 
-    await expect(sut.execute({ id: randomUUID() })).rejects.toThrow('Applicant not found');
+    await expect(sut.execute({ id: '999' })).rejects.toThrow('Applicant not found');
     expect(repo.delete).not.toHaveBeenCalled();
   });
 });

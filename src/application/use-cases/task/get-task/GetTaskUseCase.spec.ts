@@ -61,7 +61,7 @@ const makeProjectRepo = (): jest.Mocked<IProjectRepository> => ({
   save: jest.fn(),
 });
 
-const makeTask = (creatorId: string, applicantId: string, projectId: string) =>
+const makeTask = (creatorId: string, applicantId: number, projectId: string) =>
   new Task({
     id: TaskId(randomUUID()),
     projectId: ProjectId(projectId),
@@ -90,7 +90,7 @@ describe('GetTaskUseCase', () => {
     const flowRepo = makeFlowRepo();
     const projectRepo = makeProjectRepo();
     const creatorId = randomUUID();
-    const applicantId = randomUUID();
+    const applicantId = 1;
     const projectId = randomUUID();
     const flowId = randomUUID();
     const task = makeTask(creatorId, applicantId, projectId);
@@ -138,7 +138,7 @@ describe('GetTaskUseCase', () => {
     const flowRepo = makeFlowRepo();
     const projectRepo = makeProjectRepo();
     const creatorId = randomUUID();
-    const applicantId = randomUUID();
+    const applicantId = 1;
     const projectId = randomUUID();
     const task = makeTask(creatorId, applicantId, projectId);
     task.addSubTask(
@@ -195,10 +195,10 @@ describe('GetTaskUseCase', () => {
     const applicantRepo = makeApplicantRepo();
     const flowRepo = makeFlowRepo();
     const projectRepo = makeProjectRepo();
-    taskRepo.findById.mockResolvedValue(makeTask(randomUUID(), randomUUID(), randomUUID()));
+    taskRepo.findById.mockResolvedValue(makeTask(randomUUID(), 1, randomUUID()));
     userRepo.findById.mockResolvedValue(null);
     applicantRepo.findById.mockResolvedValue(
-      new Applicant({ id: ApplicantId(randomUUID()), name: 'Setor' }),
+      new Applicant({ id: ApplicantId(1), name: 'Setor' }),
     );
     flowRepo.findByIds.mockResolvedValue([]);
     projectRepo.findById.mockResolvedValue(
@@ -221,7 +221,7 @@ describe('GetTaskUseCase', () => {
     const flowRepo = makeFlowRepo();
     const projectRepo = makeProjectRepo();
     const creatorId = randomUUID();
-    taskRepo.findById.mockResolvedValue(makeTask(creatorId, randomUUID(), randomUUID()));
+    taskRepo.findById.mockResolvedValue(makeTask(creatorId, 1, randomUUID()));
     userRepo.findById.mockResolvedValue(
       new User({ id: UserId(creatorId), name: 'John', email: 'john@example.com' }),
     );
@@ -247,7 +247,7 @@ describe('GetTaskUseCase', () => {
     const flowRepo = makeFlowRepo();
     const projectRepo = makeProjectRepo();
     const creatorId = randomUUID();
-    const applicantId = randomUUID();
+    const applicantId = 1;
     taskRepo.findById.mockResolvedValue(makeTask(creatorId, applicantId, randomUUID()));
     userRepo.findById.mockResolvedValue(
       new User({ id: UserId(creatorId), name: 'John', email: 'john@example.com' }),

@@ -1,5 +1,5 @@
 import { Design } from './design.vo';
-import { DesignId, ApplicantId } from '../shared/entity-ids';
+import { DesignId, UserId } from '../shared/entity-ids';
 
 describe('Design Value Object', () => {
   const validProps = {
@@ -7,7 +7,7 @@ describe('Design Value Object', () => {
     title: 'Homepage Desktop',
     description: 'Main landing page design',
     urlImage: 'https://example.com/image.png',
-    user: ApplicantId('550e8400-e29b-41d4-a716-446655440003'),
+    user: UserId('550e8400-e29b-41d4-a716-446655440003'),
     dateUpload: new Date('2026-04-21'),
   };
 

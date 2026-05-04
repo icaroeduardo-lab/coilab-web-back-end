@@ -20,7 +20,7 @@ const baseInput = () => ({
   name: 'Task 1',
   description: 'Desc',
   priority: TaskPriority.MEDIA,
-  applicantId: randomUUID(),
+  applicantId: '1',
   creatorId: randomUUID(),
 });
 
@@ -50,7 +50,7 @@ describe('CreateTaskUseCase', () => {
     await sut.execute(input);
 
     const saved: Task = taskRepo.save.mock.calls[0][0];
-    expect(saved.getApplicantId()).toBe(input.applicantId);
+    expect(saved.getApplicantId()).toBe(Number(input.applicantId));
     expect(saved.getCreatorId()).toBe(input.creatorId);
   });
 

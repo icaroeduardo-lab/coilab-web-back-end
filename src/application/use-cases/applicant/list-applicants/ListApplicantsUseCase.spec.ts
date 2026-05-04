@@ -2,7 +2,8 @@ import { ListApplicantsUseCase } from './ListApplicantsUseCase';
 import { IApplicantRepository } from '../../../../domain/repositories/IApplicantRepository';
 import { Applicant } from '../../../../domain/entities/applicant.entity';
 import { ApplicantId } from '../../../../domain/shared/entity-ids';
-import { randomUUID } from 'crypto';
+
+let nextId = 1;
 
 const makeRepo = (): jest.Mocked<IApplicantRepository> => ({
   findById: jest.fn(),
@@ -13,7 +14,7 @@ const makeRepo = (): jest.Mocked<IApplicantRepository> => ({
   delete: jest.fn(),
 });
 
-const makeApplicant = (name: string) => new Applicant({ id: ApplicantId(randomUUID()), name });
+const makeApplicant = (name: string) => new Applicant({ id: ApplicantId(nextId++), name });
 
 describe('ListApplicantsUseCase', () => {
   it('returns paginated applicants mapped', async () => {

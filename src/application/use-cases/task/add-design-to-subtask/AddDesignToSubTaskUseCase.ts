@@ -1,7 +1,7 @@
 import { DesignSubTask, SubTaskType } from '../../../../domain/entities/sub-task.entity';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { Design } from '../../../../domain/value-objects/design.vo';
-import { TaskId, ApplicantId, DesignId } from '../../../../domain/shared/entity-ids';
+import { TaskId, UserId, DesignId } from '../../../../domain/shared/entity-ids';
 import { generateId } from '../../../../shared/generate-id';
 
 export interface AddDesignToSubTaskInput {
@@ -37,7 +37,7 @@ export class AddDesignToSubTaskUseCase {
       title: input.title,
       description: input.description,
       urlImage: input.urlImage,
-      user: ApplicantId(input.userId),
+      user: UserId(input.userId),
       dateUpload: new Date(),
     });
 

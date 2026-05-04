@@ -54,7 +54,7 @@ const makeTask = (subTasks: (DiscoverySubTask | DesignSubTask)[] = []) =>
     taskNumber: '#20260001',
     priority: TaskPriority.MEDIA,
     status: TaskStatus.EM_EXECUCAO,
-    applicantId: ApplicantId(randomUUID()),
+    applicantId: ApplicantId(1),
     creatorId: UserId(randomUUID()),
     subTasks,
   });

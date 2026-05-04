@@ -33,7 +33,7 @@ const makeDesign = (id: string) =>
     title: 'Tela inicial',
     description: 'Layout',
     urlImage: 'https://example.com/image.png',
-    user: ApplicantId(randomUUID()),
+    user: UserId(randomUUID()),
     dateUpload: new Date(),
   });
 
@@ -65,7 +65,7 @@ const makeTask = (subTasks: (DesignSubTask | DiscoverySubTask)[] = []) =>
     taskNumber: '#20260001',
     priority: TaskPriority.MEDIA,
     status: TaskStatus.EM_EXECUCAO,
-    applicantId: ApplicantId(randomUUID()),
+    applicantId: ApplicantId(1),
     creatorId: UserId(randomUUID()),
     subTasks,
   });

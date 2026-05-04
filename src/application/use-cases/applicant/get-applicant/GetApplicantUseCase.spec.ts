@@ -2,7 +2,6 @@ import { GetApplicantUseCase } from './GetApplicantUseCase';
 import { IApplicantRepository } from '../../../../domain/repositories/IApplicantRepository';
 import { Applicant } from '../../../../domain/entities/applicant.entity';
 import { ApplicantId } from '../../../../domain/shared/entity-ids';
-import { randomUUID } from 'crypto';
 
 const makeRepo = (): jest.Mocked<IApplicantRepository> => ({
   findById: jest.fn(),
@@ -13,19 +12,18 @@ const makeRepo = (): jest.Mocked<IApplicantRepository> => ({
   delete: jest.fn(),
 });
 
-const makeApplicant = (id: string, name = 'John Doe') =>
+const makeApplicant = (id: number, name = 'John Doe') =>
   new Applicant({ id: ApplicantId(id), name });
 
 describe('GetApplicantUseCase', () => {
   it('returns applicant output', async () => {
     const repo = makeRepo();
-    const id = randomUUID();
-    repo.findById.mockResolvedValue(makeApplicant(id));
+    repo.findById.mockResolvedValue(makeApplicant(1));
     const sut = new GetApplicantUseCase(repo);
 
-    const result = await sut.execute({ id });
+    const result = await sut.execute({ id: '1' });
 
-    expect(result).toEqual({ id, name: 'John Doe' });
+    expect(result).toEqual({ id: 1, name: 'John Doe' });
   });
 
   it('throws when not found', async () => {
@@ -33,6 +31,6 @@ describe('GetApplicantUseCase', () => {
     repo.findById.mockResolvedValue(null);
     const sut = new GetApplicantUseCase(repo);
 
-    await expect(sut.execute({ id: randomUUID() })).rejects.toThrow('Applicant not found');
+    await expect(sut.execute({ id: '999' })).rejects.toThrow('Applicant not found');
   });
 });
