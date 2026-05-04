@@ -12,7 +12,6 @@ provider:
     COGNITO_REGION: ${env:COGNITO_REGION}
     COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}
     CORS_ORIGIN: ${env:CORS_ORIGIN, '*'}
-    AWS_REGION: ${env:AWS_REGION, 'us-east-1'}
     BUCKET_DESIGN: ${env:BUCKET_DESIGN}
     BUCKET_PROJECTS_DOCUMENTS: ${env:BUCKET_PROJECTS_DOCUMENTS}
 
@@ -26,6 +25,13 @@ build:
     sourcemap: true
     exclude:
       - '@aws-sdk/*'
+    external:
+      - '@nestjs/microservices'
+      - '@nestjs/microservices/microservices-module'
+      - '@nestjs/websockets/socket-module'
+      - '@nestjs/platform-express'
+      - '@fastify/view'
+      - 'class-transformer/storage'
 
 functions:
   api:
