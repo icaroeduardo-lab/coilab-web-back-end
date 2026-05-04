@@ -8,7 +8,7 @@ function toDomain(row: PrismaUser): User {
   return new User({
     id: UserId(row.id),
     name: row.name,
-    email: row.email,
+    email: '',
     imageUrl: row.imageUrl ?? undefined,
   });
 }
@@ -25,12 +25,10 @@ export class PrismaUserRepository implements IUserRepository {
       create: {
         id: user.getId(),
         name: user.getName(),
-        email: user.getEmail(),
         imageUrl: user.getImageUrl(),
       },
       update: {
         name: user.getName(),
-        email: user.getEmail(),
         imageUrl: user.getImageUrl(),
       },
     });

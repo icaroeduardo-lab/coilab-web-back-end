@@ -28,6 +28,19 @@ import type {
   SubTask as PrismaSubTask,
 } from '../../../../generated/prisma/client';
 
+const STATUS_TO_ID: Record<TaskStatus, number> = {
+  [TaskStatus.BACKLOG]: 1,
+  [TaskStatus.EM_EXECUCAO]: 2,
+  [TaskStatus.CHECKOUT]: 3,
+  [TaskStatus.DESENVOLVIMENTO]: 4,
+  [TaskStatus.TESTES]: 5,
+  [TaskStatus.CONCLUIDO]: 6,
+};
+
+const ID_TO_STATUS: Record<number, TaskStatus> = Object.fromEntries(
+  Object.entries(STATUS_TO_ID).map(([k, v]) => [v, k as TaskStatus]),
+);
+
 type TaskWithRelations = PrismaTask & {
   subTasks: PrismaSubTask[];
   flows: { flowId: string }[];
@@ -92,7 +105,7 @@ function taskToDomain(row: TaskWithRelations): Task {
     description: row.description,
     taskNumber: row.taskNumber,
     priority: row.priority as TaskPriority,
-    status: row.status as TaskStatus,
+    status: ID_TO_STATUS[row.statusId] ?? TaskStatus.BACKLOG,
     applicantId: ApplicantId(row.applicantId),
     creatorId: UserId(row.creatorId),
     createdAt: row.createdAt,
@@ -213,7 +226,7 @@ export class PrismaTaskRepository implements ITaskRepository {
           description: task.getDescription(),
           taskNumber: task.getTaskNumber(),
           priority: task.getPriority(),
-          status: task.getStatus(),
+          statusId: STATUS_TO_ID[task.getStatus()],
           applicantId: task.getApplicantId(),
           creatorId: task.getCreatorId(),
           createdAt: task.getCreatedAt(),
@@ -222,7 +235,7 @@ export class PrismaTaskRepository implements ITaskRepository {
           name: task.getName(),
           description: task.getDescription(),
           priority: task.getPriority(),
-          status: task.getStatus(),
+          statusId: STATUS_TO_ID[task.getStatus()],
           applicantId: task.getApplicantId(),
           projectId: task.getProjectId(),
         },

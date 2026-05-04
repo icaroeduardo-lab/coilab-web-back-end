@@ -23,11 +23,18 @@ model Project {
 model User {
   id       String  @id @db.Uuid
   name     String
-  email    String
   imageUrl String?
   tasks    Task[]  @relation("creator")
 
   @@map("users")
+}
+
+model TaskStatus {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  tasks Task[]
+
+  @@map("task_status")
 }
 
 model Applicant {
@@ -53,11 +60,12 @@ model Task {
   description String
   taskNumber  String    @unique
   priority    String
-  status      String
+  statusId    Int
   applicantId String    @db.Uuid
   creatorId   String    @db.Uuid
   createdAt   DateTime  @default(now())
   project     Project   @relation(fields: [projectId], references: [id])
+  status      TaskStatus @relation(fields: [statusId], references: [id])
   applicant   Applicant @relation("applicant", fields: [applicantId], references: [id])
   creator     User      @relation("creator", fields: [creatorId], references: [id])
   subTasks    SubTask[]
@@ -66,7 +74,7 @@ model Task {
   @@index([projectId])
   @@index([applicantId])
   @@index([creatorId])
-  @@index([status])
+  @@index([statusId])
   @@map("tasks")
 }
 
