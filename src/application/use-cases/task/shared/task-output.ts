@@ -1,5 +1,5 @@
 import { TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
-import { SubTaskStatus, SubTaskType } from '../../../../domain/entities/sub-task.entity';
+import { SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 
 export interface TaskOutput {
   id: string;
@@ -26,54 +26,15 @@ export interface FlowOutput {
   name: string;
 }
 
-export interface DesignOutput {
-  id: string;
-  title: string;
-  description: string;
-  urlImage: string;
-  dateUpload: Date;
-}
-
-export interface DiscoveryUserOutput {
-  id: string;
-  name: string;
-  imageUrl?: string;
-}
-
-export interface DiscoveryFieldOutput {
-  value: string;
-  user: DiscoveryUserOutput;
-  filledAt?: Date;
-}
-
-export interface DiscoveryFormOutput {
-  complexity?: DiscoveryFieldOutput;
-  projectName?: DiscoveryFieldOutput;
-  summary?: DiscoveryFieldOutput;
-  painPoints?: DiscoveryFieldOutput;
-  frequency?: DiscoveryFieldOutput;
-  currentProcess?: DiscoveryFieldOutput;
-  inactionCost?: DiscoveryFieldOutput;
-  volume?: DiscoveryFieldOutput;
-  avgTime?: DiscoveryFieldOutput;
-  humanDependency?: DiscoveryFieldOutput;
-  rework?: DiscoveryFieldOutput;
-  previousAttempts?: DiscoveryFieldOutput;
-  benchmark?: DiscoveryFieldOutput;
-  institutionalPriority?: DiscoveryFieldOutput;
-  technicalOpinion?: DiscoveryFieldOutput;
-}
-
 export interface SubTaskOutput {
   id: string;
-  type: SubTaskType;
+  typeId: number;
   status: SubTaskStatus;
   expectedDelivery: Date;
   startDate?: Date;
   completionDate?: Date;
   reason?: string;
-  designs?: DesignOutput[];
-  discoveryForm?: DiscoveryFormOutput;
+  metadata: Record<string, unknown>;
 }
 
 export interface ProjectOutput {
@@ -82,7 +43,7 @@ export interface ProjectOutput {
 }
 
 export interface SubTaskSummaryOutput {
-  type: SubTaskType;
+  typeId: number;
   status: SubTaskStatus;
 }
 

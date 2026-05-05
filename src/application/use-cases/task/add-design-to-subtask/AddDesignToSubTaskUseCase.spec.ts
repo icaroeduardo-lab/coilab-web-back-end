@@ -1,17 +1,14 @@
 import { AddDesignToSubTaskUseCase } from './AddDesignToSubTaskUseCase';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
-import {
-  DesignSubTask,
-  DiscoverySubTask,
-  SubTaskStatus,
-} from '../../../../domain/entities/sub-task.entity';
+import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import {
   TaskId,
   ProjectId,
   ApplicantId,
   UserId,
   SubTaskId,
+  TaskToolId,
 } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
@@ -25,25 +22,17 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   delete: jest.fn(),
 });
 
-const makeDesignSubTask = (id: string) =>
-  new DesignSubTask({
+const makeSubTask = (id: string, typeId = 2) =>
+  new SubTask({
     id: SubTaskId(id),
     taskId: TaskId(randomUUID()),
     idUser: UserId(randomUUID()),
     status: SubTaskStatus.EM_PROGRESSO,
+    typeId: TaskToolId(typeId),
     expectedDelivery: new Date(),
   });
 
-const makeDiscoverySubTask = (id: string) =>
-  new DiscoverySubTask({
-    id: SubTaskId(id),
-    taskId: TaskId(randomUUID()),
-    idUser: UserId(randomUUID()),
-    status: SubTaskStatus.EM_PROGRESSO,
-    expectedDelivery: new Date(),
-  });
-
-const makeTask = (subTasks: (DesignSubTask | DiscoverySubTask)[] = []) =>
+const makeTask = (subTasks: SubTask[] = []) =>
   new Task({
     id: TaskId(randomUUID()),
     projectId: ProjectId(randomUUID()),
@@ -67,32 +56,22 @@ const validInput = (taskId: string, subTaskId: string) => ({
 });
 
 describe('AddDesignToSubTaskUseCase', () => {
-  it('adds design to subtask', async () => {
+  it('adds design to subtask metadata', async () => {
     const repo = makeRepo();
     const subTaskId = randomUUID();
-    const task = makeTask([makeDesignSubTask(subTaskId)]);
+    const task = makeTask([makeSubTask(subTaskId, 2)]);
     repo.findById.mockResolvedValue(task);
     const sut = new AddDesignToSubTaskUseCase(repo);
 
-    await sut.execute(validInput(task.getId(), subTaskId));
+    const result = await sut.execute(validInput(task.getId(), subTaskId));
 
+    expect(result.id).toBeDefined();
     const saved: Task = repo.save.mock.calls[0][0];
-    const subTask = saved.getSubTasks().find((s) => s.getId() === subTaskId) as DesignSubTask;
-    expect(subTask.getDesigns()).toHaveLength(1);
-    expect(subTask.getDesigns()[0].getTitle()).toBe('Tela inicial');
-    expect(subTask.getDesigns()[0].getUrlImage()).toBe('https://example.com/image.png');
-  });
-
-  it('throws when subtask type is not Design', async () => {
-    const repo = makeRepo();
-    const subTaskId = randomUUID();
-    const task = makeTask([makeDiscoverySubTask(subTaskId)]);
-    repo.findById.mockResolvedValue(task);
-    const sut = new AddDesignToSubTaskUseCase(repo);
-
-    await expect(sut.execute(validInput(task.getId(), subTaskId))).rejects.toThrow(
-      'SubTask is not a Design type',
-    );
+    const subTask = saved.getSubTasks().find((s) => s.getId() === subTaskId)!;
+    const designs = subTask.getMetadata().designs as { title: string; urlImage: string }[];
+    expect(designs).toHaveLength(1);
+    expect(designs[0].title).toBe('Tela inicial');
+    expect(designs[0].urlImage).toBe('https://example.com/image.png');
   });
 
   it('throws when task not found', async () => {

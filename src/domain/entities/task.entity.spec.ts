@@ -1,6 +1,6 @@
 import { Task, TaskPriority, TaskStatus } from './task.entity';
-import { DiscoverySubTask, DesignSubTask, DiagramSubTask, SubTaskStatus } from './sub-task.entity';
-import { TaskId, ProjectId, SubTaskId, ApplicantId, UserId, FlowId } from '../shared/entity-ids';
+import { SubTask, SubTaskStatus } from './sub-task.entity';
+import { TaskId, ProjectId, SubTaskId, ApplicantId, UserId, FlowId, TaskToolId } from '../shared/entity-ids';
 
 describe('Task Entity', () => {
   const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');
@@ -10,27 +10,30 @@ describe('Task Entity', () => {
   const projectId = ProjectId('550e8400-e29b-41d4-a716-446655440000');
   const deliveryDate = new Date('2026-12-31');
 
-  const discovery = new DiscoverySubTask({
+  const discovery = new SubTask({
     id: SubTaskId('550e8400-e29b-41d4-a716-446655440008'),
     taskId,
     idUser: userId,
     status: SubTaskStatus.NAO_INICIADO,
+    typeId: TaskToolId(1),
     expectedDelivery: deliveryDate,
   });
 
-  const design = new DesignSubTask({
+  const design = new SubTask({
     id: SubTaskId('550e8400-e29b-41d4-a716-446655440009'),
     taskId,
     idUser: userId,
     status: SubTaskStatus.NAO_INICIADO,
+    typeId: TaskToolId(2),
     expectedDelivery: deliveryDate,
   });
 
-  const diagram = new DiagramSubTask({
+  const diagram = new SubTask({
     id: SubTaskId('550e8400-e29b-41d4-a716-446655440011'),
     taskId,
     idUser: userId,
     status: SubTaskStatus.NAO_INICIADO,
+    typeId: TaskToolId(3),
     expectedDelivery: deliveryDate,
   });
 
@@ -63,9 +66,9 @@ describe('Task Entity', () => {
 
     expect(task.getStatus()).toBe(TaskStatus.BACKLOG);
     expect(task.getSubTasks()).toHaveLength(3);
-    expect(task.getDiscovery()).toHaveLength(1);
-    expect(task.getDesign()).toHaveLength(1);
-    expect(task.getDiagram()).toHaveLength(1);
+    expect(task.getSubTasks().filter((s) => s.getTypeId() === 1)).toHaveLength(1);
+    expect(task.getSubTasks().filter((s) => s.getTypeId() === 2)).toHaveLength(1);
+    expect(task.getSubTasks().filter((s) => s.getTypeId() === 3)).toHaveLength(1);
   });
 
   it('should expose all getters correctly', () => {
@@ -143,11 +146,12 @@ describe('Task Entity', () => {
     it('should allow deletion when all subtasks are NAO_INICIADO', () => {
       const task = baseTask();
       task.addSubTask(
-        new DiscoverySubTask({
+        new SubTask({
           id: SubTaskId('550e8400-e29b-41d4-a716-446655440020'),
           taskId,
           idUser: userId,
           status: SubTaskStatus.NAO_INICIADO,
+          typeId: TaskToolId(1),
           expectedDelivery: deliveryDate,
         }),
       );
@@ -157,11 +161,12 @@ describe('Task Entity', () => {
     it('should allow deletion when all subtasks are REPROVADO regardless of task status', () => {
       const task = baseTask();
       task.addSubTask(
-        new DiscoverySubTask({
+        new SubTask({
           id: SubTaskId('550e8400-e29b-41d4-a716-446655440021'),
           taskId,
           idUser: userId,
           status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+          typeId: TaskToolId(1),
           expectedDelivery: deliveryDate,
         }),
       );
@@ -173,11 +178,12 @@ describe('Task Entity', () => {
     it('should throw when task is not BACKLOG and has EM_PROGRESSO subtask', () => {
       const task = baseTask();
       task.addSubTask(
-        new DiscoverySubTask({
+        new SubTask({
           id: SubTaskId('550e8400-e29b-41d4-a716-446655440022'),
           taskId,
           idUser: userId,
           status: SubTaskStatus.EM_PROGRESSO,
+          typeId: TaskToolId(1),
           expectedDelivery: deliveryDate,
         }),
       );
@@ -189,11 +195,12 @@ describe('Task Entity', () => {
     it('should throw when task is not BACKLOG and has APROVADO subtask', () => {
       const task = baseTask();
       task.addSubTask(
-        new DiscoverySubTask({
+        new SubTask({
           id: SubTaskId('550e8400-e29b-41d4-a716-446655440023'),
           taskId,
           idUser: userId,
           status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+          typeId: TaskToolId(1),
           expectedDelivery: deliveryDate,
         }),
       );
@@ -206,11 +213,12 @@ describe('Task Entity', () => {
     it('should allow deletion when all subtasks are CANCELADO', () => {
       const task = baseTask();
       task.addSubTask(
-        new DiscoverySubTask({
+        new SubTask({
           id: SubTaskId('550e8400-e29b-41d4-a716-446655440026'),
           taskId,
           idUser: userId,
           status: SubTaskStatus.EM_PROGRESSO,
+          typeId: TaskToolId(1),
           expectedDelivery: deliveryDate,
         }),
       );
@@ -221,20 +229,22 @@ describe('Task Entity', () => {
     it('should allow deletion when subtasks are mix of REPROVADO and CANCELADO', () => {
       const task = baseTask();
       task.addSubTask(
-        new DiscoverySubTask({
+        new SubTask({
           id: SubTaskId('550e8400-e29b-41d4-a716-446655440027'),
           taskId,
           idUser: userId,
           status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+          typeId: TaskToolId(1),
           expectedDelivery: deliveryDate,
         }),
       );
       task.addSubTask(
-        new DesignSubTask({
+        new SubTask({
           id: SubTaskId('550e8400-e29b-41d4-a716-446655440028'),
           taskId,
           idUser: userId,
           status: SubTaskStatus.EM_PROGRESSO,
+          typeId: TaskToolId(2),
           expectedDelivery: deliveryDate,
         }),
       );
@@ -246,20 +256,22 @@ describe('Task Entity', () => {
     it('should throw when task is not BACKLOG and subtasks are mixed (some REPROVADO, some not)', () => {
       const task = baseTask();
       task.addSubTask(
-        new DiscoverySubTask({
+        new SubTask({
           id: SubTaskId('550e8400-e29b-41d4-a716-446655440024'),
           taskId,
           idUser: userId,
           status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+          typeId: TaskToolId(1),
           expectedDelivery: deliveryDate,
         }),
       );
       task.addSubTask(
-        new DesignSubTask({
+        new SubTask({
           id: SubTaskId('550e8400-e29b-41d4-a716-446655440025'),
           taskId,
           idUser: userId,
           status: SubTaskStatus.EM_PROGRESSO,
+          typeId: TaskToolId(2),
           expectedDelivery: deliveryDate,
         }),
       );

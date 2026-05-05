@@ -12,14 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Entity } from './entity.base';
-import {
-  DiscoverySubTask,
-  DesignSubTask,
-  DiagramSubTask,
-  SubTask,
-  SubTaskStatus,
-  SubTaskType,
-} from './sub-task.entity';
+import { SubTask, SubTaskStatus } from './sub-task.entity';
 import { TaskStatus } from './task-status.enum';
 import { ProjectId, TaskId, ApplicantId, UserId, FlowId } from '../shared/entity-ids';
 import { SEQUENTIAL_NUMBER_REGEX } from '../shared/sequential-number';
@@ -112,21 +105,21 @@ export class Task extends Entity {
     this.validate();
   }
 
-  private groupSubTasksByType(): Record<SubTaskType, SubTask[]> {
+  private groupSubTasksByTypeId(): Record<number, SubTask[]> {
     return this.subTasks.reduce(
       (acc, sub) => {
-        const type = sub.getType();
-        if (!acc[type]) acc[type] = [];
-        acc[type].push(sub);
+        const typeId = sub.getTypeId();
+        if (!acc[typeId]) acc[typeId] = [];
+        acc[typeId].push(sub);
         return acc;
       },
-      {} as Record<SubTaskType, SubTask[]>,
+      {} as Record<number, SubTask[]>,
     );
   }
 
   private checkoutConditionsMet(): boolean {
     if (this.subTasks.length === 0) return true;
-    const groups = this.groupSubTasksByType();
+    const groups = this.groupSubTasksByTypeId();
     return Object.values(groups).every((group) => {
       const allTerminal = group.every(
         (s) =>
@@ -216,16 +209,6 @@ export class Task extends Entity {
     return this.createdAt;
   }
 
-  getDiscovery(): DiscoverySubTask[] {
-    return this.subTasks.filter((s) => s instanceof DiscoverySubTask) as DiscoverySubTask[];
-  }
-  getDesign(): DesignSubTask[] {
-    return this.subTasks.filter((s) => s instanceof DesignSubTask) as DesignSubTask[];
-  }
-  getDiagram(): DiagramSubTask[] {
-    return this.subTasks.filter((s) => s instanceof DiagramSubTask) as DiagramSubTask[];
-  }
-
   changeName(name: string): void {
     this.name = name;
     this.validate();
@@ -303,11 +286,11 @@ export class Task extends Entity {
   }
 
   addSubTask(subTask: SubTask): void {
-    const lastOfSameType = this.subTasks.filter((s) => s.getType() === subTask.getType()).pop();
+    const lastOfSameType = this.subTasks.filter((s) => s.getTypeId() === subTask.getTypeId()).pop();
 
     if (lastOfSameType && lastOfSameType.getStatus() !== SubTaskStatus.REPROVADO) {
       throw new Error(
-        `Não é possível adicionar uma nova subtask do tipo ${subTask.getType()} enquanto a anterior não estiver Reprovada`,
+        `Não é possível adicionar uma nova subtask do tipo ${subTask.getTypeId()} enquanto a anterior não estiver Reprovada`,
       );
     }
 

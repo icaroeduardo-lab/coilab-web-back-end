@@ -89,8 +89,9 @@ model TaskFlow {
 }
 
 model TaskTool {
-  id   Int    @id @default(autoincrement())
-  name String @db.VarChar(255)
+  id       Int       @id @default(autoincrement())
+  name     String    @db.VarChar(255)
+  subTasks SubTask[]
 
   @@map("task_tools")
 }
@@ -100,16 +101,15 @@ model SubTask {
   taskId           String    @db.Uuid
   idUser           String    @db.Uuid
   status           String
-  type             String
+  typeId           Int
   expectedDelivery DateTime
   createdAt        DateTime  @default(now())
   startDate        DateTime?
   completionDate   DateTime?
   reason           String?
-  discoveryForm    Json?
-  designs          Json?
-  diagrams         Json?
+  metadata         Json?
   task             Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  toolType         TaskTool  @relation(fields: [typeId], references: [id])
 
   @@index([taskId])
   @@map("sub_tasks")

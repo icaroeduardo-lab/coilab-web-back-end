@@ -1,19 +1,14 @@
 import { RemoveDesignFromSubTaskUseCase } from './RemoveDesignFromSubTaskUseCase';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
-import {
-  DesignSubTask,
-  DiscoverySubTask,
-  SubTaskStatus,
-} from '../../../../domain/entities/sub-task.entity';
-import { Design } from '../../../../domain/value-objects/design.vo';
+import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import {
   TaskId,
   ProjectId,
   ApplicantId,
   UserId,
   SubTaskId,
-  DesignId,
+  TaskToolId,
 } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
@@ -27,36 +22,18 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   delete: jest.fn(),
 });
 
-const makeDesign = (id: string) =>
-  new Design({
-    id: DesignId(id),
-    title: 'Tela inicial',
-    description: 'Layout',
-    urlImage: 'https://example.com/image.png',
-    user: UserId(randomUUID()),
-    dateUpload: new Date(),
-  });
-
-const makeDesignSubTask = (id: string, designs: Design[] = []) =>
-  new DesignSubTask({
+const makeSubTask = (id: string, designs: { id: string; title: string; urlImage: string }[] = []) =>
+  new SubTask({
     id: SubTaskId(id),
     taskId: TaskId(randomUUID()),
     idUser: UserId(randomUUID()),
     status: SubTaskStatus.EM_PROGRESSO,
+    typeId: TaskToolId(2),
     expectedDelivery: new Date(),
-    designs,
+    metadata: designs.length > 0 ? { designs } : undefined,
   });
 
-const makeDiscoverySubTask = (id: string) =>
-  new DiscoverySubTask({
-    id: SubTaskId(id),
-    taskId: TaskId(randomUUID()),
-    idUser: UserId(randomUUID()),
-    status: SubTaskStatus.EM_PROGRESSO,
-    expectedDelivery: new Date(),
-  });
-
-const makeTask = (subTasks: (DesignSubTask | DiscoverySubTask)[] = []) =>
+const makeTask = (subTasks: SubTask[] = []) =>
   new Task({
     id: TaskId(randomUUID()),
     projectId: ProjectId(randomUUID()),
@@ -71,43 +48,36 @@ const makeTask = (subTasks: (DesignSubTask | DiscoverySubTask)[] = []) =>
   });
 
 describe('RemoveDesignFromSubTaskUseCase', () => {
-  it('removes design from subtask', async () => {
+  it('removes design from subtask metadata', async () => {
     const repo = makeRepo();
     const subTaskId = randomUUID();
     const designId = randomUUID();
-    const task = makeTask([makeDesignSubTask(subTaskId, [makeDesign(designId)])]);
+    const task = makeTask([
+      makeSubTask(subTaskId, [
+        { id: designId, title: 'Tela inicial', urlImage: 'https://example.com/image.png' },
+      ]),
+    ]);
     repo.findById.mockResolvedValue(task);
     const sut = new RemoveDesignFromSubTaskUseCase(repo);
 
     await sut.execute({ taskId: task.getId(), subTaskId, designId });
 
     const saved: Task = repo.save.mock.calls[0][0];
-    const subTask = saved.getSubTasks().find((s) => s.getId() === subTaskId) as DesignSubTask;
-    expect(subTask.getDesigns()).toHaveLength(0);
+    const subTask = saved.getSubTasks().find((s) => s.getId() === subTaskId)!;
+    const designs = subTask.getMetadata().designs as { id: string }[];
+    expect(designs).toHaveLength(0);
   });
 
   it('throws when design not found', async () => {
     const repo = makeRepo();
     const subTaskId = randomUUID();
-    const task = makeTask([makeDesignSubTask(subTaskId, [])]);
+    const task = makeTask([makeSubTask(subTaskId, [])]);
     repo.findById.mockResolvedValue(task);
     const sut = new RemoveDesignFromSubTaskUseCase(repo);
 
     await expect(
       sut.execute({ taskId: task.getId(), subTaskId, designId: randomUUID() }),
     ).rejects.toThrow('não encontrado');
-  });
-
-  it('throws when subtask type is not Design', async () => {
-    const repo = makeRepo();
-    const subTaskId = randomUUID();
-    const task = makeTask([makeDiscoverySubTask(subTaskId)]);
-    repo.findById.mockResolvedValue(task);
-    const sut = new RemoveDesignFromSubTaskUseCase(repo);
-
-    await expect(
-      sut.execute({ taskId: task.getId(), subTaskId, designId: randomUUID() }),
-    ).rejects.toThrow('SubTask is not a Design type');
   });
 
   it('throws when task not found', async () => {

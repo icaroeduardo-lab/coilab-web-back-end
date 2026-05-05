@@ -11,14 +11,14 @@ import {
 import { SubTaskSummaryOutput, TaskListOutput } from '../shared/task-output';
 
 function latestSubTaskPerType(subTasks: SubTask[]): SubTaskSummaryOutput[] {
-  const map = new Map<string, SubTask>();
+  const map = new Map<number, SubTask>();
   for (const s of subTasks) {
-    const existing = map.get(s.getType());
+    const existing = map.get(s.getTypeId());
     if (!existing || s.getCreatedAt() > existing.getCreatedAt()) {
-      map.set(s.getType(), s);
+      map.set(s.getTypeId(), s);
     }
   }
-  return [...map.values()].map((s) => ({ type: s.getType(), status: s.getStatus() }));
+  return [...map.values()].map((s) => ({ typeId: s.getTypeId(), status: s.getStatus() }));
 }
 
 export class ListAllTasksUseCase {

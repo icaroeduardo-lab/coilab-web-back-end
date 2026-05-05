@@ -14,6 +14,7 @@ export type ApplicantId = number & { readonly __type: 'ApplicantId' };
 export type UserId = string & { readonly __type: 'UserId' };
 export type FlowId = number & { readonly __type: 'FlowId' };
 export type DesignId = string & { readonly __type: 'DesignId' };
+export type TaskToolId = number & { readonly __type: 'TaskToolId' };
 
 export const ProjectId = (value: string): ProjectId => createId<ProjectId>('ProjectId', value);
 export const TaskId = (value: string): TaskId => createId<TaskId>('TaskId', value);
@@ -32,3 +33,9 @@ export const FlowId = (value: number): FlowId => {
   return value as FlowId;
 };
 export const DesignId = (value: string): DesignId => createId<DesignId>('DesignId', value);
+export const TaskToolId = (value: number): TaskToolId => {
+  if (!Number.isInteger(value) || value < 1) {
+    throw new Error(`Invalid TaskToolId: "${value}" is not a valid positive integer`);
+  }
+  return value as TaskToolId;
+};

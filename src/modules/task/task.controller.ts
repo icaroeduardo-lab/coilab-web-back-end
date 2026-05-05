@@ -146,7 +146,7 @@ export class TaskController {
   ) {
     await this.addSubTask.execute({
       taskId,
-      type: dto.type,
+      typeId: dto.typeId,
       idUser: user.sub,
       expectedDelivery: new Date(dto.expectedDelivery),
     });
@@ -184,7 +184,7 @@ export class TaskController {
     @Param('subTaskId') subTaskId: string,
     @Body() dto: UpdateDiscoveryFormDto,
   ) {
-    await this.updateDiscovery.execute({ taskId, subTaskId, userId: user.sub, fields: dto });
+    await this.updateDiscovery.execute({ taskId, subTaskId, userId: user.sub, fields: dto.fields ?? {} });
   }
 
   @Post(':taskId/subtasks/:subTaskId/designs')

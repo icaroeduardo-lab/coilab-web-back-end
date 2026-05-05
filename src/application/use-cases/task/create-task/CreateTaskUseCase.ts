@@ -1,11 +1,5 @@
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
-import {
-  DiscoverySubTask,
-  DesignSubTask,
-  DiagramSubTask,
-  SubTaskStatus,
-  SubTaskType,
-} from '../../../../domain/entities/sub-task.entity';
+import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import {
   TaskId,
@@ -14,6 +8,7 @@ import {
   UserId,
   SubTaskId,
   FlowId,
+  TaskToolId,
 } from '../../../../domain/shared/entity-ids';
 
 import { generateNextNumber } from '../../../../domain/shared/sequential-number';
@@ -21,7 +16,7 @@ import { generateId } from '../../../../shared/generate-id';
 import { TaskOutput } from '../shared/task-output';
 
 export interface CreateTaskSubTaskInput {
-  type: SubTaskType;
+  typeId: number;
   idUser: string;
   expectedDelivery: Date;
 }
@@ -37,24 +32,15 @@ export interface CreateTaskInput {
   subTasks?: CreateTaskSubTaskInput[];
 }
 
-const buildSubTask = (input: CreateTaskSubTaskInput, taskId: string) => {
-  const base = {
+const buildSubTask = (input: CreateTaskSubTaskInput, taskId: string): SubTask =>
+  new SubTask({
     id: SubTaskId(generateId()),
     taskId: TaskId(taskId),
     idUser: UserId(input.idUser),
     status: SubTaskStatus.NAO_INICIADO,
+    typeId: TaskToolId(input.typeId),
     expectedDelivery: input.expectedDelivery,
-  };
-
-  switch (input.type) {
-    case SubTaskType.DISCOVERY:
-      return new DiscoverySubTask(base);
-    case SubTaskType.DESIGN:
-      return new DesignSubTask(base);
-    case SubTaskType.DIAGRAM:
-      return new DiagramSubTask(base);
-  }
-};
+  });
 
 export class CreateTaskUseCase {
   constructor(private readonly taskRepository: ITaskRepository) {}

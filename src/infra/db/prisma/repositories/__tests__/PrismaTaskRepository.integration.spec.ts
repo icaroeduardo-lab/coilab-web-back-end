@@ -9,16 +9,7 @@ import { Project, ProjectStatus } from '../../../../../domain/entities/project.e
 import { Applicant } from '../../../../../domain/entities/applicant.entity';
 import { User } from '../../../../../domain/entities/user.entity';
 import { Flow } from '../../../../../domain/value-objects/flow.vo';
-import {
-  DiscoverySubTask,
-  DesignSubTask,
-  DiagramSubTask,
-  SubTaskStatus,
-  Level,
-  Frequency,
-} from '../../../../../domain/entities/sub-task.entity';
-import { Design } from '../../../../../domain/value-objects/design.vo';
-import { Diagram } from '../../../../../domain/value-objects/diagram.vo';
+import { SubTask, SubTaskStatus } from '../../../../../domain/entities/sub-task.entity';
 import {
   TaskId,
   ProjectId,
@@ -27,6 +18,7 @@ import {
   SubTaskId,
   FlowId,
   DesignId,
+  TaskToolId,
 } from '../../../../../domain/shared/entity-ids';
 import { truncateAll } from '../../test/truncate';
 
@@ -66,10 +58,7 @@ beforeEach(async () => {
   creatorId = creator.getId();
 });
 
-const makeTask = (
-  subTasks: (DiscoverySubTask | DesignSubTask | DiagramSubTask)[] = [],
-  flowIds: FlowId[] = [],
-) =>
+const makeTask = (subTasks: SubTask[] = [], flowIds: FlowId[] = []) =>
   new Task({
     id: TaskId(randomUUID()),
     projectId,
@@ -158,55 +147,42 @@ describe('PrismaTaskRepository — basic', () => {
   });
 });
 
-describe('PrismaTaskRepository — DiscoverySubTask', () => {
-  it('persists and restores discovery subtask with form data', async () => {
-    const subTask = new DiscoverySubTask({
+describe('PrismaTaskRepository — Discovery SubTask (typeId=1)', () => {
+  it('persists and restores discovery subtask with metadata form data', async () => {
+    const subTask = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(randomUUID()),
       idUser: creatorId,
       status: SubTaskStatus.EM_PROGRESSO,
+      typeId: TaskToolId(1),
       expectedDelivery: new Date('2026-12-31'),
-    });
-    subTask.updateForm(
-      {
-        complexity: Level.HIGH,
-        projectName: 'Nome do Projeto',
-        summary: 'Resumo',
-        painPoints: 'Dores',
-        frequency: Frequency.DAILY,
-        currentProcess: 'Processo atual',
-        inactionCost: 'Custo',
-        volume: 'Volume',
-        avgTime: 'Tempo médio',
-        humanDependency: Level.MEDIUM,
-        rework: 'Retrabalho',
-        previousAttempts: 'Tentativas',
-        benchmark: 'Benchmark',
-        institutionalPriority: Level.HIGH,
-        technicalOpinion: 'Opinião técnica',
+      metadata: {
+        form: {
+          complexity: { value: 'high', userId: creatorId, filledAt: new Date().toISOString() },
+          projectName: { value: 'Nome do Projeto', userId: creatorId, filledAt: new Date().toISOString() },
+        },
       },
-      creatorId,
-    );
+    });
 
     const task = makeTask([subTask]);
     await taskRepo.save(task);
 
     const found = await taskRepo.findById(task.getId());
-    const restored = found!.getDiscovery()[0];
+    const restored = found!.getSubTasks().filter((s) => s.getTypeId() === 1)[0];
     expect(restored).toBeDefined();
-    const form = restored.getForm();
-    expect(form.complexity?.value).toBe(Level.HIGH);
-    expect(form.projectName?.value).toBe('Nome do Projeto');
-    expect(form.frequency?.value).toBe(Frequency.DAILY);
-    expect(form.humanDependency?.value).toBe(Level.MEDIUM);
+    expect(restored.getTypeId()).toBe(1);
+    const form = restored.getMetadata().form as Record<string, { value: unknown }>;
+    expect(form?.complexity?.value).toBe('high');
+    expect(form?.projectName?.value).toBe('Nome do Projeto');
   });
 
-  it('persists discovery subtask with empty form', async () => {
-    const subTask = new DiscoverySubTask({
+  it('persists discovery subtask with empty metadata', async () => {
+    const subTask = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(randomUUID()),
       idUser: creatorId,
       status: SubTaskStatus.NAO_INICIADO,
+      typeId: TaskToolId(1),
       expectedDelivery: new Date('2026-12-31'),
     });
 
@@ -214,48 +190,53 @@ describe('PrismaTaskRepository — DiscoverySubTask', () => {
     await taskRepo.save(task);
 
     const found = await taskRepo.findById(task.getId());
-    const restored = found!.getDiscovery()[0];
-    expect(restored.getForm().complexity).toBeUndefined();
+    const restored = found!.getSubTasks().filter((s) => s.getTypeId() === 1)[0];
+    expect(restored.getMetadata()).toEqual({});
   });
 });
 
-describe('PrismaTaskRepository — DesignSubTask', () => {
-  it('persists and restores design subtask with designs', async () => {
-    const design = new Design({
-      id: DesignId(randomUUID()),
-      title: 'Tela Inicial',
-      description: 'Layout da home',
-      urlImage: 'https://example.com/img.png',
-      user: creatorId,
-      dateUpload: new Date('2026-01-15'),
-    });
-
-    const subTask = new DesignSubTask({
+describe('PrismaTaskRepository — Design SubTask (typeId=2)', () => {
+  it('persists and restores design subtask with designs in metadata', async () => {
+    const designId = DesignId(randomUUID());
+    const subTask = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(randomUUID()),
       idUser: creatorId,
       status: SubTaskStatus.EM_PROGRESSO,
+      typeId: TaskToolId(2),
       expectedDelivery: new Date('2026-12-31'),
-      designs: [design],
+      metadata: {
+        designs: [
+          {
+            id: designId,
+            title: 'Tela Inicial',
+            description: 'Layout da home',
+            urlImage: 'https://example.com/img.png',
+            userId: creatorId,
+            dateUpload: new Date('2026-01-15').toISOString(),
+          },
+        ],
+      },
     });
 
     const task = makeTask([subTask]);
     await taskRepo.save(task);
 
     const found = await taskRepo.findById(task.getId());
-    const restored = found!.getDesign()[0];
-    expect(restored.getDesigns()).toHaveLength(1);
-    expect(restored.getDesigns()[0].getTitle()).toBe('Tela Inicial');
-    expect(restored.getDesigns()[0].getUrlImage()).toBe('https://example.com/img.png');
-    expect(restored.getDesigns()[0].getId()).toBe(design.getId());
+    const restored = found!.getSubTasks().filter((s) => s.getTypeId() === 2)[0];
+    const designs = restored.getMetadata().designs as { title: string; urlImage: string }[];
+    expect(designs).toHaveLength(1);
+    expect(designs[0].title).toBe('Tela Inicial');
+    expect(designs[0].urlImage).toBe('https://example.com/img.png');
   });
 
   it('persists design subtask with no designs', async () => {
-    const subTask = new DesignSubTask({
+    const subTask = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(randomUUID()),
       idUser: creatorId,
       status: SubTaskStatus.NAO_INICIADO,
+      typeId: TaskToolId(2),
       expectedDelivery: new Date('2026-12-31'),
     });
 
@@ -263,66 +244,74 @@ describe('PrismaTaskRepository — DesignSubTask', () => {
     await taskRepo.save(task);
 
     const found = await taskRepo.findById(task.getId());
-    expect(found!.getDesign()[0].getDesigns()).toHaveLength(0);
+    const restored = found!.getSubTasks().filter((s) => s.getTypeId() === 2)[0];
+    expect(restored.getMetadata().designs).toBeUndefined();
   });
 });
 
-describe('PrismaTaskRepository — DiagramSubTask', () => {
-  it('persists and restores diagram subtask with diagrams', async () => {
-    const diagram = new Diagram({
-      title: 'Fluxo Principal',
-      description: 'Diagrama do fluxo',
-      urlDiagram: 'https://example.com/diagram.png',
-      user: creatorId,
-      dateUpload: new Date('2026-01-15'),
-    });
-
-    const subTask = new DiagramSubTask({
+describe('PrismaTaskRepository — Diagram SubTask (typeId=3)', () => {
+  it('persists and restores diagram subtask with diagrams in metadata', async () => {
+    const subTask = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(randomUUID()),
       idUser: creatorId,
       status: SubTaskStatus.EM_PROGRESSO,
+      typeId: TaskToolId(3),
       expectedDelivery: new Date('2026-12-31'),
-      diagrams: [diagram],
+      metadata: {
+        diagrams: [
+          {
+            title: 'Fluxo Principal',
+            description: 'Diagrama do fluxo',
+            urlDiagram: 'https://example.com/diagram.png',
+            userId: creatorId,
+            dateUpload: new Date('2026-01-15').toISOString(),
+          },
+        ],
+      },
     });
 
     const task = makeTask([subTask]);
     await taskRepo.save(task);
 
     const found = await taskRepo.findById(task.getId());
-    const restored = found!.getDiagram()[0];
-    expect(restored.getDiagrams()).toHaveLength(1);
-    expect(restored.getDiagrams()[0].getTitle()).toBe('Fluxo Principal');
-    expect(restored.getDiagrams()[0].getUrlDiagram()).toBe('https://example.com/diagram.png');
+    const restored = found!.getSubTasks().filter((s) => s.getTypeId() === 3)[0];
+    const diagrams = restored.getMetadata().diagrams as { title: string; urlDiagram: string }[];
+    expect(diagrams).toHaveLength(1);
+    expect(diagrams[0].title).toBe('Fluxo Principal');
+    expect(diagrams[0].urlDiagram).toBe('https://example.com/diagram.png');
   });
 });
 
 describe('PrismaTaskRepository — save syncs subtasks', () => {
   it('replaces subtasks on re-save', async () => {
-    const subTask = new DesignSubTask({
+    const subTask = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(randomUUID()),
       idUser: creatorId,
       status: SubTaskStatus.NAO_INICIADO,
+      typeId: TaskToolId(2),
       expectedDelivery: new Date('2026-12-31'),
     });
     const task = makeTask([subTask]);
     await taskRepo.save(task);
 
-    const design = new Design({
+    const newDesign = {
       id: DesignId(randomUUID()),
       title: 'Nova Imagem',
       description: 'Desc',
       urlImage: 'https://example.com/new.png',
-      user: creatorId,
-      dateUpload: new Date(),
-    });
+      userId: creatorId,
+      dateUpload: new Date().toISOString(),
+    };
     subTask.start();
-    (task.getSubTasks()[0] as DesignSubTask).addDesign(design);
+    subTask.updateMetadata({ designs: [newDesign] });
     await taskRepo.save(task);
 
     const found = await taskRepo.findById(task.getId());
-    expect(found!.getDesign()[0].getDesigns()).toHaveLength(1);
+    const restored = found!.getSubTasks().filter((s) => s.getTypeId() === 2)[0];
+    const designs = restored.getMetadata().designs as { title: string }[];
+    expect(designs).toHaveLength(1);
     expect(found!.getSubTasks()[0].getStatus()).toBe(SubTaskStatus.EM_PROGRESSO);
   });
 });

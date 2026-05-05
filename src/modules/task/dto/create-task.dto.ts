@@ -4,19 +4,21 @@ import {
   IsArray,
   IsDateString,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { TaskPriority } from '../../../domain/entities/task.entity';
-import { SubTaskType } from '../../../domain/entities/sub-task.entity';
 
 class SubTaskDto {
-  @ApiProperty({ enum: SubTaskType, enumName: 'SubTaskType' })
-  @IsEnum(SubTaskType)
-  type: SubTaskType;
+  @ApiProperty({ example: 1, description: 'ID do tipo de subtarefa (TaskToolId)' })
+  @IsInt()
+  @Min(1)
+  typeId: number;
 
   @ApiProperty({ example: '2026-12-31', description: 'Data esperada de entrega (ISO 8601)' })
   @IsDateString()

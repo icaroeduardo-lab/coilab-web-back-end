@@ -14,7 +14,6 @@ import { AddDesignToSubTaskUseCase } from '../../application/use-cases/task/add-
 import { RemoveDesignFromSubTaskUseCase } from '../../application/use-cases/task/remove-design-from-subtask/RemoveDesignFromSubTaskUseCase';
 import { GetDesignUploadUrlUseCase } from '../../application/use-cases/task/get-design-upload-url/GetDesignUploadUrlUseCase';
 import { TaskPriority, TaskStatus } from '../../domain/entities/task.entity';
-import { SubTaskType } from '../../domain/entities/sub-task.entity';
 import { JwtPayload } from '../auth/current-user.decorator';
 import { randomUUID } from 'crypto';
 
@@ -98,7 +97,7 @@ describe('TaskController', () => {
         description: 'D',
         priority: TaskPriority.MEDIA,
         applicantId: randomUUID(),
-        subTasks: [{ type: SubTaskType.DISCOVERY, expectedDelivery: dateStr }],
+        subTasks: [{ typeId: 1, expectedDelivery: dateStr }],
       } as never;
       await controller.create(fakeUser, dto);
       const called = mockCreateTask.execute.mock.calls[0][0];
@@ -175,12 +174,12 @@ describe('TaskController', () => {
     it('calls addSubTask.execute with idUser from token and converted expectedDelivery', async () => {
       const taskId = randomUUID();
       const dateStr = '2026-12-31';
-      const dto = { type: SubTaskType.DESIGN, expectedDelivery: dateStr } as never;
+      const dto = { typeId: 2, expectedDelivery: dateStr } as never;
       mockAddSubTask.execute.mockResolvedValue(undefined);
       await controller.addSubTask_(fakeUser, taskId, dto);
       const called = mockAddSubTask.execute.mock.calls[0][0];
       expect(called.taskId).toBe(taskId);
-      expect(called.type).toBe(SubTaskType.DESIGN);
+      expect(called.typeId).toBe(2);
       expect(called.idUser).toBe(fakeUser.sub);
       expect(called.expectedDelivery).toBeInstanceOf(Date);
     });
@@ -203,17 +202,18 @@ describe('TaskController', () => {
   });
 
   describe('updateDiscovery_', () => {
-    it('passes userId from token and dto as fields', async () => {
+    it('passes userId from token and dto.fields as fields', async () => {
       const taskId = randomUUID();
       const subTaskId = randomUUID();
-      const dto = { summary: 'Resumo' } as never;
+      const fields = { summary: 'Resumo' };
+      const dto = { fields } as never;
       mockUpdateDiscovery.execute.mockResolvedValue(undefined);
       await controller.updateDiscovery_(fakeUser, taskId, subTaskId, dto);
       expect(mockUpdateDiscovery.execute).toHaveBeenCalledWith({
         taskId,
         subTaskId,
         userId: fakeUser.sub,
-        fields: dto,
+        fields,
       });
     });
   });

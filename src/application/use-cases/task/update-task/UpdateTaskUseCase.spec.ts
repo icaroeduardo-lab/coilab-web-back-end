@@ -1,7 +1,7 @@
 import { UpdateTaskUseCase } from './UpdateTaskUseCase';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
-import { DiscoverySubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
+import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import {
   TaskId,
   ProjectId,
@@ -9,6 +9,7 @@ import {
   UserId,
   SubTaskId,
   FlowId,
+  TaskToolId,
 } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
@@ -100,11 +101,12 @@ describe('UpdateTaskUseCase', () => {
     const task = makeTask(id);
     const subTaskId = randomUUID();
     task.addSubTask(
-      new DiscoverySubTask({
+      new SubTask({
         id: SubTaskId(subTaskId),
         taskId: TaskId(id),
         idUser: UserId(randomUUID()),
         status: SubTaskStatus.NAO_INICIADO,
+        typeId: TaskToolId(1),
         expectedDelivery: new Date(),
       }),
     );
@@ -175,11 +177,12 @@ describe('UpdateTaskUseCase', () => {
     const task = makeTask(id);
     const subTaskId = randomUUID();
     task.addSubTask(
-      new DiscoverySubTask({
+      new SubTask({
         id: SubTaskId(subTaskId),
         taskId: TaskId(id),
         idUser: UserId(randomUUID()),
         status: SubTaskStatus.EM_PROGRESSO,
+        typeId: TaskToolId(1),
         expectedDelivery: new Date(),
       }),
     );

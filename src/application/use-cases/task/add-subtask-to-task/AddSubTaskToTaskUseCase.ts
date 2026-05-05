@@ -1,17 +1,11 @@
-import {
-  DiscoverySubTask,
-  DesignSubTask,
-  DiagramSubTask,
-  SubTaskStatus,
-  SubTaskType,
-} from '../../../../domain/entities/sub-task.entity';
+import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
-import { TaskId, UserId, SubTaskId } from '../../../../domain/shared/entity-ids';
+import { TaskId, UserId, SubTaskId, TaskToolId } from '../../../../domain/shared/entity-ids';
 import { generateId } from '../../../../shared/generate-id';
 
 export interface AddSubTaskToTaskInput {
   taskId: string;
-  type: SubTaskType;
+  typeId: number;
   idUser: string;
   expectedDelivery: Date;
 }
@@ -25,25 +19,16 @@ export class AddSubTaskToTaskUseCase {
       throw new Error(`Task not found: ${input.taskId}`);
     }
 
-    const base = {
-      id: SubTaskId(generateId()),
-      taskId: TaskId(input.taskId),
-      idUser: UserId(input.idUser),
-      status: SubTaskStatus.NAO_INICIADO,
-      expectedDelivery: input.expectedDelivery,
-    };
-
-    switch (input.type) {
-      case SubTaskType.DISCOVERY:
-        task.addSubTask(new DiscoverySubTask(base));
-        break;
-      case SubTaskType.DESIGN:
-        task.addSubTask(new DesignSubTask(base));
-        break;
-      case SubTaskType.DIAGRAM:
-        task.addSubTask(new DiagramSubTask(base));
-        break;
-    }
+    task.addSubTask(
+      new SubTask({
+        id: SubTaskId(generateId()),
+        taskId: TaskId(input.taskId),
+        idUser: UserId(input.idUser),
+        status: SubTaskStatus.NAO_INICIADO,
+        typeId: TaskToolId(input.typeId),
+        expectedDelivery: input.expectedDelivery,
+      }),
+    );
 
     await this.taskRepository.save(task);
   }

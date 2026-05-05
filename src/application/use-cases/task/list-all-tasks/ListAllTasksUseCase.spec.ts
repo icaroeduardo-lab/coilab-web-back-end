@@ -3,11 +3,7 @@ import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository
 import { IApplicantRepository } from '../../../../domain/repositories/IApplicantRepository';
 import { IProjectRepository } from '../../../../domain/repositories/IProjectRepository';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
-import {
-  DiscoverySubTask,
-  SubTaskStatus,
-  SubTaskType,
-} from '../../../../domain/entities/sub-task.entity';
+import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import { Applicant } from '../../../../domain/entities/applicant.entity';
 import { Project } from '../../../../domain/entities/project.entity';
 import {
@@ -16,6 +12,7 @@ import {
   ApplicantId,
   UserId,
   SubTaskId,
+  TaskToolId,
 } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
@@ -148,25 +145,27 @@ describe('ListAllTasksUseCase', () => {
     await expect(sut.execute()).rejects.toThrow('Project not found');
   });
 
-  it('deduplicates subtasks by type keeping latest createdAt', async () => {
+  it('deduplicates subtasks by typeId keeping latest createdAt', async () => {
     const taskRepo = makeTaskRepo();
     const applicantRepo = makeApplicantRepo();
     const projectRepo = makeProjectRepo();
     const projectId = randomUUID();
     const task = makeTask(1, projectId);
-    const older = new DiscoverySubTask({
+    const older = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(task.getId()),
       idUser: UserId(randomUUID()),
       status: SubTaskStatus.REPROVADO,
+      typeId: TaskToolId(1),
       expectedDelivery: new Date(),
       createdAt: new Date('2026-01-01'),
     });
-    const newer = new DiscoverySubTask({
+    const newer = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(task.getId()),
       idUser: UserId(randomUUID()),
       status: SubTaskStatus.EM_PROGRESSO,
+      typeId: TaskToolId(1),
       expectedDelivery: new Date(),
       createdAt: new Date('2026-03-01'),
     });
@@ -181,7 +180,7 @@ describe('ListAllTasksUseCase', () => {
     const result = await sut.execute();
 
     expect(result.data[0].subTasks).toHaveLength(1);
-    expect(result.data[0].subTasks[0].type).toBe(SubTaskType.DISCOVERY);
+    expect(result.data[0].subTasks[0].typeId).toBe(1);
     expect(result.data[0].subTasks[0].status).toBe(SubTaskStatus.EM_PROGRESSO);
   });
 
@@ -191,19 +190,21 @@ describe('ListAllTasksUseCase', () => {
     const projectRepo = makeProjectRepo();
     const projectId = randomUUID();
     const taskId = TaskId(randomUUID());
-    const newer = new DiscoverySubTask({
+    const newer = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId,
       idUser: UserId(randomUUID()),
       status: SubTaskStatus.EM_PROGRESSO,
+      typeId: TaskToolId(1),
       expectedDelivery: new Date(),
       createdAt: new Date('2026-03-01'),
     });
-    const older = new DiscoverySubTask({
+    const older = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId,
       idUser: UserId(randomUUID()),
       status: SubTaskStatus.REPROVADO,
+      typeId: TaskToolId(1),
       expectedDelivery: new Date(),
       createdAt: new Date('2026-01-01'),
     });

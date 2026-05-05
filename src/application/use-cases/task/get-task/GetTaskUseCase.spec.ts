@@ -9,7 +9,7 @@ import { User } from '../../../../domain/entities/user.entity';
 import { Applicant } from '../../../../domain/entities/applicant.entity';
 import { Project } from '../../../../domain/entities/project.entity';
 import { Flow } from '../../../../domain/value-objects/flow.vo';
-import { DiscoverySubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
+import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import {
   TaskId,
   ProjectId,
@@ -17,6 +17,7 @@ import {
   UserId,
   FlowId,
   SubTaskId,
+  TaskToolId,
 } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
@@ -142,11 +143,12 @@ describe('GetTaskUseCase', () => {
     const projectId = randomUUID();
     const task = makeTask(creatorId, applicantId, projectId);
     task.addSubTask(
-      new DiscoverySubTask({
+      new SubTask({
         id: SubTaskId(randomUUID()),
         taskId: task.getId(),
         idUser: UserId(randomUUID()),
         status: SubTaskStatus.EM_PROGRESSO,
+        typeId: TaskToolId(1),
         expectedDelivery: new Date('2026-12-31'),
       }),
     );

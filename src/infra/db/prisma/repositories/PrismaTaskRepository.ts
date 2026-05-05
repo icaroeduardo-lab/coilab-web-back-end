@@ -1,16 +1,6 @@
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
-import {
-  SubTask,
-  SubTaskStatus,
-  SubTaskType,
-  DiscoverySubTask,
-  DesignSubTask,
-  DiagramSubTask,
-  DiscoveryFormProps,
-} from '../../../../domain/entities/sub-task.entity';
-import { Design } from '../../../../domain/value-objects/design.vo';
-import { Diagram } from '../../../../domain/value-objects/diagram.vo';
+import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import {
   TaskId,
   ProjectId,
@@ -18,7 +8,7 @@ import {
   UserId,
   SubTaskId,
   FlowId,
-  DesignId,
+  TaskToolId,
 } from '../../../../domain/shared/entity-ids';
 
 import { prisma } from '../prisma.client';
@@ -47,54 +37,19 @@ type TaskWithRelations = PrismaTask & {
 };
 
 function subTaskToDomain(row: PrismaSubTask): SubTask {
-  const base = {
+  return new SubTask({
     id: SubTaskId(row.id),
     taskId: TaskId(row.taskId),
     idUser: UserId(row.idUser),
     status: row.status as SubTaskStatus,
+    typeId: TaskToolId(row.typeId),
     expectedDelivery: row.expectedDelivery,
     createdAt: row.createdAt,
     startDate: row.startDate ?? undefined,
     completionDate: row.completionDate ?? undefined,
     reason: row.reason ?? undefined,
-  };
-
-  if (row.type === SubTaskType.DISCOVERY) {
-    const form = (row.discoveryForm ?? {}) as Record<string, unknown>;
-    return new DiscoverySubTask({ ...base, ...(form as DiscoveryFormProps) });
-  }
-
-  if (row.type === SubTaskType.DESIGN) {
-    const rawDesigns = Array.isArray(row.designs) ? (row.designs as Record<string, unknown>[]) : [];
-    const designs = rawDesigns.map(
-      (d) =>
-        new Design({
-          id: DesignId(d.id as string),
-          title: d.title as string,
-          description: d.description as string,
-          urlImage: d.urlImage as string,
-          user: UserId(d.user as string),
-          dateUpload: new Date(d.dateUpload as string),
-        }),
-    );
-    return new DesignSubTask({ ...base, designs });
-  }
-
-  // DIAGRAM
-  const rawDiagrams = Array.isArray(row.diagrams)
-    ? (row.diagrams as Record<string, unknown>[])
-    : [];
-  const diagrams = rawDiagrams.map(
-    (d) =>
-      new Diagram({
-        title: d.title as string,
-        description: d.description as string,
-        urlDiagram: d.urlDiagram as string,
-        user: UserId(d.user as string),
-        dateUpload: new Date(d.dateUpload as string),
-      }),
-  );
-  return new DiagramSubTask({ ...base, diagrams });
+    metadata: (row.metadata ?? {}) as Record<string, unknown>,
+  });
 }
 
 function taskToDomain(row: TaskWithRelations): Task {
@@ -124,54 +79,30 @@ function serializeSubTask(
   taskId: string;
   idUser: string;
   status: string;
-  type: string;
+  typeId: number;
   expectedDelivery: Date;
   createdAt: Date;
   startDate: Date | null;
   completionDate: Date | null;
   reason: string | null;
-  discoveryForm: JsonInput;
-  designs: JsonInput;
-  diagrams: JsonInput;
+  metadata: JsonInput;
 } {
-  const base = {
+  const metadata = subTask.getMetadata();
+  return {
     id: subTask.getId(),
     taskId: parentTaskId,
     idUser: subTask.getIdUser(),
     status: subTask.getStatus(),
-    type: subTask.getType(),
+    typeId: subTask.getTypeId(),
     expectedDelivery: subTask.getExpectedDelivery(),
     createdAt: subTask.getCreatedAt(),
     startDate: subTask.getStartDate() ?? null,
     completionDate: subTask.getCompletionDate() ?? null,
     reason: subTask.getReason() ?? null,
-    discoveryForm: Prisma.DbNull as JsonInput,
-    designs: Prisma.DbNull as JsonInput,
-    diagrams: Prisma.DbNull as JsonInput,
+    metadata: Object.keys(metadata).length > 0
+      ? (metadata as Prisma.InputJsonValue)
+      : (Prisma.DbNull as JsonInput),
   };
-
-  if (subTask instanceof DiscoverySubTask) {
-    base.discoveryForm = subTask.getForm() as Prisma.InputJsonValue;
-  } else if (subTask instanceof DesignSubTask) {
-    base.designs = subTask.getDesigns().map((d) => ({
-      id: d.getId(),
-      title: d.getTitle(),
-      description: d.getDescription(),
-      urlImage: d.getUrlImage(),
-      user: d.getUser(),
-      dateUpload: d.getDateUpload().toISOString(),
-    })) as Prisma.InputJsonValue;
-  } else if (subTask instanceof DiagramSubTask) {
-    base.diagrams = subTask.getDiagrams().map((d) => ({
-      title: d.getTitle(),
-      description: d.getDescription(),
-      urlDiagram: d.getUrlDiagram(),
-      user: d.getUser(),
-      dateUpload: d.getDateUpload().toISOString(),
-    })) as Prisma.InputJsonValue;
-  }
-
-  return base;
 }
 
 const taskInclude = {
