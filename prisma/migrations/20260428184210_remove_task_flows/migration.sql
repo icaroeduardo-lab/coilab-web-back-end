@@ -1,0 +1,2 @@
+-- Migration applied directly to DB (applicants/flows UUID→int, task_flows flow_id UUID→int)
+-- This file is a placeholder to sync local migration history with DB state.

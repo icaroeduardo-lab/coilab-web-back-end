@@ -88,6 +88,13 @@ model TaskFlow {
   @@map("task_flows")
 }
 
+model TaskTool {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(255)
+
+  @@map("task_tools")
+}
+
 model SubTask {
   id               String    @id @db.Uuid
   taskId           String    @db.Uuid
