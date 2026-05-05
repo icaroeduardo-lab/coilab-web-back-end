@@ -8,9 +8,11 @@ import {
   IsDate,
   IsInt,
   Min,
+  Matches,
 } from 'class-validator';
 import { Entity } from './entity.base';
 import { SubTaskId, TaskId, TaskToolId, UserId } from '../shared/entity-ids';
+import { SEQUENTIAL_NUMBER_REGEX } from '../shared/sequential-number';
 
 export enum SubTaskStatus {
   NAO_INICIADO = 'Não iniciado',
@@ -27,6 +29,7 @@ export interface SubTaskProps {
   idUser: UserId;
   status: SubTaskStatus;
   typeId: TaskToolId;
+  taskNumber: string;
   expectedDelivery: Date;
   createdAt?: Date;
   startDate?: Date;
@@ -54,6 +57,10 @@ export class SubTask extends Entity {
   @IsInt()
   @Min(1)
   protected typeId: TaskToolId;
+
+  @Matches(SEQUENTIAL_NUMBER_REGEX)
+  @IsNotEmpty()
+  protected taskNumber: string;
 
   @IsDate()
   protected expectedDelivery: Date;
@@ -83,6 +90,7 @@ export class SubTask extends Entity {
     this.idUser = props.idUser;
     this.status = props.status;
     this.typeId = props.typeId;
+    this.taskNumber = props.taskNumber;
     this.expectedDelivery = props.expectedDelivery;
     this.createdAt = props.createdAt ?? new Date();
     this.startDate = props.startDate;
@@ -97,6 +105,7 @@ export class SubTask extends Entity {
   getIdUser(): UserId { return this.idUser; }
   getStatus(): SubTaskStatus { return this.status; }
   getTypeId(): TaskToolId { return this.typeId; }
+  getTaskNumber(): string { return this.taskNumber; }
   getExpectedDelivery(): Date { return this.expectedDelivery; }
   getCreatedAt(): Date { return this.createdAt; }
   getStartDate(): Date | undefined { return this.startDate; }

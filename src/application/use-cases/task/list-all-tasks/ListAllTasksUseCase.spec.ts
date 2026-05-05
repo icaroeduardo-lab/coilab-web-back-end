@@ -22,6 +22,7 @@ const makeTaskRepo = (): jest.Mocked<ITaskRepository> => ({
   count: jest.fn(),
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
+  findLastSubTaskNumber: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
 });
@@ -157,6 +158,7 @@ describe('ListAllTasksUseCase', () => {
       idUser: UserId(randomUUID()),
       status: SubTaskStatus.REPROVADO,
       typeId: TaskToolId(1),
+      taskNumber: '#20260001',
       expectedDelivery: new Date(),
       createdAt: new Date('2026-01-01'),
     });
@@ -166,6 +168,7 @@ describe('ListAllTasksUseCase', () => {
       idUser: UserId(randomUUID()),
       status: SubTaskStatus.EM_PROGRESSO,
       typeId: TaskToolId(1),
+      taskNumber: '#20260001',
       expectedDelivery: new Date(),
       createdAt: new Date('2026-03-01'),
     });
@@ -196,6 +199,7 @@ describe('ListAllTasksUseCase', () => {
       idUser: UserId(randomUUID()),
       status: SubTaskStatus.EM_PROGRESSO,
       typeId: TaskToolId(1),
+      taskNumber: '#20260001',
       expectedDelivery: new Date(),
       createdAt: new Date('2026-03-01'),
     });
@@ -205,6 +209,7 @@ describe('ListAllTasksUseCase', () => {
       idUser: UserId(randomUUID()),
       status: SubTaskStatus.REPROVADO,
       typeId: TaskToolId(1),
+      taskNumber: '#20260001',
       expectedDelivery: new Date(),
       createdAt: new Date('2026-01-01'),
     });

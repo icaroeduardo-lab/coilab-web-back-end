@@ -68,7 +68,6 @@ describe('TaskController', () => {
       const output = {
         id: randomUUID(),
         name: 'Task 1',
-        taskNumber: '#20260001',
         priority: TaskPriority.MEDIA,
         status: TaskStatus.BACKLOG,
         projectId: randomUUID(),

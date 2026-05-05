@@ -155,6 +155,7 @@ describe('PrismaTaskRepository — Discovery SubTask (typeId=1)', () => {
       idUser: creatorId,
       status: SubTaskStatus.EM_PROGRESSO,
       typeId: TaskToolId(1),
+      taskNumber: '#20260001',
       expectedDelivery: new Date('2026-12-31'),
       metadata: {
         form: {
@@ -183,6 +184,7 @@ describe('PrismaTaskRepository — Discovery SubTask (typeId=1)', () => {
       idUser: creatorId,
       status: SubTaskStatus.NAO_INICIADO,
       typeId: TaskToolId(1),
+      taskNumber: '#20260001',
       expectedDelivery: new Date('2026-12-31'),
     });
 
@@ -204,6 +206,7 @@ describe('PrismaTaskRepository — Design SubTask (typeId=2)', () => {
       idUser: creatorId,
       status: SubTaskStatus.EM_PROGRESSO,
       typeId: TaskToolId(2),
+      taskNumber: '#20260001',
       expectedDelivery: new Date('2026-12-31'),
       metadata: {
         designs: [
@@ -237,6 +240,7 @@ describe('PrismaTaskRepository — Design SubTask (typeId=2)', () => {
       idUser: creatorId,
       status: SubTaskStatus.NAO_INICIADO,
       typeId: TaskToolId(2),
+      taskNumber: '#20260001',
       expectedDelivery: new Date('2026-12-31'),
     });
 
@@ -257,6 +261,7 @@ describe('PrismaTaskRepository — Diagram SubTask (typeId=3)', () => {
       idUser: creatorId,
       status: SubTaskStatus.EM_PROGRESSO,
       typeId: TaskToolId(3),
+      taskNumber: '#20260001',
       expectedDelivery: new Date('2026-12-31'),
       metadata: {
         diagrams: [
@@ -291,6 +296,7 @@ describe('PrismaTaskRepository — save syncs subtasks', () => {
       idUser: creatorId,
       status: SubTaskStatus.NAO_INICIADO,
       typeId: TaskToolId(2),
+      taskNumber: '#20260001',
       expectedDelivery: new Date('2026-12-31'),
     });
     const task = makeTask([subTask]);

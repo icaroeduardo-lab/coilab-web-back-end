@@ -17,6 +17,7 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   findAll: jest.fn(),
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
+  findLastSubTaskNumber: jest.fn(),
   count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
@@ -29,6 +30,7 @@ const makeSubTask = (id: string, typeId = 3) =>
     idUser: UserId(randomUUID()),
     status: SubTaskStatus.NAO_INICIADO,
     typeId: TaskToolId(typeId),
+    taskNumber: '#20260001',
     expectedDelivery: new Date(),
   });
 

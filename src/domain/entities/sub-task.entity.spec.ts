@@ -19,6 +19,7 @@ const makeSubTask = (
     idUser: userId,
     status: overrides.status ?? SubTaskStatus.NAO_INICIADO,
     typeId: overrides.typeId ?? TaskToolId(1),
+    taskNumber: '#20260001',
     expectedDelivery: new Date('2026-12-31'),
     metadata: overrides.metadata,
   });
@@ -174,6 +175,7 @@ describe('SubTask Entity', () => {
       idUser: userId,
       status: SubTaskStatus.NAO_INICIADO,
       typeId: TaskToolId(1),
+      taskNumber: '#20260001',
       expectedDelivery: new Date(),
     });
 

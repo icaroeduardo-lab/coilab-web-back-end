@@ -35,6 +35,7 @@ describe('Task Status Transition Rules', () => {
         idUser: userId,
         status: SubTaskStatus.AGUARDANDO_CHECKOUT,
         typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );
@@ -50,6 +51,7 @@ describe('Task Status Transition Rules', () => {
       idUser: userId,
       status: SubTaskStatus.AGUARDANDO_CHECKOUT,
       typeId: TaskToolId(1),
+      taskNumber: '#20260001',
       expectedDelivery: deliveryDate,
     });
     task.addSubTask(subtask);
@@ -67,6 +69,7 @@ describe('Task Status Transition Rules', () => {
         idUser: userId,
         status: SubTaskStatus.EM_PROGRESSO,
         typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );
@@ -83,6 +86,7 @@ describe('Task Status Transition Rules', () => {
         idUser: userId,
         status: SubTaskStatus.REPROVADO,
         typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );
@@ -93,6 +97,7 @@ describe('Task Status Transition Rules', () => {
         idUser: userId,
         status: SubTaskStatus.AGUARDANDO_CHECKOUT,
         typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );
@@ -109,6 +114,7 @@ describe('Task Status Transition Rules', () => {
         idUser: userId,
         status: SubTaskStatus.REPROVADO,
         typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );
@@ -125,6 +131,7 @@ describe('Task Status Transition Rules', () => {
         idUser: userId,
         status: SubTaskStatus.EM_PROGRESSO,
         typeId: TaskToolId(2),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );
@@ -136,6 +143,7 @@ describe('Task Status Transition Rules', () => {
           idUser: userId,
           status: SubTaskStatus.NAO_INICIADO,
           typeId: TaskToolId(2),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       ),
@@ -151,6 +159,7 @@ describe('Task Status Transition Rules', () => {
         idUser: userId,
         status: SubTaskStatus.REPROVADO,
         typeId: TaskToolId(2),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );
@@ -162,6 +171,7 @@ describe('Task Status Transition Rules', () => {
           idUser: userId,
           status: SubTaskStatus.NAO_INICIADO,
           typeId: TaskToolId(2),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       ),
@@ -178,6 +188,7 @@ describe('Task Status Transition Rules', () => {
           idUser: userId,
           status: SubTaskStatus.NAO_INICIADO,
           typeId: TaskToolId(1),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       ),
@@ -193,6 +204,7 @@ describe('Task Status Transition Rules', () => {
         idUser: userId,
         status: SubTaskStatus.EM_PROGRESSO,
         typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );

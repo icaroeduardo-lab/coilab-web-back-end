@@ -2,6 +2,7 @@ import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.ent
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { TaskId, UserId, SubTaskId, TaskToolId } from '../../../../domain/shared/entity-ids';
 import { generateId } from '../../../../shared/generate-id';
+import { generateNextNumber } from '../../../../domain/shared/sequential-number';
 
 export interface AddSubTaskToTaskInput {
   taskId: string;
@@ -14,7 +15,10 @@ export class AddSubTaskToTaskUseCase {
   constructor(private readonly taskRepository: ITaskRepository) {}
 
   async execute(input: AddSubTaskToTaskInput): Promise<void> {
-    const task = await this.taskRepository.findById(TaskId(input.taskId));
+    const [task, lastSubTaskNumber] = await Promise.all([
+      this.taskRepository.findById(TaskId(input.taskId)),
+      this.taskRepository.findLastSubTaskNumber(),
+    ]);
     if (!task) {
       throw new Error(`Task not found: ${input.taskId}`);
     }
@@ -26,6 +30,7 @@ export class AddSubTaskToTaskUseCase {
         idUser: UserId(input.idUser),
         status: SubTaskStatus.NAO_INICIADO,
         typeId: TaskToolId(input.typeId),
+        taskNumber: generateNextNumber(lastSubTaskNumber),
         expectedDelivery: input.expectedDelivery,
       }),
     );

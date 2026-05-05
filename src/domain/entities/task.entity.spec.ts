@@ -16,6 +16,7 @@ describe('Task Entity', () => {
     idUser: userId,
     status: SubTaskStatus.NAO_INICIADO,
     typeId: TaskToolId(1),
+    taskNumber: '#20260001',
     expectedDelivery: deliveryDate,
   });
 
@@ -25,6 +26,7 @@ describe('Task Entity', () => {
     idUser: userId,
     status: SubTaskStatus.NAO_INICIADO,
     typeId: TaskToolId(2),
+    taskNumber: '#20260002',
     expectedDelivery: deliveryDate,
   });
 
@@ -34,6 +36,7 @@ describe('Task Entity', () => {
     idUser: userId,
     status: SubTaskStatus.NAO_INICIADO,
     typeId: TaskToolId(3),
+    taskNumber: '#20260003',
     expectedDelivery: deliveryDate,
   });
 
@@ -152,6 +155,7 @@ describe('Task Entity', () => {
           idUser: userId,
           status: SubTaskStatus.NAO_INICIADO,
           typeId: TaskToolId(1),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       );
@@ -167,6 +171,7 @@ describe('Task Entity', () => {
           idUser: userId,
           status: SubTaskStatus.AGUARDANDO_CHECKOUT,
           typeId: TaskToolId(1),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       );
@@ -184,6 +189,7 @@ describe('Task Entity', () => {
           idUser: userId,
           status: SubTaskStatus.EM_PROGRESSO,
           typeId: TaskToolId(1),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       );
@@ -201,6 +207,7 @@ describe('Task Entity', () => {
           idUser: userId,
           status: SubTaskStatus.AGUARDANDO_CHECKOUT,
           typeId: TaskToolId(1),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       );
@@ -219,6 +226,7 @@ describe('Task Entity', () => {
           idUser: userId,
           status: SubTaskStatus.EM_PROGRESSO,
           typeId: TaskToolId(1),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       );
@@ -235,6 +243,7 @@ describe('Task Entity', () => {
           idUser: userId,
           status: SubTaskStatus.AGUARDANDO_CHECKOUT,
           typeId: TaskToolId(1),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       );
@@ -245,6 +254,7 @@ describe('Task Entity', () => {
           idUser: userId,
           status: SubTaskStatus.EM_PROGRESSO,
           typeId: TaskToolId(2),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       );
@@ -262,6 +272,7 @@ describe('Task Entity', () => {
           idUser: userId,
           status: SubTaskStatus.AGUARDANDO_CHECKOUT,
           typeId: TaskToolId(1),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       );
@@ -272,6 +283,7 @@ describe('Task Entity', () => {
           idUser: userId,
           status: SubTaskStatus.EM_PROGRESSO,
           typeId: TaskToolId(2),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       );

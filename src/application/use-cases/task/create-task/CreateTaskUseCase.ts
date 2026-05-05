@@ -32,13 +32,18 @@ export interface CreateTaskInput {
   subTasks?: CreateTaskSubTaskInput[];
 }
 
-const buildSubTask = (input: CreateTaskSubTaskInput, taskId: string): SubTask =>
+const buildSubTask = (
+  input: CreateTaskSubTaskInput,
+  taskId: string,
+  taskNumber: string,
+): SubTask =>
   new SubTask({
     id: SubTaskId(generateId()),
     taskId: TaskId(taskId),
     idUser: UserId(input.idUser),
     status: SubTaskStatus.NAO_INICIADO,
     typeId: TaskToolId(input.typeId),
+    taskNumber,
     expectedDelivery: input.expectedDelivery,
   });
 
@@ -46,11 +51,18 @@ export class CreateTaskUseCase {
   constructor(private readonly taskRepository: ITaskRepository) {}
 
   async execute(input: CreateTaskInput): Promise<TaskOutput> {
-    const lastNumber = await this.taskRepository.findLastTaskNumber();
-    const taskNumber = generateNextNumber(lastNumber);
+    const [lastTaskNumber, lastSubTaskNumber] = await Promise.all([
+      this.taskRepository.findLastTaskNumber(),
+      this.taskRepository.findLastSubTaskNumber(),
+    ]);
+    const taskNumber = generateNextNumber(lastTaskNumber);
     const taskId = generateId();
 
-    const subTasks = (input.subTasks ?? []).map((s) => buildSubTask(s, taskId));
+    let subTaskSeq = lastSubTaskNumber;
+    const subTasks = (input.subTasks ?? []).map((s) => {
+      subTaskSeq = generateNextNumber(subTaskSeq);
+      return buildSubTask(s, taskId, subTaskSeq);
+    });
 
     const task = new Task({
       id: TaskId(taskId),

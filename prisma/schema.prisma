@@ -102,6 +102,7 @@ model SubTask {
   idUser           String    @db.Uuid
   status           String
   typeId           Int
+  taskNumber       String    @unique
   expectedDelivery DateTime
   createdAt        DateTime  @default(now())
   startDate        DateTime?

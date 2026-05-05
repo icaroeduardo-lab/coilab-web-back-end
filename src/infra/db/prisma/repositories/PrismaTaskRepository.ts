@@ -43,6 +43,7 @@ function subTaskToDomain(row: PrismaSubTask): SubTask {
     idUser: UserId(row.idUser),
     status: row.status as SubTaskStatus,
     typeId: TaskToolId(row.typeId),
+    taskNumber: row.taskNumber,
     expectedDelivery: row.expectedDelivery,
     createdAt: row.createdAt,
     startDate: row.startDate ?? undefined,
@@ -80,6 +81,7 @@ function serializeSubTask(
   idUser: string;
   status: string;
   typeId: number;
+  taskNumber: string;
   expectedDelivery: Date;
   createdAt: Date;
   startDate: Date | null;
@@ -94,6 +96,7 @@ function serializeSubTask(
     idUser: subTask.getIdUser(),
     status: subTask.getStatus(),
     typeId: subTask.getTypeId(),
+    taskNumber: subTask.getTaskNumber(),
     expectedDelivery: subTask.getExpectedDelivery(),
     createdAt: subTask.getCreatedAt(),
     startDate: subTask.getStartDate() ?? null,
@@ -140,6 +143,11 @@ export class PrismaTaskRepository implements ITaskRepository {
 
   async findLastTaskNumber(): Promise<string | null> {
     const row = await prisma.task.findFirst({ orderBy: { taskNumber: 'desc' } });
+    return row?.taskNumber ?? null;
+  }
+
+  async findLastSubTaskNumber(): Promise<string | null> {
+    const row = await prisma.subTask.findFirst({ orderBy: { taskNumber: 'desc' } });
     return row?.taskNumber ?? null;
   }
 
