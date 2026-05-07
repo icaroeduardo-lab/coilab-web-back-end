@@ -42,9 +42,8 @@ describe('PrismaFlowRepository', () => {
   });
 
   it('delete removes flow', async () => {
-    const flow = makeFlow();
-    await repo.save(flow);
-    await repo.delete(flow.getId());
+    const saved = await repo.save(makeFlow());
+    await repo.delete(saved.getId());
 
     const all = await repo.findAll();
     expect(all).toHaveLength(0);
