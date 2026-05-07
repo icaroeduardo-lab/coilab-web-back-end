@@ -100,18 +100,42 @@ export class SubTask extends Entity {
     this.validate();
   }
 
-  getId(): SubTaskId { return this.id; }
-  getTaskId(): TaskId { return this.taskId; }
-  getIdUser(): UserId { return this.idUser; }
-  getStatus(): SubTaskStatus { return this.status; }
-  getTypeId(): TaskToolId { return this.typeId; }
-  getTaskNumber(): string { return this.taskNumber; }
-  getExpectedDelivery(): Date { return this.expectedDelivery; }
-  getCreatedAt(): Date { return this.createdAt; }
-  getStartDate(): Date | undefined { return this.startDate; }
-  getCompletionDate(): Date | undefined { return this.completionDate; }
-  getReason(): string | undefined { return this.reason; }
-  getMetadata(): Record<string, unknown> { return this.metadata; }
+  getId(): SubTaskId {
+    return this.id;
+  }
+  getTaskId(): TaskId {
+    return this.taskId;
+  }
+  getIdUser(): UserId {
+    return this.idUser;
+  }
+  getStatus(): SubTaskStatus {
+    return this.status;
+  }
+  getTypeId(): TaskToolId {
+    return this.typeId;
+  }
+  getTaskNumber(): string {
+    return this.taskNumber;
+  }
+  getExpectedDelivery(): Date {
+    return this.expectedDelivery;
+  }
+  getCreatedAt(): Date {
+    return this.createdAt;
+  }
+  getStartDate(): Date | undefined {
+    return this.startDate;
+  }
+  getCompletionDate(): Date | undefined {
+    return this.completionDate;
+  }
+  getReason(): string | undefined {
+    return this.reason;
+  }
+  getMetadata(): Record<string, unknown> {
+    return this.metadata;
+  }
 
   updateMetadata(data: Record<string, unknown>): void {
     this.assertEditable();

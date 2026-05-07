@@ -14,9 +14,7 @@ const makeRepo = (): jest.Mocked<IFlowRepository> => ({
 describe('CreateFlowUseCase', () => {
   it('creates and saves flow', async () => {
     const repo = makeRepo();
-    repo.save.mockImplementation(async (f: Flow) =>
-      new Flow({ id: FlowId(1), name: f.getName() }),
-    );
+    repo.save.mockImplementation(async (f: Flow) => new Flow({ id: FlowId(1), name: f.getName() }));
     const sut = new CreateFlowUseCase(repo);
 
     const output = await sut.execute({ name: 'Discovery' });

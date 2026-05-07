@@ -32,11 +32,7 @@ export interface CreateTaskInput {
   subTasks?: CreateTaskSubTaskInput[];
 }
 
-const buildSubTask = (
-  input: CreateTaskSubTaskInput,
-  taskId: string,
-  taskNumber: string,
-): SubTask =>
+const buildSubTask = (input: CreateTaskSubTaskInput, taskId: string, taskNumber: string): SubTask =>
   new SubTask({
     id: SubTaskId(generateId()),
     taskId: TaskId(taskId),

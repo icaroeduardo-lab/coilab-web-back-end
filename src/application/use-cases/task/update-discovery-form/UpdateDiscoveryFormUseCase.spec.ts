@@ -88,7 +88,10 @@ describe('UpdateDiscoveryFormUseCase', () => {
 
     const saved: Task = repo.save.mock.calls[0][0];
     const updated = saved.getSubTasks().find((s) => s.getId() === subTaskId)!;
-    const form = updated.getMetadata().form as Record<string, { value: unknown; userId: string; filledAt: string }>;
+    const form = updated.getMetadata().form as Record<
+      string,
+      { value: unknown; userId: string; filledAt: string }
+    >;
     expect(form.summary?.userId).toBe(userId);
     expect(new Date(form.summary?.filledAt).getTime()).toBeGreaterThanOrEqual(before.getTime());
   });

@@ -1,6 +1,14 @@
 import { Task, TaskPriority, TaskStatus } from './task.entity';
 import { SubTask, SubTaskStatus } from './sub-task.entity';
-import { TaskId, ProjectId, SubTaskId, ApplicantId, UserId, FlowId, TaskToolId } from '../shared/entity-ids';
+import {
+  TaskId,
+  ProjectId,
+  SubTaskId,
+  ApplicantId,
+  UserId,
+  FlowId,
+  TaskToolId,
+} from '../shared/entity-ids';
 
 describe('Task Entity', () => {
   const taskId = TaskId('550e8400-e29b-41d4-a716-446655440001');

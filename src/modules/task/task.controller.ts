@@ -184,7 +184,12 @@ export class TaskController {
     @Param('subTaskId') subTaskId: string,
     @Body() dto: UpdateDiscoveryFormDto,
   ) {
-    await this.updateDiscovery.execute({ taskId, subTaskId, userId: user.sub, fields: dto.fields ?? {} });
+    await this.updateDiscovery.execute({
+      taskId,
+      subTaskId,
+      userId: user.sub,
+      fields: dto.fields ?? {},
+    });
   }
 
   @Post(':taskId/subtasks/:subTaskId/designs')

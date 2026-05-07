@@ -160,7 +160,11 @@ describe('PrismaTaskRepository — Discovery SubTask (typeId=1)', () => {
       metadata: {
         form: {
           complexity: { value: 'high', userId: creatorId, filledAt: new Date().toISOString() },
-          projectName: { value: 'Nome do Projeto', userId: creatorId, filledAt: new Date().toISOString() },
+          projectName: {
+            value: 'Nome do Projeto',
+            userId: creatorId,
+            filledAt: new Date().toISOString(),
+          },
         },
       },
     });
