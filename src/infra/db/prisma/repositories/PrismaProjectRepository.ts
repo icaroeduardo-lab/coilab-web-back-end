@@ -8,7 +8,7 @@ const STATUS_NORMALIZE: Record<string, ProjectStatus> = {
   ativo: ProjectStatus.EM_EXECUCAO,
   backlog: ProjectStatus.BACKLOG,
   'em execução': ProjectStatus.EM_EXECUCAO,
-  'concluído': ProjectStatus.CONCLUIDO,
+  concluído: ProjectStatus.CONCLUIDO,
   cancelado: ProjectStatus.CANCELADO,
 };
 

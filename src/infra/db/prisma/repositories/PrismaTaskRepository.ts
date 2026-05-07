@@ -74,9 +74,11 @@ const PRIORITY_NORMALIZE: Record<string, TaskPriority> = {
 };
 
 function normalizePriority(raw: string): TaskPriority {
-  return PRIORITY_NORMALIZE[raw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')] ??
+  return (
+    PRIORITY_NORMALIZE[raw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')] ??
     PRIORITY_NORMALIZE[raw.toLowerCase()] ??
-    TaskPriority.BAIXA;
+    TaskPriority.BAIXA
+  );
 }
 
 function normalizeTaskNumber(raw: string): string {
@@ -132,9 +134,10 @@ function serializeSubTask(
     startDate: subTask.getStartDate() ?? null,
     completionDate: subTask.getCompletionDate() ?? null,
     reason: subTask.getReason() ?? null,
-    metadata: Object.keys(metadata).length > 0
-      ? (metadata as Prisma.InputJsonValue)
-      : (Prisma.DbNull as JsonInput),
+    metadata:
+      Object.keys(metadata).length > 0
+        ? (metadata as Prisma.InputJsonValue)
+        : (Prisma.DbNull as JsonInput),
   };
 }
 

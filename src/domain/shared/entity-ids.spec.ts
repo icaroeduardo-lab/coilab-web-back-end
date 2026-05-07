@@ -1,4 +1,4 @@
-import { ProjectId, TaskId, SubTaskId, ApplicantId, FlowId, DesignId } from './entity-ids';
+import { ProjectId, TaskId, SubTaskId, ApplicantId, DesignId } from './entity-ids';
 
 describe('Typed Entity IDs', () => {
   const validUuid = '550e8400-e29b-41d4-a716-446655440000';
