@@ -80,7 +80,7 @@ describe('UpdateTaskUseCase', () => {
     const id = randomUUID();
     repo.findById.mockResolvedValue(makeTask(id));
     const sut = new UpdateTaskUseCase(repo);
-    const newApplicantId = '2';
+    const newApplicantId = 2;
 
     await sut.execute({ id, applicantId: newApplicantId });
 
@@ -140,7 +140,7 @@ describe('UpdateTaskUseCase', () => {
     repo.findById.mockResolvedValue(makeTask(id));
     const sut = new UpdateTaskUseCase(repo);
 
-    await sut.execute({ id, flowIdsToAdd: ['1', '2'] });
+    await sut.execute({ id, flowIdsToAdd: [1, 2] });
 
     const saved: Task = repo.save.mock.calls[0][0];
     expect(saved.getFlowIds()).toHaveLength(2);
@@ -156,7 +156,7 @@ describe('UpdateTaskUseCase', () => {
     repo.findById.mockResolvedValue(task);
     const sut = new UpdateTaskUseCase(repo);
 
-    await sut.execute({ id, flowIdsToRemove: [String(flowId)] });
+    await sut.execute({ id, flowIdsToRemove: [flowId] });
 
     const saved: Task = repo.save.mock.calls[0][0];
     expect(saved.getFlowIds()).toHaveLength(0);
@@ -168,7 +168,7 @@ describe('UpdateTaskUseCase', () => {
     repo.findById.mockResolvedValue(makeTask(id));
     const sut = new UpdateTaskUseCase(repo);
 
-    await expect(sut.execute({ id, flowIdsToRemove: ['999'] })).rejects.toThrow(
+    await expect(sut.execute({ id, flowIdsToRemove: [999] })).rejects.toThrow(
       'Flow não encontrado',
     );
   });

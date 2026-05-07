@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsArray, IsEnum, IsInt, IsOptional, IsString, IsUUID, Min } from 'class-validator';
 import { TaskPriority } from '../../../domain/entities/task.entity';
 
 export class UpdateTaskDto {
@@ -23,25 +23,25 @@ export class UpdateTaskDto {
   @IsOptional()
   projectId?: string;
 
-  @ApiPropertyOptional({
-    example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-    description: 'ID do setor solicitante',
-  })
-  @IsUUID()
+  @ApiPropertyOptional({ example: 1, description: 'ID inteiro do setor solicitante' })
+  @IsInt()
+  @Min(1)
   @IsOptional()
-  applicantId?: string;
+  applicantId?: number;
 
-  @ApiPropertyOptional({ type: [String], example: ['uuid-flow-1'] })
+  @ApiPropertyOptional({ type: [Number], example: [1, 2] })
   @IsArray()
-  @IsUUID('4', { each: true })
+  @IsInt({ each: true })
+  @Min(1, { each: true })
   @IsOptional()
-  flowIdsToAdd?: string[];
+  flowIdsToAdd?: number[];
 
-  @ApiPropertyOptional({ type: [String], example: ['uuid-flow-2'] })
+  @ApiPropertyOptional({ type: [Number], example: [1, 2] })
   @IsArray()
-  @IsUUID('4', { each: true })
+  @IsInt({ each: true })
+  @Min(1, { each: true })
   @IsOptional()
-  flowIdsToRemove?: string[];
+  flowIdsToRemove?: number[];
 
   @ApiPropertyOptional({ type: [String], example: ['uuid-subtask-1'] })
   @IsArray()
