@@ -1,6 +1,7 @@
 import { CreateFlowUseCase } from './CreateFlowUseCase';
 import { IFlowRepository } from '../../../../domain/repositories/IFlowRepository';
 import { Flow } from '../../../../domain/value-objects/flow.vo';
+import { FlowId } from '../../../../domain/shared/entity-ids';
 
 const makeRepo = (): jest.Mocked<IFlowRepository> => ({
   findByIds: jest.fn(),
@@ -13,15 +14,14 @@ const makeRepo = (): jest.Mocked<IFlowRepository> => ({
 describe('CreateFlowUseCase', () => {
   it('creates and saves flow', async () => {
     const repo = makeRepo();
+    repo.save.mockImplementation(async (f: Flow) => new Flow({ id: FlowId(1), name: f.getName() }));
     const sut = new CreateFlowUseCase(repo);
 
     const output = await sut.execute({ name: 'Discovery' });
 
     expect(repo.save).toHaveBeenCalledTimes(1);
-    const saved: Flow = repo.save.mock.calls[0][0];
-    expect(saved.getName()).toBe('Discovery');
     expect(output.name).toBe('Discovery');
-    expect(output.id).toBe(saved.getId());
+    expect(output.id).toBe(1);
   });
 
   it('throws when name too short', async () => {

@@ -10,7 +10,7 @@ export class UpdateApplicantUseCase {
   constructor(private readonly applicantRepository: IApplicantRepository) {}
 
   async execute(input: UpdateApplicantInput): Promise<void> {
-    const applicant = await this.applicantRepository.findById(ApplicantId(input.id));
+    const applicant = await this.applicantRepository.findById(ApplicantId(Number(input.id)));
     if (!applicant) {
       throw new Error(`Applicant not found: ${input.id}`);
     }

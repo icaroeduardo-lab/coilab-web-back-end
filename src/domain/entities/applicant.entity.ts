@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
 import { Entity } from './entity.base';
 import { ApplicantId } from '../shared/entity-ids';
 
@@ -9,8 +9,8 @@ export interface ApplicantProps {
 }
 
 export class Applicant extends Entity {
-  @IsUUID()
-  @IsNotEmpty()
+  @IsInt()
+  @Min(0)
   private id: ApplicantId;
 
   @IsString()

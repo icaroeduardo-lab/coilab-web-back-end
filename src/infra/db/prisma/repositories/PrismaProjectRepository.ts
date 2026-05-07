@@ -4,14 +4,30 @@ import { ProjectId } from '../../../../domain/shared/entity-ids';
 import { prisma } from '../prisma.client';
 import type { Project as PrismaProject } from '../../../../generated/prisma/client';
 
+const STATUS_NORMALIZE: Record<string, ProjectStatus> = {
+  ativo: ProjectStatus.EM_EXECUCAO,
+  backlog: ProjectStatus.BACKLOG,
+  'em execução': ProjectStatus.EM_EXECUCAO,
+  concluído: ProjectStatus.CONCLUIDO,
+  cancelado: ProjectStatus.CANCELADO,
+};
+
+function normalizeProjectStatus(raw: string): ProjectStatus {
+  return STATUS_NORMALIZE[raw.toLowerCase()] ?? ProjectStatus.BACKLOG;
+}
+
+function normalizeProjectNumber(raw: string): string {
+  return raw.startsWith('#') ? raw : `#${raw}`;
+}
+
 function toDomain(row: PrismaProject): Project {
   return new Project({
     id: ProjectId(row.id),
     name: row.name,
-    projectNumber: row.projectNumber,
+    projectNumber: normalizeProjectNumber(row.projectNumber),
     description: row.description,
     urlDocument: row.urlDocument ?? undefined,
-    status: row.status as ProjectStatus,
+    status: normalizeProjectStatus(row.status),
     createdAt: row.createdAt,
   });
 }

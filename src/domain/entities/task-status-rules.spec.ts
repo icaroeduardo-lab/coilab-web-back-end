@@ -1,6 +1,13 @@
 import { Task, TaskPriority, TaskStatus } from './task.entity';
-import { DiscoverySubTask, DesignSubTask, SubTaskStatus } from './sub-task.entity';
-import { TaskId, ProjectId, SubTaskId, ApplicantId, UserId } from '../shared/entity-ids';
+import { SubTask, SubTaskStatus } from './sub-task.entity';
+import {
+  TaskId,
+  ProjectId,
+  SubTaskId,
+  ApplicantId,
+  UserId,
+  TaskToolId,
+} from '../shared/entity-ids';
 
 describe('Task Status Transition Rules', () => {
   const userId = UserId('550e8400-e29b-41d4-a716-446655440003');
@@ -16,7 +23,7 @@ describe('Task Status Transition Rules', () => {
       taskNumber: '#20260001',
       priority: TaskPriority.MEDIA,
       status: TaskStatus.BACKLOG,
-      applicantId: ApplicantId('550e8400-e29b-41d4-a716-446655440005'),
+      applicantId: ApplicantId(1),
       creatorId: UserId('550e8400-e29b-41d4-a716-446655440006'),
     });
 
@@ -29,11 +36,13 @@ describe('Task Status Transition Rules', () => {
   it('should allow checkout if all subtasks are AGUARDANDO_CHECKOUT', () => {
     const task = baseTask();
     task.addSubTask(
-      new DiscoverySubTask({
+      new SubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440012'),
         taskId,
         idUser: userId,
         status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+        typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );
@@ -43,11 +52,13 @@ describe('Task Status Transition Rules', () => {
 
   it('should allow checkout if subtask was manually approved (all APROVADO, no REPROVADO)', () => {
     const task = baseTask();
-    const subtask = new DiscoverySubTask({
+    const subtask = new SubTask({
       id: SubTaskId('550e8400-e29b-41d4-a716-446655440013'),
       taskId,
       idUser: userId,
       status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+      typeId: TaskToolId(1),
+      taskNumber: '#20260001',
       expectedDelivery: deliveryDate,
     });
     task.addSubTask(subtask);
@@ -59,11 +70,13 @@ describe('Task Status Transition Rules', () => {
   it('should NOT allow checkout if a subtask is EM_PROGRESSO', () => {
     const task = baseTask();
     task.addSubTask(
-      new DiscoverySubTask({
+      new SubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440012'),
         taskId,
         idUser: userId,
         status: SubTaskStatus.EM_PROGRESSO,
+        typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );
@@ -74,20 +87,24 @@ describe('Task Status Transition Rules', () => {
   it('should allow checkout if one subtask is REPROVADO and another of same type is AGUARDANDO_CHECKOUT', () => {
     const task = baseTask();
     task.addSubTask(
-      new DiscoverySubTask({
+      new SubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440013'),
         taskId,
         idUser: userId,
         status: SubTaskStatus.REPROVADO,
+        typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );
     task.addSubTask(
-      new DiscoverySubTask({
+      new SubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440014'),
         taskId,
         idUser: userId,
         status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+        typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );
@@ -98,11 +115,13 @@ describe('Task Status Transition Rules', () => {
   it('should NOT allow checkout if a subtask is REPROVADO with no substitute AGUARDANDO_CHECKOUT', () => {
     const task = baseTask();
     task.addSubTask(
-      new DiscoverySubTask({
+      new SubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440013'),
         taskId,
         idUser: userId,
         status: SubTaskStatus.REPROVADO,
+        typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );
@@ -113,21 +132,25 @@ describe('Task Status Transition Rules', () => {
   it('should NOT allow adding a second subtask of the same type if the previous is not REPROVADO', () => {
     const task = baseTask();
     task.addSubTask(
-      new DesignSubTask({
+      new SubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440020'),
         taskId,
         idUser: userId,
         status: SubTaskStatus.EM_PROGRESSO,
+        typeId: TaskToolId(2),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );
     expect(() =>
       task.addSubTask(
-        new DesignSubTask({
+        new SubTask({
           id: SubTaskId('550e8400-e29b-41d4-a716-446655440021'),
           taskId,
           idUser: userId,
           status: SubTaskStatus.NAO_INICIADO,
+          typeId: TaskToolId(2),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       ),
@@ -137,21 +160,25 @@ describe('Task Status Transition Rules', () => {
   it('should allow adding a second subtask of the same type if the previous is REPROVADO', () => {
     const task = baseTask();
     task.addSubTask(
-      new DesignSubTask({
+      new SubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440022'),
         taskId,
         idUser: userId,
         status: SubTaskStatus.REPROVADO,
+        typeId: TaskToolId(2),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );
     expect(() =>
       task.addSubTask(
-        new DesignSubTask({
+        new SubTask({
           id: SubTaskId('550e8400-e29b-41d4-a716-446655440023'),
           taskId,
           idUser: userId,
           status: SubTaskStatus.NAO_INICIADO,
+          typeId: TaskToolId(2),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       ),
@@ -162,11 +189,13 @@ describe('Task Status Transition Rules', () => {
     const task = baseTask();
     expect(() =>
       task.addSubTask(
-        new DiscoverySubTask({
+        new SubTask({
           id: SubTaskId('550e8400-e29b-41d4-a716-446655440024'),
           taskId,
           idUser: userId,
           status: SubTaskStatus.NAO_INICIADO,
+          typeId: TaskToolId(1),
+          taskNumber: '#20260001',
           expectedDelivery: deliveryDate,
         }),
       ),
@@ -176,11 +205,13 @@ describe('Task Status Transition Rules', () => {
   it('should move from BACKLOG to EM_EXECUCAO automatically when subtask starts', () => {
     const task = baseTask();
     task.addSubTask(
-      new DiscoverySubTask({
+      new SubTask({
         id: SubTaskId('550e8400-e29b-41d4-a716-446655440012'),
         taskId,
         idUser: userId,
         status: SubTaskStatus.EM_PROGRESSO,
+        typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: deliveryDate,
       }),
     );

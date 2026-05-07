@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsEnum } from 'class-validator';
-import { SubTaskType } from '../../../domain/entities/sub-task.entity';
+import { IsDateString, IsInt, Min } from 'class-validator';
 
 export class AddSubTaskDto {
-  @ApiProperty({ enum: SubTaskType, enumName: 'SubTaskType' })
-  @IsEnum(SubTaskType)
-  type: SubTaskType;
+  @ApiProperty({ example: 1, description: 'ID do tipo de subtarefa (TaskToolId)' })
+  @IsInt()
+  @Min(1)
+  typeId: number;
 
   @ApiProperty({ example: '2026-12-31', description: 'Data esperada de entrega (ISO 8601)' })
   @IsDateString()

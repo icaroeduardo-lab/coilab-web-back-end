@@ -6,67 +6,13 @@ import {
   IsString,
   IsUUID,
   IsDate,
-  ValidateNested,
+  IsInt,
+  Min,
+  Matches,
 } from 'class-validator';
 import { Entity } from './entity.base';
-import { Design } from '../value-objects/design.vo';
-import { Diagram } from '../value-objects/diagram.vo';
-import { SubTaskId, TaskId, DesignId, UserId } from '../shared/entity-ids';
-
-export enum Level {
-  HIGH = 'Alta',
-  MEDIUM = 'Média',
-  LOW = 'Baixa',
-}
-
-export enum Frequency {
-  DAILY = 'Diária',
-  WEEKLY = 'Semanal',
-  MONTHLY = 'Mensal',
-  OCCASIONAL = 'Eventual',
-}
-
-export interface DiscoveryFieldEntry<T = string> {
-  value: T;
-  userId: UserId;
-  filledAt: Date;
-}
-
-export interface DiscoveryFormProps {
-  complexity?: DiscoveryFieldEntry<Level>;
-  projectName?: DiscoveryFieldEntry;
-  summary?: DiscoveryFieldEntry;
-  painPoints?: DiscoveryFieldEntry;
-  frequency?: DiscoveryFieldEntry<Frequency>;
-  currentProcess?: DiscoveryFieldEntry;
-  inactionCost?: DiscoveryFieldEntry;
-  volume?: DiscoveryFieldEntry;
-  avgTime?: DiscoveryFieldEntry;
-  humanDependency?: DiscoveryFieldEntry<Level>;
-  rework?: DiscoveryFieldEntry;
-  previousAttempts?: DiscoveryFieldEntry;
-  benchmark?: DiscoveryFieldEntry;
-  institutionalPriority?: DiscoveryFieldEntry<Level>;
-  technicalOpinion?: DiscoveryFieldEntry;
-}
-
-export type DiscoveryFormInput = {
-  complexity?: Level;
-  projectName?: string;
-  summary?: string;
-  painPoints?: string;
-  frequency?: Frequency;
-  currentProcess?: string;
-  inactionCost?: string;
-  volume?: string;
-  avgTime?: string;
-  humanDependency?: Level;
-  rework?: string;
-  previousAttempts?: string;
-  benchmark?: string;
-  institutionalPriority?: Level;
-  technicalOpinion?: string;
-};
+import { SubTaskId, TaskId, TaskToolId, UserId } from '../shared/entity-ids';
+import { SEQUENTIAL_NUMBER_REGEX } from '../shared/sequential-number';
 
 export enum SubTaskStatus {
   NAO_INICIADO = 'Não iniciado',
@@ -77,26 +23,22 @@ export enum SubTaskStatus {
   CANCELADO = 'Cancelado',
 }
 
-export enum SubTaskType {
-  DISCOVERY = 'Discovery',
-  DESIGN = 'Design',
-  DIAGRAM = 'Diagram',
-}
-
 export interface SubTaskProps {
   id: SubTaskId;
   taskId: TaskId;
   idUser: UserId;
   status: SubTaskStatus;
-  type: SubTaskType;
+  typeId: TaskToolId;
+  taskNumber: string;
   expectedDelivery: Date;
   createdAt?: Date;
   startDate?: Date;
   completionDate?: Date;
   reason?: string;
+  metadata?: Record<string, unknown>;
 }
 
-export abstract class SubTask extends Entity {
+export class SubTask extends Entity {
   @IsUUID()
   @IsNotEmpty()
   protected id: SubTaskId;
@@ -112,8 +54,13 @@ export abstract class SubTask extends Entity {
   @IsEnum(SubTaskStatus)
   protected status: SubTaskStatus;
 
-  @IsEnum(SubTaskType)
-  protected type: SubTaskType;
+  @IsInt()
+  @Min(1)
+  protected typeId: TaskToolId;
+
+  @Matches(SEQUENTIAL_NUMBER_REGEX)
+  @IsNotEmpty()
+  protected taskNumber: string;
 
   @IsDate()
   protected expectedDelivery: Date;
@@ -134,22 +81,25 @@ export abstract class SubTask extends Entity {
   @IsOptional()
   protected reason?: string;
 
+  protected metadata: Record<string, unknown>;
+
   constructor(props: SubTaskProps) {
     super();
     this.id = props.id;
     this.taskId = props.taskId;
     this.idUser = props.idUser;
     this.status = props.status;
-    this.type = props.type;
+    this.typeId = props.typeId;
+    this.taskNumber = props.taskNumber;
     this.expectedDelivery = props.expectedDelivery;
     this.createdAt = props.createdAt ?? new Date();
     this.startDate = props.startDate;
     this.completionDate = props.completionDate;
     this.reason = props.reason;
+    this.metadata = props.metadata ?? {};
     this.validate();
   }
 
-  // Getters
   getId(): SubTaskId {
     return this.id;
   }
@@ -162,8 +112,11 @@ export abstract class SubTask extends Entity {
   getStatus(): SubTaskStatus {
     return this.status;
   }
-  getType(): SubTaskType {
-    return this.type;
+  getTypeId(): TaskToolId {
+    return this.typeId;
+  }
+  getTaskNumber(): string {
+    return this.taskNumber;
   }
   getExpectedDelivery(): Date {
     return this.expectedDelivery;
@@ -180,6 +133,14 @@ export abstract class SubTask extends Entity {
   getReason(): string | undefined {
     return this.reason;
   }
+  getMetadata(): Record<string, unknown> {
+    return this.metadata;
+  }
+
+  updateMetadata(data: Record<string, unknown>): void {
+    this.assertEditable();
+    this.metadata = { ...this.metadata, ...data };
+  }
 
   protected assertEditable(): void {
     const lockedStatuses = [
@@ -193,7 +154,6 @@ export abstract class SubTask extends Entity {
     }
   }
 
-  // Common Business Rules
   start(): void {
     this.status = SubTaskStatus.EM_PROGRESSO;
     this.startDate = new Date();
@@ -234,175 +194,6 @@ export abstract class SubTask extends Entity {
 
   updateStatus(status: SubTaskStatus): void {
     this.status = status;
-    this.validate();
-  }
-}
-
-export class DiscoverySubTask extends SubTask {
-  private complexity?: DiscoveryFieldEntry<Level>;
-  private projectName?: DiscoveryFieldEntry;
-  private summary?: DiscoveryFieldEntry;
-  private painPoints?: DiscoveryFieldEntry;
-  private frequency?: DiscoveryFieldEntry<Frequency>;
-  private currentProcess?: DiscoveryFieldEntry;
-  private inactionCost?: DiscoveryFieldEntry;
-  private volume?: DiscoveryFieldEntry;
-  private avgTime?: DiscoveryFieldEntry;
-  private humanDependency?: DiscoveryFieldEntry<Level>;
-  private rework?: DiscoveryFieldEntry;
-  private previousAttempts?: DiscoveryFieldEntry;
-  private benchmark?: DiscoveryFieldEntry;
-  private institutionalPriority?: DiscoveryFieldEntry<Level>;
-  private technicalOpinion?: DiscoveryFieldEntry;
-
-  constructor(props: Omit<SubTaskProps, 'type'> & DiscoveryFormProps) {
-    super({ ...props, type: SubTaskType.DISCOVERY });
-    this.complexity = props.complexity;
-    this.projectName = props.projectName;
-    this.summary = props.summary;
-    this.painPoints = props.painPoints;
-    this.frequency = props.frequency;
-    this.currentProcess = props.currentProcess;
-    this.inactionCost = props.inactionCost;
-    this.volume = props.volume;
-    this.avgTime = props.avgTime;
-    this.humanDependency = props.humanDependency;
-    this.rework = props.rework;
-    this.previousAttempts = props.previousAttempts;
-    this.benchmark = props.benchmark;
-    this.institutionalPriority = props.institutionalPriority;
-    this.technicalOpinion = props.technicalOpinion;
-  }
-
-  getForm(): DiscoveryFormProps {
-    return {
-      complexity: this.complexity,
-      projectName: this.projectName,
-      summary: this.summary,
-      painPoints: this.painPoints,
-      frequency: this.frequency,
-      currentProcess: this.currentProcess,
-      inactionCost: this.inactionCost,
-      volume: this.volume,
-      avgTime: this.avgTime,
-      humanDependency: this.humanDependency,
-      rework: this.rework,
-      previousAttempts: this.previousAttempts,
-      benchmark: this.benchmark,
-      institutionalPriority: this.institutionalPriority,
-      technicalOpinion: this.technicalOpinion,
-    };
-  }
-
-  updateForm(data: Partial<DiscoveryFormInput>, userId: UserId): void {
-    this.assertEditable();
-    const filledAt = new Date();
-    (Object.entries(data) as [keyof DiscoveryFormInput, unknown][]).forEach(([key, value]) => {
-      if (value !== undefined) {
-        (this as unknown as Record<string, unknown>)[key] = { value, userId, filledAt };
-      }
-    });
-    const effectiveComplexity = data.complexity ?? this.complexity?.value;
-    if (effectiveComplexity === Level.LOW) {
-      this.rework = undefined;
-      this.previousAttempts = undefined;
-      this.benchmark = undefined;
-    }
-  }
-
-  override complete(): void {
-    this.assertFormComplete();
-    super.complete();
-  }
-
-  private assertFormComplete(): void {
-    const baseFields: (keyof DiscoveryFormProps)[] = [
-      'complexity',
-      'projectName',
-      'summary',
-      'painPoints',
-      'frequency',
-      'currentProcess',
-      'inactionCost',
-      'volume',
-      'avgTime',
-      'humanDependency',
-      'institutionalPriority',
-      'technicalOpinion',
-    ];
-    const complexFields: (keyof DiscoveryFormProps)[] = ['rework', 'previousAttempts', 'benchmark'];
-    const isComplex = this.complexity?.value === Level.HIGH;
-    const required = isComplex ? [...baseFields, ...complexFields] : baseFields;
-    const missing = required.filter((f) => !this[f as keyof this]);
-    if (missing.length > 0) {
-      throw new Error(`Campos obrigatórios não preenchidos: ${missing.join(', ')}`);
-    }
-  }
-}
-
-export class DesignSubTask extends SubTask {
-  @ValidateNested({ each: true })
-  private designs: Design[];
-
-  constructor(props: Omit<SubTaskProps, 'type'> & { designs?: Design[] }) {
-    super({ ...props, type: SubTaskType.DESIGN });
-    this.designs = props.designs ?? [];
-  }
-
-  getDesigns(): Design[] {
-    return this.designs;
-  }
-
-  addDesign(design: Design): void {
-    this.assertEditable();
-    this.designs.push(design);
-    this.validate();
-  }
-
-  override complete(): void {
-    if (this.designs.length === 0) {
-      throw new Error('É necessário ao menos uma imagem para finalizar o Design');
-    }
-    super.complete();
-  }
-
-  removeDesign(id: DesignId): void {
-    this.assertEditable();
-    const index = this.designs.findIndex((d) => d.getId() === id);
-    if (index === -1) {
-      throw new Error(`Design com id ${id} não encontrado`);
-    }
-    this.designs.splice(index, 1);
-    this.validate();
-  }
-}
-
-export class DiagramSubTask extends SubTask {
-  @ValidateNested({ each: true })
-  private diagrams: Diagram[];
-
-  constructor(props: Omit<SubTaskProps, 'type'> & { diagrams?: Diagram[] }) {
-    super({ ...props, type: SubTaskType.DIAGRAM });
-    this.diagrams = props.diagrams ?? [];
-  }
-
-  getDiagrams(): Diagram[] {
-    return this.diagrams;
-  }
-
-  addDiagram(diagram: Diagram): void {
-    this.assertEditable();
-    this.diagrams.push(diagram);
-    this.validate();
-  }
-
-  removeDiagram(title: string): void {
-    this.assertEditable();
-    const index = this.diagrams.findIndex((d) => d.getTitle() === title);
-    if (index === -1) {
-      throw new Error(`Diagram com título "${title}" não encontrado`);
-    }
-    this.diagrams.splice(index, 1);
     this.validate();
   }
 }

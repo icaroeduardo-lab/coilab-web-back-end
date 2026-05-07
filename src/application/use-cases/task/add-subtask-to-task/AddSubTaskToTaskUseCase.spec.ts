@@ -1,7 +1,6 @@
 import { AddSubTaskToTaskUseCase } from './AddSubTaskToTaskUseCase';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
-import { SubTaskType } from '../../../../domain/entities/sub-task.entity';
 import { TaskId, ProjectId, ApplicantId, UserId } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
@@ -10,6 +9,7 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   findAll: jest.fn(),
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
+  findLastSubTaskNumber: jest.fn(),
   count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
@@ -24,7 +24,7 @@ const makeTask = (id: string) =>
     taskNumber: '#20260001',
     priority: TaskPriority.MEDIA,
     status: TaskStatus.BACKLOG,
-    applicantId: ApplicantId(randomUUID()),
+    applicantId: ApplicantId(1),
     creatorId: UserId(randomUUID()),
   });
 
@@ -37,14 +37,14 @@ describe('AddSubTaskToTaskUseCase', () => {
 
     await sut.execute({
       taskId,
-      type: SubTaskType.DISCOVERY,
+      typeId: 1,
       idUser: randomUUID(),
       expectedDelivery: new Date('2026-12-31'),
     });
 
     const saved: Task = repo.save.mock.calls[0][0];
     expect(saved.getSubTasks()).toHaveLength(1);
-    expect(saved.getSubTasks()[0].getType()).toBe(SubTaskType.DISCOVERY);
+    expect(saved.getSubTasks()[0].getTypeId()).toBe(1);
   });
 
   it('adds design subtask to task', async () => {
@@ -55,13 +55,13 @@ describe('AddSubTaskToTaskUseCase', () => {
 
     await sut.execute({
       taskId,
-      type: SubTaskType.DESIGN,
+      typeId: 2,
       idUser: randomUUID(),
       expectedDelivery: new Date('2026-12-31'),
     });
 
     const saved: Task = repo.save.mock.calls[0][0];
-    expect(saved.getSubTasks()[0].getType()).toBe(SubTaskType.DESIGN);
+    expect(saved.getSubTasks()[0].getTypeId()).toBe(2);
   });
 
   it('adds diagram subtask to task', async () => {
@@ -72,13 +72,13 @@ describe('AddSubTaskToTaskUseCase', () => {
 
     await sut.execute({
       taskId,
-      type: SubTaskType.DIAGRAM,
+      typeId: 3,
       idUser: randomUUID(),
       expectedDelivery: new Date('2026-12-31'),
     });
 
     const saved: Task = repo.save.mock.calls[0][0];
-    expect(saved.getSubTasks()[0].getType()).toBe(SubTaskType.DIAGRAM);
+    expect(saved.getSubTasks()[0].getTypeId()).toBe(3);
   });
 
   it('throws when task not found', async () => {
@@ -89,7 +89,7 @@ describe('AddSubTaskToTaskUseCase', () => {
     await expect(
       sut.execute({
         taskId: randomUUID(),
-        type: SubTaskType.DESIGN,
+        typeId: 2,
         idUser: randomUUID(),
         expectedDelivery: new Date(),
       }),
@@ -105,7 +105,7 @@ describe('AddSubTaskToTaskUseCase', () => {
 
     await sut.execute({
       taskId,
-      type: SubTaskType.DESIGN,
+      typeId: 2,
       idUser: randomUUID(),
       expectedDelivery: new Date(),
     });
@@ -116,7 +116,7 @@ describe('AddSubTaskToTaskUseCase', () => {
     await expect(
       sut.execute({
         taskId,
-        type: SubTaskType.DESIGN,
+        typeId: 2,
         idUser: randomUUID(),
         expectedDelivery: new Date(),
       }),

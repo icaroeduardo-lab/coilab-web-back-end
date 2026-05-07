@@ -3,11 +3,7 @@ import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository
 import { IApplicantRepository } from '../../../../domain/repositories/IApplicantRepository';
 import { IProjectRepository } from '../../../../domain/repositories/IProjectRepository';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
-import {
-  DiscoverySubTask,
-  SubTaskStatus,
-  SubTaskType,
-} from '../../../../domain/entities/sub-task.entity';
+import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import { Applicant } from '../../../../domain/entities/applicant.entity';
 import { Project } from '../../../../domain/entities/project.entity';
 import {
@@ -16,6 +12,7 @@ import {
   ApplicantId,
   UserId,
   SubTaskId,
+  TaskToolId,
 } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
@@ -25,6 +22,7 @@ const makeTaskRepo = (): jest.Mocked<ITaskRepository> => ({
   count: jest.fn(),
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
+  findLastSubTaskNumber: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
 });
@@ -47,7 +45,7 @@ const makeProjectRepo = (): jest.Mocked<IProjectRepository> => ({
   save: jest.fn(),
 });
 
-const makeApplicant = (id: string) => new Applicant({ id: ApplicantId(id), name: 'Setor TI' });
+const makeApplicant = (id: number) => new Applicant({ id: ApplicantId(id), name: 'Setor TI' });
 const makeProject = (id: string) =>
   new Project({
     id: ProjectId(id),
@@ -56,7 +54,7 @@ const makeProject = (id: string) =>
     description: 'D',
   });
 
-const makeTask = (applicantId: string, projectId: string) =>
+const makeTask = (applicantId: number, projectId: string) =>
   new Task({
     id: TaskId(randomUUID()),
     projectId: ProjectId(projectId),
@@ -74,7 +72,7 @@ describe('ListAllTasksUseCase', () => {
     const taskRepo = makeTaskRepo();
     const applicantRepo = makeApplicantRepo();
     const projectRepo = makeProjectRepo();
-    const applicantId = randomUUID();
+    const applicantId = 1;
     const projectId = randomUUID();
     const tasks = [makeTask(applicantId, projectId), makeTask(applicantId, projectId)];
     taskRepo.findAll.mockResolvedValue(tasks);
@@ -124,9 +122,8 @@ describe('ListAllTasksUseCase', () => {
     const taskRepo = makeTaskRepo();
     const applicantRepo = makeApplicantRepo();
     const projectRepo = makeProjectRepo();
-    const applicantId = randomUUID();
     const projectId = randomUUID();
-    taskRepo.findAll.mockResolvedValue([makeTask(applicantId, projectId)]);
+    taskRepo.findAll.mockResolvedValue([makeTask(1, projectId)]);
     taskRepo.count.mockResolvedValue(1);
     applicantRepo.findByIds.mockResolvedValue([]);
     projectRepo.findByIds.mockResolvedValue([makeProject(projectId)]);
@@ -139,37 +136,39 @@ describe('ListAllTasksUseCase', () => {
     const taskRepo = makeTaskRepo();
     const applicantRepo = makeApplicantRepo();
     const projectRepo = makeProjectRepo();
-    const applicantId = randomUUID();
     const projectId = randomUUID();
-    taskRepo.findAll.mockResolvedValue([makeTask(applicantId, projectId)]);
+    taskRepo.findAll.mockResolvedValue([makeTask(1, projectId)]);
     taskRepo.count.mockResolvedValue(1);
-    applicantRepo.findByIds.mockResolvedValue([makeApplicant(applicantId)]);
+    applicantRepo.findByIds.mockResolvedValue([makeApplicant(1)]);
     projectRepo.findByIds.mockResolvedValue([]);
     const sut = new ListAllTasksUseCase(taskRepo, applicantRepo, projectRepo);
 
     await expect(sut.execute()).rejects.toThrow('Project not found');
   });
 
-  it('deduplicates subtasks by type keeping latest createdAt', async () => {
+  it('deduplicates subtasks by typeId keeping latest createdAt', async () => {
     const taskRepo = makeTaskRepo();
     const applicantRepo = makeApplicantRepo();
     const projectRepo = makeProjectRepo();
-    const applicantId = randomUUID();
     const projectId = randomUUID();
-    const task = makeTask(applicantId, projectId);
-    const older = new DiscoverySubTask({
+    const task = makeTask(1, projectId);
+    const older = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(task.getId()),
       idUser: UserId(randomUUID()),
       status: SubTaskStatus.REPROVADO,
+      typeId: TaskToolId(1),
+      taskNumber: '#20260001',
       expectedDelivery: new Date(),
       createdAt: new Date('2026-01-01'),
     });
-    const newer = new DiscoverySubTask({
+    const newer = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(task.getId()),
       idUser: UserId(randomUUID()),
       status: SubTaskStatus.EM_PROGRESSO,
+      typeId: TaskToolId(1),
+      taskNumber: '#20260001',
       expectedDelivery: new Date(),
       createdAt: new Date('2026-03-01'),
     });
@@ -177,14 +176,14 @@ describe('ListAllTasksUseCase', () => {
     task.addSubTask(newer);
     taskRepo.findAll.mockResolvedValue([task]);
     taskRepo.count.mockResolvedValue(1);
-    applicantRepo.findByIds.mockResolvedValue([makeApplicant(applicantId)]);
+    applicantRepo.findByIds.mockResolvedValue([makeApplicant(1)]);
     projectRepo.findByIds.mockResolvedValue([makeProject(projectId)]);
     const sut = new ListAllTasksUseCase(taskRepo, applicantRepo, projectRepo);
 
     const result = await sut.execute();
 
     expect(result.data[0].subTasks).toHaveLength(1);
-    expect(result.data[0].subTasks[0].type).toBe(SubTaskType.DISCOVERY);
+    expect(result.data[0].subTasks[0].typeId).toBe(1);
     expect(result.data[0].subTasks[0].status).toBe(SubTaskStatus.EM_PROGRESSO);
   });
 
@@ -192,22 +191,25 @@ describe('ListAllTasksUseCase', () => {
     const taskRepo = makeTaskRepo();
     const applicantRepo = makeApplicantRepo();
     const projectRepo = makeProjectRepo();
-    const applicantId = randomUUID();
     const projectId = randomUUID();
     const taskId = TaskId(randomUUID());
-    const newer = new DiscoverySubTask({
+    const newer = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId,
       idUser: UserId(randomUUID()),
       status: SubTaskStatus.EM_PROGRESSO,
+      typeId: TaskToolId(1),
+      taskNumber: '#20260001',
       expectedDelivery: new Date(),
       createdAt: new Date('2026-03-01'),
     });
-    const older = new DiscoverySubTask({
+    const older = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId,
       idUser: UserId(randomUUID()),
       status: SubTaskStatus.REPROVADO,
+      typeId: TaskToolId(1),
+      taskNumber: '#20260001',
       expectedDelivery: new Date(),
       createdAt: new Date('2026-01-01'),
     });
@@ -219,13 +221,13 @@ describe('ListAllTasksUseCase', () => {
       taskNumber: '#20260001',
       priority: TaskPriority.MEDIA,
       status: TaskStatus.BACKLOG,
-      applicantId: ApplicantId(applicantId),
+      applicantId: ApplicantId(1),
       creatorId: UserId(randomUUID()),
       subTasks: [newer, older],
     });
     taskRepo.findAll.mockResolvedValue([task]);
     taskRepo.count.mockResolvedValue(1);
-    applicantRepo.findByIds.mockResolvedValue([makeApplicant(applicantId)]);
+    applicantRepo.findByIds.mockResolvedValue([makeApplicant(1)]);
     projectRepo.findByIds.mockResolvedValue([makeProject(projectId)]);
     const sut = new ListAllTasksUseCase(taskRepo, applicantRepo, projectRepo);
 

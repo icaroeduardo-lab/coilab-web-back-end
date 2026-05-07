@@ -27,15 +27,16 @@ export class UpdateTaskUseCase {
     if (input.description !== undefined) task.changeDescription(input.description);
     if (input.priority !== undefined) task.changePriority(input.priority);
     if (input.projectId !== undefined) task.changeProjectId(ProjectId(input.projectId));
-    if (input.applicantId !== undefined) task.changeApplicantId(ApplicantId(input.applicantId));
+    if (input.applicantId !== undefined)
+      task.changeApplicantId(ApplicantId(Number(input.applicantId)));
     if (input.flowIdsToAdd) {
       for (const flowId of input.flowIdsToAdd) {
-        task.addFlowId(FlowId(flowId));
+        task.addFlowId(FlowId(Number(flowId)));
       }
     }
     if (input.flowIdsToRemove) {
       for (const flowId of input.flowIdsToRemove) {
-        task.removeFlowId(flowId);
+        task.removeFlowId(FlowId(Number(flowId)));
       }
     }
     if (input.subTaskIdsToRemove) {

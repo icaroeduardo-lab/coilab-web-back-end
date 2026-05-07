@@ -9,7 +9,7 @@ import { User } from '../../../../domain/entities/user.entity';
 import { Applicant } from '../../../../domain/entities/applicant.entity';
 import { Project } from '../../../../domain/entities/project.entity';
 import { Flow } from '../../../../domain/value-objects/flow.vo';
-import { DiscoverySubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
+import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import {
   TaskId,
   ProjectId,
@@ -17,6 +17,7 @@ import {
   UserId,
   FlowId,
   SubTaskId,
+  TaskToolId,
 } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
@@ -25,6 +26,7 @@ const makeTaskRepo = (): jest.Mocked<ITaskRepository> => ({
   findAll: jest.fn(),
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
+  findLastSubTaskNumber: jest.fn(),
   count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
@@ -61,7 +63,7 @@ const makeProjectRepo = (): jest.Mocked<IProjectRepository> => ({
   save: jest.fn(),
 });
 
-const makeTask = (creatorId: string, applicantId: string, projectId: string) =>
+const makeTask = (creatorId: string, applicantId: number, projectId: string) =>
   new Task({
     id: TaskId(randomUUID()),
     projectId: ProjectId(projectId),
@@ -90,9 +92,9 @@ describe('GetTaskUseCase', () => {
     const flowRepo = makeFlowRepo();
     const projectRepo = makeProjectRepo();
     const creatorId = randomUUID();
-    const applicantId = randomUUID();
+    const applicantId = 1;
     const projectId = randomUUID();
-    const flowId = randomUUID();
+    const flowId = 1;
     const task = makeTask(creatorId, applicantId, projectId);
     task.addFlowId(FlowId(flowId));
     taskRepo.findById.mockResolvedValue(task);
@@ -138,15 +140,17 @@ describe('GetTaskUseCase', () => {
     const flowRepo = makeFlowRepo();
     const projectRepo = makeProjectRepo();
     const creatorId = randomUUID();
-    const applicantId = randomUUID();
+    const applicantId = 1;
     const projectId = randomUUID();
     const task = makeTask(creatorId, applicantId, projectId);
     task.addSubTask(
-      new DiscoverySubTask({
+      new SubTask({
         id: SubTaskId(randomUUID()),
         taskId: task.getId(),
         idUser: UserId(randomUUID()),
         status: SubTaskStatus.EM_PROGRESSO,
+        typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: new Date('2026-12-31'),
       }),
     );
@@ -195,11 +199,9 @@ describe('GetTaskUseCase', () => {
     const applicantRepo = makeApplicantRepo();
     const flowRepo = makeFlowRepo();
     const projectRepo = makeProjectRepo();
-    taskRepo.findById.mockResolvedValue(makeTask(randomUUID(), randomUUID(), randomUUID()));
+    taskRepo.findById.mockResolvedValue(makeTask(randomUUID(), 1, randomUUID()));
     userRepo.findById.mockResolvedValue(null);
-    applicantRepo.findById.mockResolvedValue(
-      new Applicant({ id: ApplicantId(randomUUID()), name: 'Setor' }),
-    );
+    applicantRepo.findById.mockResolvedValue(new Applicant({ id: ApplicantId(1), name: 'Setor' }));
     flowRepo.findByIds.mockResolvedValue([]);
     projectRepo.findById.mockResolvedValue(
       new Project({
@@ -221,7 +223,7 @@ describe('GetTaskUseCase', () => {
     const flowRepo = makeFlowRepo();
     const projectRepo = makeProjectRepo();
     const creatorId = randomUUID();
-    taskRepo.findById.mockResolvedValue(makeTask(creatorId, randomUUID(), randomUUID()));
+    taskRepo.findById.mockResolvedValue(makeTask(creatorId, 1, randomUUID()));
     userRepo.findById.mockResolvedValue(
       new User({ id: UserId(creatorId), name: 'John', email: 'john@example.com' }),
     );
@@ -247,7 +249,7 @@ describe('GetTaskUseCase', () => {
     const flowRepo = makeFlowRepo();
     const projectRepo = makeProjectRepo();
     const creatorId = randomUUID();
-    const applicantId = randomUUID();
+    const applicantId = 1;
     taskRepo.findById.mockResolvedValue(makeTask(creatorId, applicantId, randomUUID()));
     userRepo.findById.mockResolvedValue(
       new User({ id: UserId(creatorId), name: 'John', email: 'john@example.com' }),

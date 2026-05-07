@@ -2,7 +2,7 @@ import { Flow } from './flow.vo';
 import { FlowId } from '../shared/entity-ids';
 
 describe('Flow Value Object', () => {
-  const validId = FlowId('550e8400-e29b-41d4-a716-446655440005');
+  const validId = FlowId(1);
 
   it('should create a valid flow', () => {
     const flow = new Flow({ id: validId, name: 'Initial Flow' });

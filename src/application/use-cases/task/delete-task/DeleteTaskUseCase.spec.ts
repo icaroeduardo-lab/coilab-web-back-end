@@ -2,8 +2,8 @@ import { DeleteTaskUseCase } from './DeleteTaskUseCase';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
 import { TaskId, ProjectId, ApplicantId, UserId } from '../../../../domain/shared/entity-ids';
-import { DiscoverySubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
-import { SubTaskId } from '../../../../domain/shared/entity-ids';
+import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
+import { SubTaskId, TaskToolId } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
 const makeRepo = (): jest.Mocked<ITaskRepository> => ({
@@ -11,6 +11,7 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   findAll: jest.fn(),
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
+  findLastSubTaskNumber: jest.fn(),
   count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
@@ -25,7 +26,7 @@ const makeTask = (id: string) =>
     taskNumber: '#20260001',
     priority: TaskPriority.MEDIA,
     status: TaskStatus.BACKLOG,
-    applicantId: ApplicantId(randomUUID()),
+    applicantId: ApplicantId(1),
     creatorId: UserId(randomUUID()),
   });
 
@@ -45,11 +46,13 @@ describe('DeleteTaskUseCase', () => {
     const repo = makeRepo();
     const id = randomUUID();
     const task = makeTask(id);
-    const subtask = new DiscoverySubTask({
+    const subtask = new SubTask({
       id: SubTaskId(randomUUID()),
       taskId: TaskId(id),
       idUser: UserId(randomUUID()),
       status: SubTaskStatus.EM_PROGRESSO,
+      typeId: TaskToolId(1),
+      taskNumber: '#20260001',
       expectedDelivery: new Date(),
     });
     task.addSubTask(subtask);

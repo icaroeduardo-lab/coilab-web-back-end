@@ -7,6 +7,7 @@ export interface ITaskRepository {
   count(): Promise<number>;
   findByProjectId(projectId: ProjectId): Promise<Task[]>;
   findLastTaskNumber(): Promise<string | null>;
+  findLastSubTaskNumber(): Promise<string | null>;
   save(task: Task): Promise<void>;
   delete(id: TaskId): Promise<void>;
 }

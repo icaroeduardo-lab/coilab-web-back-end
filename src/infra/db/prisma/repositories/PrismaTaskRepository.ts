@@ -1,16 +1,6 @@
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
-import {
-  SubTask,
-  SubTaskStatus,
-  SubTaskType,
-  DiscoverySubTask,
-  DesignSubTask,
-  DiagramSubTask,
-  DiscoveryFormProps,
-} from '../../../../domain/entities/sub-task.entity';
-import { Design } from '../../../../domain/value-objects/design.vo';
-import { Diagram } from '../../../../domain/value-objects/diagram.vo';
+import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import {
   TaskId,
   ProjectId,
@@ -18,7 +8,7 @@ import {
   UserId,
   SubTaskId,
   FlowId,
-  DesignId,
+  TaskToolId,
 } from '../../../../domain/shared/entity-ids';
 
 import { prisma } from '../prisma.client';
@@ -28,60 +18,71 @@ import type {
   SubTask as PrismaSubTask,
 } from '../../../../generated/prisma/client';
 
+const STATUS_TO_ID: Record<TaskStatus, number> = {
+  [TaskStatus.BACKLOG]: 1,
+  [TaskStatus.EM_EXECUCAO]: 2,
+  [TaskStatus.CHECKOUT]: 3,
+  [TaskStatus.DESENVOLVIMENTO]: 4,
+  [TaskStatus.TESTES]: 5,
+  [TaskStatus.CONCLUIDO]: 6,
+};
+
+const ID_TO_STATUS: Record<number, TaskStatus> = Object.fromEntries(
+  Object.entries(STATUS_TO_ID).map(([k, v]) => [v, k as TaskStatus]),
+);
+
+const SUB_STATUS_TO_ID: Record<SubTaskStatus, number> = {
+  [SubTaskStatus.NAO_INICIADO]: 1,
+  [SubTaskStatus.EM_PROGRESSO]: 2,
+  [SubTaskStatus.AGUARDANDO_CHECKOUT]: 3,
+  [SubTaskStatus.CANCELADO]: 4,
+  [SubTaskStatus.APROVADO]: 5,
+  [SubTaskStatus.REPROVADO]: 6,
+};
+
+const ID_TO_SUB_STATUS: Record<number, SubTaskStatus> = Object.fromEntries(
+  Object.entries(SUB_STATUS_TO_ID).map(([k, v]) => [v, k as SubTaskStatus]),
+);
+
 type TaskWithRelations = PrismaTask & {
   subTasks: PrismaSubTask[];
-  flows: { flowId: string }[];
+  flows: { flowId: number }[];
 };
 
 function subTaskToDomain(row: PrismaSubTask): SubTask {
-  const base = {
+  return new SubTask({
     id: SubTaskId(row.id),
     taskId: TaskId(row.taskId),
     idUser: UserId(row.idUser),
-    status: row.status as SubTaskStatus,
+    status: ID_TO_SUB_STATUS[row.statusId] ?? SubTaskStatus.NAO_INICIADO,
+    typeId: TaskToolId(row.typeId),
+    taskNumber: row.taskNumber,
     expectedDelivery: row.expectedDelivery,
     createdAt: row.createdAt,
     startDate: row.startDate ?? undefined,
     completionDate: row.completionDate ?? undefined,
     reason: row.reason ?? undefined,
-  };
+    metadata: (row.metadata ?? {}) as Record<string, unknown>,
+  });
+}
 
-  if (row.type === SubTaskType.DISCOVERY) {
-    const form = (row.discoveryForm ?? {}) as Record<string, unknown>;
-    return new DiscoverySubTask({ ...base, ...(form as DiscoveryFormProps) });
-  }
+const PRIORITY_NORMALIZE: Record<string, TaskPriority> = {
+  baixa: TaskPriority.BAIXA,
+  media: TaskPriority.MEDIA,
+  média: TaskPriority.MEDIA,
+  alta: TaskPriority.ALTA,
+};
 
-  if (row.type === SubTaskType.DESIGN) {
-    const rawDesigns = Array.isArray(row.designs) ? (row.designs as Record<string, unknown>[]) : [];
-    const designs = rawDesigns.map(
-      (d) =>
-        new Design({
-          id: DesignId(d.id as string),
-          title: d.title as string,
-          description: d.description as string,
-          urlImage: d.urlImage as string,
-          user: ApplicantId(d.user as string),
-          dateUpload: new Date(d.dateUpload as string),
-        }),
-    );
-    return new DesignSubTask({ ...base, designs });
-  }
-
-  // DIAGRAM
-  const rawDiagrams = Array.isArray(row.diagrams)
-    ? (row.diagrams as Record<string, unknown>[])
-    : [];
-  const diagrams = rawDiagrams.map(
-    (d) =>
-      new Diagram({
-        title: d.title as string,
-        description: d.description as string,
-        urlDiagram: d.urlDiagram as string,
-        user: ApplicantId(d.user as string),
-        dateUpload: new Date(d.dateUpload as string),
-      }),
+function normalizePriority(raw: string): TaskPriority {
+  return (
+    PRIORITY_NORMALIZE[raw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')] ??
+    PRIORITY_NORMALIZE[raw.toLowerCase()] ??
+    TaskPriority.BAIXA
   );
-  return new DiagramSubTask({ ...base, diagrams });
+}
+
+function normalizeTaskNumber(raw: string): string {
+  return raw.startsWith('#') ? raw : `#${raw}`;
 }
 
 function taskToDomain(row: TaskWithRelations): Task {
@@ -90,9 +91,9 @@ function taskToDomain(row: TaskWithRelations): Task {
     projectId: ProjectId(row.projectId),
     name: row.name,
     description: row.description,
-    taskNumber: row.taskNumber,
-    priority: row.priority as TaskPriority,
-    status: row.status as TaskStatus,
+    taskNumber: normalizeTaskNumber(row.taskNumber),
+    priority: normalizePriority(row.priority),
+    status: ID_TO_STATUS[row.statusId] ?? TaskStatus.BACKLOG,
     applicantId: ApplicantId(row.applicantId),
     creatorId: UserId(row.creatorId),
     createdAt: row.createdAt,
@@ -110,55 +111,34 @@ function serializeSubTask(
   id: string;
   taskId: string;
   idUser: string;
-  status: string;
-  type: string;
+  statusId: number;
+  typeId: number;
+  taskNumber: string;
   expectedDelivery: Date;
   createdAt: Date;
   startDate: Date | null;
   completionDate: Date | null;
   reason: string | null;
-  discoveryForm: JsonInput;
-  designs: JsonInput;
-  diagrams: JsonInput;
+  metadata: JsonInput;
 } {
-  const base = {
+  const metadata = subTask.getMetadata();
+  return {
     id: subTask.getId(),
     taskId: parentTaskId,
     idUser: subTask.getIdUser(),
-    status: subTask.getStatus(),
-    type: subTask.getType(),
+    statusId: SUB_STATUS_TO_ID[subTask.getStatus()],
+    typeId: subTask.getTypeId(),
+    taskNumber: subTask.getTaskNumber(),
     expectedDelivery: subTask.getExpectedDelivery(),
     createdAt: subTask.getCreatedAt(),
     startDate: subTask.getStartDate() ?? null,
     completionDate: subTask.getCompletionDate() ?? null,
     reason: subTask.getReason() ?? null,
-    discoveryForm: Prisma.DbNull as JsonInput,
-    designs: Prisma.DbNull as JsonInput,
-    diagrams: Prisma.DbNull as JsonInput,
+    metadata:
+      Object.keys(metadata).length > 0
+        ? (metadata as Prisma.InputJsonValue)
+        : (Prisma.DbNull as JsonInput),
   };
-
-  if (subTask instanceof DiscoverySubTask) {
-    base.discoveryForm = subTask.getForm() as Prisma.InputJsonValue;
-  } else if (subTask instanceof DesignSubTask) {
-    base.designs = subTask.getDesigns().map((d) => ({
-      id: d.getId(),
-      title: d.getTitle(),
-      description: d.getDescription(),
-      urlImage: d.getUrlImage(),
-      user: d.getUser(),
-      dateUpload: d.getDateUpload().toISOString(),
-    })) as Prisma.InputJsonValue;
-  } else if (subTask instanceof DiagramSubTask) {
-    base.diagrams = subTask.getDiagrams().map((d) => ({
-      title: d.getTitle(),
-      description: d.getDescription(),
-      urlDiagram: d.getUrlDiagram(),
-      user: d.getUser(),
-      dateUpload: d.getDateUpload().toISOString(),
-    })) as Prisma.InputJsonValue;
-  }
-
-  return base;
 }
 
 const taskInclude = {
@@ -199,6 +179,11 @@ export class PrismaTaskRepository implements ITaskRepository {
     return row?.taskNumber ?? null;
   }
 
+  async findLastSubTaskNumber(): Promise<string | null> {
+    const row = await prisma.subTask.findFirst({ orderBy: { taskNumber: 'desc' } });
+    return row?.taskNumber ?? null;
+  }
+
   async save(task: Task): Promise<void> {
     const serializedSubTasks = task.getSubTasks().map((s) => serializeSubTask(s, task.getId()));
     const flowIds = task.getFlowIds();
@@ -213,7 +198,7 @@ export class PrismaTaskRepository implements ITaskRepository {
           description: task.getDescription(),
           taskNumber: task.getTaskNumber(),
           priority: task.getPriority(),
-          status: task.getStatus(),
+          statusId: STATUS_TO_ID[task.getStatus()],
           applicantId: task.getApplicantId(),
           creatorId: task.getCreatorId(),
           createdAt: task.getCreatedAt(),
@@ -222,7 +207,7 @@ export class PrismaTaskRepository implements ITaskRepository {
           name: task.getName(),
           description: task.getDescription(),
           priority: task.getPriority(),
-          status: task.getStatus(),
+          statusId: STATUS_TO_ID[task.getStatus()],
           applicantId: task.getApplicantId(),
           projectId: task.getProjectId(),
         },

@@ -1,8 +1,7 @@
 import { Applicant } from './applicant.entity';
 import { ApplicantId } from '../shared/entity-ids';
-import { randomUUID } from 'crypto';
 
-const validId = () => ApplicantId(randomUUID());
+const validId = () => ApplicantId(1);
 
 describe('Applicant entity', () => {
   it('creates applicant with valid props', () => {
@@ -10,7 +9,7 @@ describe('Applicant entity', () => {
     expect(applicant.getName()).toBe('Setor TI');
   });
 
-  it('getId returns the provided UUID', () => {
+  it('getId returns the provided id', () => {
     const id = validId();
     const applicant = new Applicant({ id, name: 'Setor TI' });
     expect(applicant.getId()).toBe(id);
@@ -18,12 +17,6 @@ describe('Applicant entity', () => {
 
   it('throws when name is empty', () => {
     expect(() => new Applicant({ id: validId(), name: '' })).toThrow('Validation failed');
-  });
-
-  it('throws when id is not a valid UUID', () => {
-    expect(
-      () => new Applicant({ id: 'bad-id' as ReturnType<typeof ApplicantId>, name: 'Setor' }),
-    ).toThrow('Validation failed');
   });
 
   it('changeName updates name', () => {

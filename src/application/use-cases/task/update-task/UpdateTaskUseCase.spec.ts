@@ -1,7 +1,7 @@
 import { UpdateTaskUseCase } from './UpdateTaskUseCase';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
-import { DiscoverySubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
+import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import {
   TaskId,
   ProjectId,
@@ -9,6 +9,7 @@ import {
   UserId,
   SubTaskId,
   FlowId,
+  TaskToolId,
 } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
@@ -17,6 +18,7 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   findAll: jest.fn(),
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
+  findLastSubTaskNumber: jest.fn(),
   count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
@@ -31,7 +33,7 @@ const makeTask = (id: string) =>
     taskNumber: '#20260001',
     priority: TaskPriority.BAIXA,
     status: TaskStatus.BACKLOG,
-    applicantId: ApplicantId(randomUUID()),
+    applicantId: ApplicantId(1),
     creatorId: UserId(randomUUID()),
   });
 
@@ -78,12 +80,12 @@ describe('UpdateTaskUseCase', () => {
     const id = randomUUID();
     repo.findById.mockResolvedValue(makeTask(id));
     const sut = new UpdateTaskUseCase(repo);
-    const newApplicantId = randomUUID();
+    const newApplicantId = '2';
 
     await sut.execute({ id, applicantId: newApplicantId });
 
     const saved: Task = repo.save.mock.calls[0][0];
-    expect(saved.getApplicantId()).toBe(newApplicantId);
+    expect(saved.getApplicantId()).toBe(2);
   });
 
   it('throws when task not found', async () => {
@@ -100,11 +102,13 @@ describe('UpdateTaskUseCase', () => {
     const task = makeTask(id);
     const subTaskId = randomUUID();
     task.addSubTask(
-      new DiscoverySubTask({
+      new SubTask({
         id: SubTaskId(subTaskId),
         taskId: TaskId(id),
         idUser: UserId(randomUUID()),
         status: SubTaskStatus.NAO_INICIADO,
+        typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: new Date(),
       }),
     );
@@ -135,26 +139,24 @@ describe('UpdateTaskUseCase', () => {
     const id = randomUUID();
     repo.findById.mockResolvedValue(makeTask(id));
     const sut = new UpdateTaskUseCase(repo);
-    const flowIdA = randomUUID();
-    const flowIdB = randomUUID();
 
-    await sut.execute({ id, flowIdsToAdd: [flowIdA, flowIdB] });
+    await sut.execute({ id, flowIdsToAdd: ['1', '2'] });
 
     const saved: Task = repo.save.mock.calls[0][0];
     expect(saved.getFlowIds()).toHaveLength(2);
-    expect(saved.getFlowIds()).toContain(flowIdA);
+    expect(saved.getFlowIds()).toContain(1);
   });
 
   it('removes flow by id', async () => {
     const repo = makeRepo();
     const id = randomUUID();
     const task = makeTask(id);
-    const flowId = randomUUID();
+    const flowId = 1;
     task.addFlowId(FlowId(flowId));
     repo.findById.mockResolvedValue(task);
     const sut = new UpdateTaskUseCase(repo);
 
-    await sut.execute({ id, flowIdsToRemove: [flowId] });
+    await sut.execute({ id, flowIdsToRemove: [String(flowId)] });
 
     const saved: Task = repo.save.mock.calls[0][0];
     expect(saved.getFlowIds()).toHaveLength(0);
@@ -166,7 +168,7 @@ describe('UpdateTaskUseCase', () => {
     repo.findById.mockResolvedValue(makeTask(id));
     const sut = new UpdateTaskUseCase(repo);
 
-    await expect(sut.execute({ id, flowIdsToRemove: [randomUUID()] })).rejects.toThrow(
+    await expect(sut.execute({ id, flowIdsToRemove: ['999'] })).rejects.toThrow(
       'Flow não encontrado',
     );
   });
@@ -177,11 +179,13 @@ describe('UpdateTaskUseCase', () => {
     const task = makeTask(id);
     const subTaskId = randomUUID();
     task.addSubTask(
-      new DiscoverySubTask({
+      new SubTask({
         id: SubTaskId(subTaskId),
         taskId: TaskId(id),
         idUser: UserId(randomUUID()),
         status: SubTaskStatus.EM_PROGRESSO,
+        typeId: TaskToolId(1),
+        taskNumber: '#20260001',
         expectedDelivery: new Date(),
       }),
     );

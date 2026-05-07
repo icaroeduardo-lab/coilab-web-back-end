@@ -9,11 +9,11 @@ export class DeleteFlowUseCase {
   constructor(private readonly flowRepository: IFlowRepository) {}
 
   async execute(input: DeleteFlowInput): Promise<void> {
-    const [flow] = await this.flowRepository.findByIds([FlowId(input.id)]);
+    const [flow] = await this.flowRepository.findByIds([FlowId(Number(input.id))]);
     if (!flow) {
       throw new Error(`Flow not found: ${input.id}`);
     }
 
-    await this.flowRepository.delete(FlowId(input.id));
+    await this.flowRepository.delete(FlowId(Number(input.id)));
   }
 }

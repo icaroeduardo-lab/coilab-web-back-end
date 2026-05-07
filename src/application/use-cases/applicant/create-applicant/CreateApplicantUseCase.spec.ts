@@ -1,6 +1,7 @@
 import { CreateApplicantUseCase } from './CreateApplicantUseCase';
 import { IApplicantRepository } from '../../../../domain/repositories/IApplicantRepository';
 import { Applicant } from '../../../../domain/entities/applicant.entity';
+import { ApplicantId } from '../../../../domain/shared/entity-ids';
 
 const makeRepo = (): jest.Mocked<IApplicantRepository> => ({
   findById: jest.fn(),
@@ -14,15 +15,15 @@ const makeRepo = (): jest.Mocked<IApplicantRepository> => ({
 describe('CreateApplicantUseCase', () => {
   it('creates and saves applicant', async () => {
     const repo = makeRepo();
+    const saved = new Applicant({ id: ApplicantId(7), name: 'John Doe' });
+    repo.save.mockResolvedValue(saved);
     const sut = new CreateApplicantUseCase(repo);
 
     const output = await sut.execute({ name: 'John Doe' });
 
     expect(repo.save).toHaveBeenCalledTimes(1);
-    const saved: Applicant = repo.save.mock.calls[0][0];
-    expect(saved.getName()).toBe('John Doe');
     expect(output.name).toBe('John Doe');
-    expect(output.id).toBe(saved.getId());
+    expect(output.id).toBe(7);
   });
 
   it('throws when name is empty', async () => {

@@ -2,7 +2,7 @@ import { Applicant } from './applicant.vo';
 import { ApplicantId } from '../shared/entity-ids';
 
 describe('Applicant Value Object', () => {
-  const validId = ApplicantId('550e8400-e29b-41d4-a716-446655440003');
+  const validId = ApplicantId(1);
 
   it('should create a valid applicant', () => {
     const applicant = new Applicant({ id: validId, name: 'pomar' });

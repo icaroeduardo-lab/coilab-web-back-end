@@ -1,18 +1,14 @@
 import { ChangeSubTaskStatusUseCase } from './ChangeSubTaskStatusUseCase';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
-import {
-  DiscoverySubTask,
-  DiagramSubTask,
-  SubTaskStatus,
-  SubTaskType,
-} from '../../../../domain/entities/sub-task.entity';
+import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import {
   TaskId,
   ProjectId,
   ApplicantId,
   UserId,
   SubTaskId,
+  TaskToolId,
 } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
@@ -21,31 +17,24 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   findAll: jest.fn(),
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
+  findLastSubTaskNumber: jest.fn(),
   count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
 });
 
-const makeSubTask = (id: string, type = SubTaskType.DIAGRAM) => {
-  if (type === SubTaskType.DISCOVERY) {
-    return new DiscoverySubTask({
-      id: SubTaskId(id),
-      taskId: TaskId(randomUUID()),
-      idUser: UserId(randomUUID()),
-      status: SubTaskStatus.NAO_INICIADO,
-      expectedDelivery: new Date(),
-    });
-  }
-  return new DiagramSubTask({
+const makeSubTask = (id: string, typeId = 3) =>
+  new SubTask({
     id: SubTaskId(id),
     taskId: TaskId(randomUUID()),
     idUser: UserId(randomUUID()),
     status: SubTaskStatus.NAO_INICIADO,
+    typeId: TaskToolId(typeId),
+    taskNumber: '#20260001',
     expectedDelivery: new Date(),
   });
-};
 
-const makeTask = (subTasks: (DiscoverySubTask | DiagramSubTask)[] = []) =>
+const makeTask = (subTasks: SubTask[] = []) =>
   new Task({
     id: TaskId(randomUUID()),
     projectId: ProjectId(randomUUID()),
@@ -54,7 +43,7 @@ const makeTask = (subTasks: (DiscoverySubTask | DiagramSubTask)[] = []) =>
     taskNumber: '#20260001',
     priority: TaskPriority.MEDIA,
     status: TaskStatus.BACKLOG,
-    applicantId: ApplicantId(randomUUID()),
+    applicantId: ApplicantId(1),
     creatorId: UserId(randomUUID()),
     subTasks,
   });

@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { IsNotEmpty, IsString, IsUUID, MinLength } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, Min, MinLength } from 'class-validator';
 import { ValueObject } from './value-object.base';
 import { ApplicantId } from '../shared/entity-ids';
 
@@ -9,8 +9,8 @@ export interface ApplicantProps {
 }
 
 export class Applicant extends ValueObject {
-  @IsUUID()
-  @IsNotEmpty()
+  @IsInt()
+  @Min(0)
   private readonly id: ApplicantId;
 
   @IsString()

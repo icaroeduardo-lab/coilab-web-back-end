@@ -5,6 +5,6 @@ export interface IFlowRepository {
   findByIds(ids: FlowId[]): Promise<Flow[]>;
   findAll(): Promise<Flow[]>;
   count(): Promise<number>;
-  save(flow: Flow): Promise<void>;
+  save(flow: Flow): Promise<Flow>;
   delete(id: FlowId): Promise<void>;
 }

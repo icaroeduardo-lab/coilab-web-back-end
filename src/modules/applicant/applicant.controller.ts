@@ -57,7 +57,7 @@ export class ApplicantController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Buscar solicitante por ID' })
-  @ApiParam({ name: 'id', description: 'UUID do solicitante' })
+  @ApiParam({ name: 'id', description: 'ID do solicitante' })
   @ApiResponse({ status: 200, description: 'Solicitante encontrado.' })
   @ApiResponse({ status: 404, description: 'Solicitante não encontrado.' })
   get(@Param('id') id: string) {
@@ -66,7 +66,7 @@ export class ApplicantController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar nome do solicitante' })
-  @ApiParam({ name: 'id', description: 'UUID do solicitante' })
+  @ApiParam({ name: 'id', description: 'ID do solicitante' })
   @ApiResponse({ status: 200, description: 'Solicitante atualizado.' })
   update(@Param('id') id: string, @Body() dto: UpdateApplicantDto) {
     return this.updateApplicant.execute({ id, name: dto.name });
@@ -75,7 +75,7 @@ export class ApplicantController {
   @Delete(':id')
   @HttpCode(204)
   @ApiOperation({ summary: 'Remover solicitante' })
-  @ApiParam({ name: 'id', description: 'UUID do solicitante' })
+  @ApiParam({ name: 'id', description: 'ID do solicitante' })
   @ApiResponse({ status: 204, description: 'Solicitante removido.' })
   @ApiResponse({ status: 404, description: 'Solicitante não encontrado.' })
   async remove(@Param('id') id: string) {

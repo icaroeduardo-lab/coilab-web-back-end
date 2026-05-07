@@ -9,11 +9,11 @@ export class DeleteApplicantUseCase {
   constructor(private readonly applicantRepository: IApplicantRepository) {}
 
   async execute(input: DeleteApplicantInput): Promise<void> {
-    const applicant = await this.applicantRepository.findById(ApplicantId(input.id));
+    const applicant = await this.applicantRepository.findById(ApplicantId(Number(input.id)));
     if (!applicant) {
       throw new Error(`Applicant not found: ${input.id}`);
     }
 
-    await this.applicantRepository.delete(ApplicantId(input.id));
+    await this.applicantRepository.delete(ApplicantId(Number(input.id)));
   }
 }
