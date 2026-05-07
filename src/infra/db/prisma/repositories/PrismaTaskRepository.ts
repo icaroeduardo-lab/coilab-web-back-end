@@ -31,6 +31,19 @@ const ID_TO_STATUS: Record<number, TaskStatus> = Object.fromEntries(
   Object.entries(STATUS_TO_ID).map(([k, v]) => [v, k as TaskStatus]),
 );
 
+const SUB_STATUS_TO_ID: Record<SubTaskStatus, number> = {
+  [SubTaskStatus.NAO_INICIADO]: 1,
+  [SubTaskStatus.EM_PROGRESSO]: 2,
+  [SubTaskStatus.AGUARDANDO_CHECKOUT]: 3,
+  [SubTaskStatus.CANCELADO]: 4,
+  [SubTaskStatus.APROVADO]: 5,
+  [SubTaskStatus.REPROVADO]: 6,
+};
+
+const ID_TO_SUB_STATUS: Record<number, SubTaskStatus> = Object.fromEntries(
+  Object.entries(SUB_STATUS_TO_ID).map(([k, v]) => [v, k as SubTaskStatus]),
+);
+
 type TaskWithRelations = PrismaTask & {
   subTasks: PrismaSubTask[];
   flows: { flowId: number }[];
@@ -41,7 +54,7 @@ function subTaskToDomain(row: PrismaSubTask): SubTask {
     id: SubTaskId(row.id),
     taskId: TaskId(row.taskId),
     idUser: UserId(row.idUser),
-    status: row.status as SubTaskStatus,
+    status: ID_TO_SUB_STATUS[row.statusId] ?? SubTaskStatus.NAO_INICIADO,
     typeId: TaskToolId(row.typeId),
     taskNumber: row.taskNumber,
     expectedDelivery: row.expectedDelivery,
@@ -53,14 +66,31 @@ function subTaskToDomain(row: PrismaSubTask): SubTask {
   });
 }
 
+const PRIORITY_NORMALIZE: Record<string, TaskPriority> = {
+  baixa: TaskPriority.BAIXA,
+  media: TaskPriority.MEDIA,
+  média: TaskPriority.MEDIA,
+  alta: TaskPriority.ALTA,
+};
+
+function normalizePriority(raw: string): TaskPriority {
+  return PRIORITY_NORMALIZE[raw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')] ??
+    PRIORITY_NORMALIZE[raw.toLowerCase()] ??
+    TaskPriority.BAIXA;
+}
+
+function normalizeTaskNumber(raw: string): string {
+  return raw.startsWith('#') ? raw : `#${raw}`;
+}
+
 function taskToDomain(row: TaskWithRelations): Task {
   return new Task({
     id: TaskId(row.id),
     projectId: ProjectId(row.projectId),
     name: row.name,
     description: row.description,
-    taskNumber: row.taskNumber,
-    priority: row.priority as TaskPriority,
+    taskNumber: normalizeTaskNumber(row.taskNumber),
+    priority: normalizePriority(row.priority),
     status: ID_TO_STATUS[row.statusId] ?? TaskStatus.BACKLOG,
     applicantId: ApplicantId(row.applicantId),
     creatorId: UserId(row.creatorId),
@@ -79,7 +109,7 @@ function serializeSubTask(
   id: string;
   taskId: string;
   idUser: string;
-  status: string;
+  statusId: number;
   typeId: number;
   taskNumber: string;
   expectedDelivery: Date;
@@ -94,7 +124,7 @@ function serializeSubTask(
     id: subTask.getId(),
     taskId: parentTaskId,
     idUser: subTask.getIdUser(),
-    status: subTask.getStatus(),
+    statusId: SUB_STATUS_TO_ID[subTask.getStatus()],
     typeId: subTask.getTypeId(),
     taskNumber: subTask.getTaskNumber(),
     expectedDelivery: subTask.getExpectedDelivery(),
