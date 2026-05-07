@@ -8,9 +8,9 @@ export interface UpdateTaskInput {
   description?: string;
   priority?: TaskPriority;
   projectId?: string;
-  applicantId?: string;
-  flowIdsToAdd?: string[];
-  flowIdsToRemove?: string[];
+  applicantId?: number;
+  flowIdsToAdd?: number[];
+  flowIdsToRemove?: number[];
   subTaskIdsToRemove?: string[];
 }
 
@@ -27,16 +27,15 @@ export class UpdateTaskUseCase {
     if (input.description !== undefined) task.changeDescription(input.description);
     if (input.priority !== undefined) task.changePriority(input.priority);
     if (input.projectId !== undefined) task.changeProjectId(ProjectId(input.projectId));
-    if (input.applicantId !== undefined)
-      task.changeApplicantId(ApplicantId(Number(input.applicantId)));
+    if (input.applicantId !== undefined) task.changeApplicantId(ApplicantId(input.applicantId));
     if (input.flowIdsToAdd) {
       for (const flowId of input.flowIdsToAdd) {
-        task.addFlowId(FlowId(Number(flowId)));
+        task.addFlowId(FlowId(flowId));
       }
     }
     if (input.flowIdsToRemove) {
       for (const flowId of input.flowIdsToRemove) {
-        task.removeFlowId(FlowId(Number(flowId)));
+        task.removeFlowId(FlowId(flowId));
       }
     }
     if (input.subTaskIdsToRemove) {

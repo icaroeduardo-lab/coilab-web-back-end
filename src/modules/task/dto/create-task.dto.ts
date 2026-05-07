@@ -45,19 +45,17 @@ export class CreateTaskDto {
   @IsEnum(TaskPriority)
   priority: TaskPriority;
 
-  @ApiProperty({
-    example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-    description: 'ID do setor solicitante',
-  })
-  @IsUUID()
-  @IsNotEmpty()
-  applicantId: string;
+  @ApiProperty({ example: 1, description: 'ID inteiro do setor solicitante' })
+  @IsInt()
+  @Min(1)
+  applicantId: number;
 
-  @ApiPropertyOptional({ type: [String], example: ['uuid-flow-1', 'uuid-flow-2'] })
+  @ApiPropertyOptional({ type: [Number], example: [1, 2] })
   @IsArray()
-  @IsUUID('4', { each: true })
+  @IsInt({ each: true })
+  @Min(1, { each: true })
   @IsOptional()
-  flowIds?: string[];
+  flowIds?: number[];
 
   @ApiPropertyOptional({ type: [SubTaskDto] })
   @IsArray()

@@ -144,6 +144,14 @@ Ocorre ao chamar `changeStatus(EM_EXECUCAO)`.
 
 > Após qualquer mudança de status de uma SubTask, o use case chama `task.changeStatus(task.getStatus())` para re-avaliar as regras de Checkout.
 
+**Desenvolvimento — validação ao entrar no status**
+- Se a Task não tiver subtasks: transição permitida sem restrições.
+- Se tiver subtasks:
+  - Nenhuma subtask pode estar em `Em Progresso`, `Não Iniciado` ou `Aguardando Checkout`.
+  - Para cada tipo, deve existir ao menos uma subtask `Aprovada` (ignorando as `Canceladas`).
+  - Se alguma estiver `Reprovada`, deve existir outra do mesmo tipo com status `Aprovado` (substituta aprovada).
+  - Violação lança erro — não há reversão automática.
+
 ### Regra de adição de subtasks
 
 - Só é possível adicionar segunda subtask do mesmo tipo se a anterior estiver com status `Reprovado`.

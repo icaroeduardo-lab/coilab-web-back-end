@@ -301,4 +301,144 @@ describe('Task Entity', () => {
       );
     });
   });
+
+  describe('changeStatus() → DESENVOLVIMENTO guard', () => {
+    const makeSubTask = (id: string, typeId: number, status: SubTaskStatus, taskNumber: string) =>
+      new SubTask({
+        id: SubTaskId(id),
+        taskId,
+        idUser: userId,
+        status,
+        typeId: TaskToolId(typeId),
+        taskNumber,
+        expectedDelivery: deliveryDate,
+      });
+
+    it('allows DESENVOLVIMENTO when task has no subtasks', () => {
+      const task = baseTask();
+      expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).not.toThrow();
+      expect(task.getStatus()).toBe(TaskStatus.DESENVOLVIMENTO);
+    });
+
+    it('allows DESENVOLVIMENTO when all subtasks are APROVADO', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440030',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260010',
+        ),
+      );
+      task.getSubTasks()[0].approve();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440031',
+          2,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260011',
+        ),
+      );
+      task.getSubTasks()[1].approve();
+      expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).not.toThrow();
+    });
+
+    it('allows DESENVOLVIMENTO when REPROVADO has substituta APROVADA do mesmo tipo', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440032',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260012',
+        ),
+      );
+      task.getSubTasks()[0].reject('Reprovado');
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440033',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260013',
+        ),
+      );
+      task.getSubTasks()[1].approve();
+      expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).not.toThrow();
+    });
+
+    it('allows DESENVOLVIMENTO when only CANCELADO subtasks exist', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440034',
+          1,
+          SubTaskStatus.EM_PROGRESSO,
+          '#20260014',
+        ),
+      );
+      task.getSubTasks()[0].cancel('Cancelado');
+      expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).not.toThrow();
+    });
+
+    it('blocks DESENVOLVIMENTO when subtask is EM_PROGRESSO', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440035',
+          1,
+          SubTaskStatus.EM_PROGRESSO,
+          '#20260015',
+        ),
+      );
+      expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).toThrow(
+        'Para ir para Desenvolvimento',
+      );
+    });
+
+    it('blocks DESENVOLVIMENTO when subtask is NAO_INICIADO', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440036',
+          1,
+          SubTaskStatus.NAO_INICIADO,
+          '#20260016',
+        ),
+      );
+      expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).toThrow(
+        'Para ir para Desenvolvimento',
+      );
+    });
+
+    it('blocks DESENVOLVIMENTO when subtask is AGUARDANDO_CHECKOUT', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440037',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260017',
+        ),
+      );
+      expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).toThrow(
+        'Para ir para Desenvolvimento',
+      );
+    });
+
+    it('blocks DESENVOLVIMENTO when REPROVADO has no substituta APROVADA', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440038',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260018',
+        ),
+      );
+      task.getSubTasks()[0].reject('Reprovado');
+      expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).toThrow(
+        'Para ir para Desenvolvimento',
+      );
+    });
+  });
 });

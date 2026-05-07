@@ -26,9 +26,9 @@ export interface CreateTaskInput {
   name: string;
   description: string;
   priority: TaskPriority;
-  applicantId: string;
+  applicantId: number;
   creatorId: string;
-  flowIds?: string[];
+  flowIds?: number[];
   subTasks?: CreateTaskSubTaskInput[];
 }
 
@@ -68,9 +68,9 @@ export class CreateTaskUseCase {
       taskNumber,
       priority: input.priority,
       status: TaskStatus.BACKLOG,
-      applicantId: ApplicantId(Number(input.applicantId)),
+      applicantId: ApplicantId(input.applicantId),
       creatorId: UserId(input.creatorId),
-      flowIds: (input.flowIds ?? []).map((id) => FlowId(Number(id))),
+      flowIds: (input.flowIds ?? []).map((id) => FlowId(id)),
       subTasks,
     });
 
