@@ -67,8 +67,12 @@ import { TaskController } from './task.controller';
     },
     {
       provide: ListTasksByProjectUseCase,
-      useFactory: (repo: ITaskRepository) => new ListTasksByProjectUseCase(repo),
-      inject: [REPOSITORY_TOKENS.TASK],
+      useFactory: (
+        task: ITaskRepository,
+        applicant: IApplicantRepository,
+        project: IProjectRepository,
+      ) => new ListTasksByProjectUseCase(task, applicant, project),
+      inject: [REPOSITORY_TOKENS.TASK, REPOSITORY_TOKENS.APPLICANT, REPOSITORY_TOKENS.PROJECT],
     },
     {
       provide: UpdateTaskUseCase,
