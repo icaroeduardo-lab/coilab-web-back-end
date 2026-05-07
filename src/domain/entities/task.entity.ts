@@ -117,6 +117,24 @@ export class Task extends Entity {
     );
   }
 
+  private desenvolvimentoConditionsMet(): boolean {
+    if (this.subTasks.length === 0) return true;
+
+    const blocking = [
+      SubTaskStatus.EM_PROGRESSO,
+      SubTaskStatus.NAO_INICIADO,
+      SubTaskStatus.AGUARDANDO_CHECKOUT,
+    ];
+    if (this.subTasks.some((s) => blocking.includes(s.getStatus()))) return false;
+
+    const groups = this.groupSubTasksByTypeId();
+    return Object.values(groups).every((group) => {
+      const nonCancelled = group.filter((s) => s.getStatus() !== SubTaskStatus.CANCELADO);
+      if (nonCancelled.length === 0) return true;
+      return nonCancelled.some((s) => s.getStatus() === SubTaskStatus.APROVADO);
+    });
+  }
+
   private checkoutConditionsMet(): boolean {
     if (this.subTasks.length === 0) return true;
     const groups = this.groupSubTasksByTypeId();
@@ -225,6 +243,13 @@ export class Task extends Entity {
   }
 
   changeStatus(status: TaskStatus): void {
+    if (status === TaskStatus.DESENVOLVIMENTO && !this.desenvolvimentoConditionsMet()) {
+      throw new Error(
+        'Para ir para Desenvolvimento todas as subtasks devem estar Aprovadas. ' +
+          'Subtasks Reprovadas precisam ter uma substituta Aprovada do mesmo tipo. ' +
+          'Nenhuma subtask pode estar Em Progresso, Não Iniciada ou Aguardando Checkout.',
+      );
+    }
     this.status = status;
     this.applyStatusRules();
     this.validate();
