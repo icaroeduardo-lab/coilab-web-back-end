@@ -16,6 +16,7 @@ import { GetDesignUploadUrlUseCase } from '../../application/use-cases/task/get-
 import { AddIssueToSubTaskUseCase } from '../../application/use-cases/task/add-issue-to-subtask/AddIssueToSubTaskUseCase';
 import { RemoveIssueFromSubTaskUseCase } from '../../application/use-cases/task/remove-issue-from-subtask/RemoveIssueFromSubTaskUseCase';
 import { UpdateIssueInSubTaskUseCase } from '../../application/use-cases/task/update-issue-in-subtask/UpdateIssueInSubTaskUseCase';
+import { ListTaskToolsUseCase } from '../../application/use-cases/task/list-task-tools/ListTaskToolsUseCase';
 import { TaskPriority, TaskStatus } from '../../domain/entities/task.entity';
 import { JwtPayload } from '../auth/current-user.decorator';
 import { randomUUID } from 'crypto';
@@ -36,6 +37,7 @@ const mockGetDesignUploadUrl = { execute: jest.fn() };
 const mockAddIssue = { execute: jest.fn() };
 const mockRemoveIssue = { execute: jest.fn() };
 const mockUpdateIssue = { execute: jest.fn() };
+const mockListTaskTools = { execute: jest.fn() };
 
 const fakeUser: JwtPayload = {
   sub: randomUUID(),
@@ -67,6 +69,7 @@ describe('TaskController', () => {
         { provide: AddIssueToSubTaskUseCase, useValue: mockAddIssue },
         { provide: RemoveIssueFromSubTaskUseCase, useValue: mockRemoveIssue },
         { provide: UpdateIssueInSubTaskUseCase, useValue: mockUpdateIssue },
+        { provide: ListTaskToolsUseCase, useValue: mockListTaskTools },
       ],
     }).compile();
     controller = module.get(TaskController);
