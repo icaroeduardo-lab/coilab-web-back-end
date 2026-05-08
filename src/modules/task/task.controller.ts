@@ -34,6 +34,7 @@ import { GetDesignUploadUrlUseCase } from '../../application/use-cases/task/get-
 import { AddIssueToSubTaskUseCase } from '../../application/use-cases/task/add-issue-to-subtask/AddIssueToSubTaskUseCase';
 import { RemoveIssueFromSubTaskUseCase } from '../../application/use-cases/task/remove-issue-from-subtask/RemoveIssueFromSubTaskUseCase';
 import { UpdateIssueInSubTaskUseCase } from '../../application/use-cases/task/update-issue-in-subtask/UpdateIssueInSubTaskUseCase';
+import { ListTaskToolsUseCase } from '../../application/use-cases/task/list-task-tools/ListTaskToolsUseCase';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ChangeTaskStatusDto } from './dto/change-task-status.dto';
@@ -73,6 +74,8 @@ export class TaskController {
     private readonly removeIssue: RemoveIssueFromSubTaskUseCase,
     @Inject(UpdateIssueInSubTaskUseCase)
     private readonly updateIssue: UpdateIssueInSubTaskUseCase,
+    @Inject(ListTaskToolsUseCase)
+    private readonly listTaskTools: ListTaskToolsUseCase,
   ) {}
 
   @Post()
@@ -89,6 +92,13 @@ export class TaskController {
         expectedDelivery: new Date(s.expectedDelivery),
       })),
     });
+  }
+
+  @Get('tools')
+  @ApiOperation({ summary: 'Listar tipos de subtask (task tools)' })
+  @ApiResponse({ status: 200, description: 'Lista de task tools.' })
+  listTools() {
+    return this.listTaskTools.execute();
   }
 
   @Get()

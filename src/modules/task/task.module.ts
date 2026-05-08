@@ -26,6 +26,7 @@ import { GetDesignUploadUrlUseCase } from '../../application/use-cases/task/get-
 import { AddIssueToSubTaskUseCase } from '../../application/use-cases/task/add-issue-to-subtask/AddIssueToSubTaskUseCase';
 import { RemoveIssueFromSubTaskUseCase } from '../../application/use-cases/task/remove-issue-from-subtask/RemoveIssueFromSubTaskUseCase';
 import { UpdateIssueInSubTaskUseCase } from '../../application/use-cases/task/update-issue-in-subtask/UpdateIssueInSubTaskUseCase';
+import { ListTaskToolsUseCase } from '../../application/use-cases/task/list-task-tools/ListTaskToolsUseCase';
 import { S3StorageService } from '../../infra/storage/S3StorageService';
 import { TaskController } from './task.controller';
 
@@ -139,6 +140,7 @@ import { TaskController } from './task.controller';
       useFactory: (repo: ITaskRepository) => new UpdateIssueInSubTaskUseCase(repo),
       inject: [REPOSITORY_TOKENS.TASK],
     },
+    { provide: ListTaskToolsUseCase, useValue: new ListTaskToolsUseCase() },
   ],
 })
 export class TaskModule {}
