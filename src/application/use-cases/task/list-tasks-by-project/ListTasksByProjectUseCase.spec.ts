@@ -5,12 +5,7 @@ import { IProjectRepository } from '../../../../domain/repositories/IProjectRepo
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
 import { Applicant } from '../../../../domain/entities/applicant.entity';
 import { Project, ProjectStatus } from '../../../../domain/entities/project.entity';
-import {
-  TaskId,
-  ProjectId,
-  ApplicantId,
-  UserId,
-} from '../../../../domain/shared/entity-ids';
+import { TaskId, ProjectId, ApplicantId, UserId } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
 const makeTaskRepo = (): jest.Mocked<ITaskRepository> => ({
@@ -58,8 +53,7 @@ const makeTask = () =>
     creatorId: UserId(randomUUID()),
   });
 
-const makeApplicant = () =>
-  new Applicant({ id: ApplicantId(applicantIdNum), name: 'Setor X' });
+const makeApplicant = () => new Applicant({ id: ApplicantId(applicantIdNum), name: 'Setor X' });
 
 const makeProject = () =>
   new Project({

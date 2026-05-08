@@ -282,14 +282,22 @@ export class Task extends Entity {
     this.validate();
   }
 
+  private developmentSubTaskCanBeRemoved(subTask: SubTask): boolean {
+    const issues = (subTask.getMetadata().issues ?? []) as { status: boolean }[];
+    return !issues.some((i) => i.status === true);
+  }
+
   assertCanBeDeleted(): void {
     const terminalStatuses = [
       SubTaskStatus.NAO_INICIADO,
       SubTaskStatus.REPROVADO,
       SubTaskStatus.CANCELADO,
     ];
-    const allTerminal = this.subTasks.every((s) => terminalStatuses.includes(s.getStatus()));
-    if (allTerminal) return;
+    const allRemovable = this.subTasks.every((s) => {
+      if (s.getTypeId() === 4) return this.developmentSubTaskCanBeRemoved(s);
+      return terminalStatuses.includes(s.getStatus());
+    });
+    if (allRemovable) return;
     throw new Error('Task não pode ser removida pois possui subtasks ativas');
   }
 
@@ -303,7 +311,13 @@ export class Task extends Entity {
     if (!subTask) {
       throw new Error(`SubTask não encontrada: ${subTaskId}`);
     }
-    if (!removableStatuses.includes(subTask.getStatus())) {
+    if (subTask.getTypeId() === 4) {
+      if (!this.developmentSubTaskCanBeRemoved(subTask)) {
+        throw new Error(
+          'Subtask de Desenvolvimento não pode ser removida pois possui issues concluídas',
+        );
+      }
+    } else if (!removableStatuses.includes(subTask.getStatus())) {
       throw new Error(`SubTask com status "${subTask.getStatus()}" não pode ser removida`);
     }
     this.subTasks = this.subTasks.filter((s) => s.getId() !== subTaskId);

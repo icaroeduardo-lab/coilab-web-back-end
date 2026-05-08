@@ -31,6 +31,9 @@ import { UpdateDiscoveryFormUseCase } from '../../application/use-cases/task/upd
 import { AddDesignToSubTaskUseCase } from '../../application/use-cases/task/add-design-to-subtask/AddDesignToSubTaskUseCase';
 import { RemoveDesignFromSubTaskUseCase } from '../../application/use-cases/task/remove-design-from-subtask/RemoveDesignFromSubTaskUseCase';
 import { GetDesignUploadUrlUseCase } from '../../application/use-cases/task/get-design-upload-url/GetDesignUploadUrlUseCase';
+import { AddIssueToSubTaskUseCase } from '../../application/use-cases/task/add-issue-to-subtask/AddIssueToSubTaskUseCase';
+import { RemoveIssueFromSubTaskUseCase } from '../../application/use-cases/task/remove-issue-from-subtask/RemoveIssueFromSubTaskUseCase';
+import { UpdateIssueInSubTaskUseCase } from '../../application/use-cases/task/update-issue-in-subtask/UpdateIssueInSubTaskUseCase';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ChangeTaskStatusDto } from './dto/change-task-status.dto';
@@ -38,6 +41,8 @@ import { AddSubTaskDto } from './dto/add-subtask.dto';
 import { ChangeSubTaskStatusDto } from './dto/change-subtask-status.dto';
 import { UpdateDiscoveryFormDto } from './dto/update-discovery-form.dto';
 import { AddDesignDto } from './dto/add-design.dto';
+import { AddIssueDto } from './dto/add-issue.dto';
+import { UpdateIssueDto } from './dto/update-issue.dto';
 import { CurrentUser, JwtPayload } from '../auth/current-user.decorator';
 
 @ApiTags('Tasks')
@@ -62,6 +67,12 @@ export class TaskController {
     private readonly removeDesign: RemoveDesignFromSubTaskUseCase,
     @Inject(GetDesignUploadUrlUseCase)
     private readonly getDesignUploadUrl: GetDesignUploadUrlUseCase,
+    @Inject(AddIssueToSubTaskUseCase)
+    private readonly addIssue: AddIssueToSubTaskUseCase,
+    @Inject(RemoveIssueFromSubTaskUseCase)
+    private readonly removeIssue: RemoveIssueFromSubTaskUseCase,
+    @Inject(UpdateIssueInSubTaskUseCase)
+    private readonly updateIssue: UpdateIssueInSubTaskUseCase,
   ) {}
 
   @Post()
@@ -231,5 +242,53 @@ export class TaskController {
     @Param('designId') designId: string,
   ) {
     await this.removeDesign.execute({ taskId, subTaskId, designId });
+  }
+
+  @Post(':taskId/subtasks/:subTaskId/issues')
+  @HttpCode(201)
+  @ApiOperation({ summary: 'Adicionar issue à subtarefa de Desenvolvimento' })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiParam({ name: 'subTaskId', description: 'UUID da subtarefa (typeId=4)' })
+  @ApiResponse({ status: 201, description: 'Issue adicionada.' })
+  @ApiResponse({ status: 422, description: 'Subtarefa inválida ou não editável.' })
+  async addIssue_(
+    @Param('taskId') taskId: string,
+    @Param('subTaskId') subTaskId: string,
+    @Body() dto: AddIssueDto,
+  ) {
+    return this.addIssue.execute({ taskId, subTaskId, ...dto });
+  }
+
+  @Patch(':taskId/subtasks/:subTaskId/issues/:issueId')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Editar issue da subtarefa de Desenvolvimento' })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiParam({ name: 'subTaskId', description: 'UUID da subtarefa' })
+  @ApiParam({ name: 'issueId', description: 'UUID da issue' })
+  @ApiResponse({ status: 204, description: 'Issue atualizada.' })
+  @ApiResponse({ status: 422, description: 'Regra de negócio violada.' })
+  async updateIssue_(
+    @Param('taskId') taskId: string,
+    @Param('subTaskId') subTaskId: string,
+    @Param('issueId') issueId: string,
+    @Body() dto: UpdateIssueDto,
+  ) {
+    await this.updateIssue.execute({ taskId, subTaskId, issueId, ...dto });
+  }
+
+  @Delete(':taskId/subtasks/:subTaskId/issues/:issueId')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Remover issue da subtarefa de Desenvolvimento' })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiParam({ name: 'subTaskId', description: 'UUID da subtarefa' })
+  @ApiParam({ name: 'issueId', description: 'UUID da issue' })
+  @ApiResponse({ status: 204, description: 'Issue removida.' })
+  @ApiResponse({ status: 422, description: 'Issue concluída não pode ser removida.' })
+  async removeIssue_(
+    @Param('taskId') taskId: string,
+    @Param('subTaskId') subTaskId: string,
+    @Param('issueId') issueId: string,
+  ) {
+    await this.removeIssue.execute({ taskId, subTaskId, issueId });
   }
 }
