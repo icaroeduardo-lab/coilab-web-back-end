@@ -13,6 +13,9 @@ import { UpdateDiscoveryFormUseCase } from '../../application/use-cases/task/upd
 import { AddDesignToSubTaskUseCase } from '../../application/use-cases/task/add-design-to-subtask/AddDesignToSubTaskUseCase';
 import { RemoveDesignFromSubTaskUseCase } from '../../application/use-cases/task/remove-design-from-subtask/RemoveDesignFromSubTaskUseCase';
 import { GetDesignUploadUrlUseCase } from '../../application/use-cases/task/get-design-upload-url/GetDesignUploadUrlUseCase';
+import { AddIssueToSubTaskUseCase } from '../../application/use-cases/task/add-issue-to-subtask/AddIssueToSubTaskUseCase';
+import { RemoveIssueFromSubTaskUseCase } from '../../application/use-cases/task/remove-issue-from-subtask/RemoveIssueFromSubTaskUseCase';
+import { UpdateIssueInSubTaskUseCase } from '../../application/use-cases/task/update-issue-in-subtask/UpdateIssueInSubTaskUseCase';
 import { TaskPriority, TaskStatus } from '../../domain/entities/task.entity';
 import { JwtPayload } from '../auth/current-user.decorator';
 import { randomUUID } from 'crypto';
@@ -30,6 +33,9 @@ const mockUpdateDiscovery = { execute: jest.fn() };
 const mockAddDesign = { execute: jest.fn() };
 const mockRemoveDesign = { execute: jest.fn() };
 const mockGetDesignUploadUrl = { execute: jest.fn() };
+const mockAddIssue = { execute: jest.fn() };
+const mockRemoveIssue = { execute: jest.fn() };
+const mockUpdateIssue = { execute: jest.fn() };
 
 const fakeUser: JwtPayload = {
   sub: randomUUID(),
@@ -58,6 +64,9 @@ describe('TaskController', () => {
         { provide: AddDesignToSubTaskUseCase, useValue: mockAddDesign },
         { provide: RemoveDesignFromSubTaskUseCase, useValue: mockRemoveDesign },
         { provide: GetDesignUploadUrlUseCase, useValue: mockGetDesignUploadUrl },
+        { provide: AddIssueToSubTaskUseCase, useValue: mockAddIssue },
+        { provide: RemoveIssueFromSubTaskUseCase, useValue: mockRemoveIssue },
+        { provide: UpdateIssueInSubTaskUseCase, useValue: mockUpdateIssue },
       ],
     }).compile();
     controller = module.get(TaskController);
