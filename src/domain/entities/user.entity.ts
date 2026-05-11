@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Entity } from './entity.base';
 import { UserId } from '../shared/entity-ids';
 
