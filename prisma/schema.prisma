@@ -23,8 +23,8 @@ model Project {
 model User {
   id       String  @id @db.Uuid
   name     String
-  email    String  @default("")
   imageUrl String?
+  email    String
   tasks    Task[]  @relation("creator")
 
   @@map("users")
@@ -32,7 +32,7 @@ model User {
 
 model TaskStatus {
   id    Int    @id @default(autoincrement())
-  name  String @unique
+  name  String @unique @db.VarChar(50)
   tasks Task[]
 
   @@map("task_status")
@@ -55,35 +55,33 @@ model Flow {
 }
 
 model Task {
-  id          String    @id @db.Uuid
-  projectId   String    @db.Uuid
+  id          String     @id @db.Uuid
+  projectId   String     @db.Uuid
   name        String
   description String
-  taskNumber  String    @unique
+  taskNumber  String     @unique
   priority    String
-  statusId    Int
+  creatorId   String     @db.Uuid
+  createdAt   DateTime   @default(now())
   applicantId Int
-  creatorId   String    @db.Uuid
-  createdAt   DateTime  @default(now())
-  project     Project   @relation(fields: [projectId], references: [id])
-  status      TaskStatus @relation(fields: [statusId], references: [id])
-  applicant   Applicant @relation("applicant", fields: [applicantId], references: [id])
-  creator     User      @relation("creator", fields: [creatorId], references: [id])
+  statusId    Int
   subTasks    SubTask[]
   flows       TaskFlow[]
+  applicant   Applicant  @relation("applicant", fields: [applicantId], references: [id])
+  creator     User       @relation("creator", fields: [creatorId], references: [id])
+  project     Project    @relation(fields: [projectId], references: [id])
+  status      TaskStatus @relation(fields: [statusId], references: [id])
 
   @@index([projectId])
-  @@index([applicantId])
   @@index([creatorId])
-  @@index([statusId])
   @@map("tasks")
 }
 
 model TaskFlow {
   taskId String @db.Uuid
   flowId Int
-  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
   flow   Flow   @relation(fields: [flowId], references: [id], onDelete: Cascade)
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@id([taskId, flowId])
   @@map("task_flows")
@@ -109,18 +107,18 @@ model SubTask {
   id               String        @id @db.Uuid
   taskId           String        @db.Uuid
   idUser           String        @db.Uuid
-  statusId         Int
-  typeId           Int
-  taskNumber       String        @unique
   expectedDelivery DateTime
   createdAt        DateTime      @default(now())
   startDate        DateTime?
   completionDate   DateTime?
   reason           String?
+  typeId           Int
   metadata         Json?
+  taskNumber       String        @unique
+  statusId         Int
+  status           SubTaskStatus @relation(fields: [statusId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   task             Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  status           SubTaskStatus @relation(fields: [statusId], references: [id])
-  toolType         TaskTool      @relation(fields: [typeId], references: [id])
+  toolType         TaskTool      @relation(fields: [typeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([taskId])
   @@map("sub_tasks")

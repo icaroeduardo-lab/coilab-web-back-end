@@ -441,4 +441,75 @@ describe('Task Entity', () => {
       );
     });
   });
+
+  describe('Development subtask (typeId=4) guards', () => {
+    const makeDevSubTask = (id: string, issues: { status: boolean }[] = []) =>
+      new SubTask({
+        id: SubTaskId(id),
+        taskId,
+        idUser: userId,
+        status: SubTaskStatus.EM_PROGRESSO,
+        typeId: TaskToolId(4),
+        taskNumber: '#20260001',
+        expectedDelivery: deliveryDate,
+        metadata: { issues },
+      });
+
+    describe('removeSubTask()', () => {
+      it('allows removal when no issues', () => {
+        const task = baseTask();
+        task.addSubTask(makeDevSubTask('550e8400-e29b-41d4-a716-446655440050'));
+        const subTaskId = task.getSubTasks()[0].getId();
+        expect(() => task.removeSubTask(subTaskId)).not.toThrow();
+      });
+
+      it('allows removal when all issues have status=false', () => {
+        const task = baseTask();
+        task.addSubTask(
+          makeDevSubTask('550e8400-e29b-41d4-a716-446655440051', [
+            { status: false },
+            { status: false },
+          ]),
+        );
+        const subTaskId = task.getSubTasks()[0].getId();
+        expect(() => task.removeSubTask(subTaskId)).not.toThrow();
+      });
+
+      it('blocks removal when any issue has status=true', () => {
+        const task = baseTask();
+        task.addSubTask(
+          makeDevSubTask('550e8400-e29b-41d4-a716-446655440052', [
+            { status: false },
+            { status: true },
+          ]),
+        );
+        const subTaskId = task.getSubTasks()[0].getId();
+        expect(() => task.removeSubTask(subTaskId)).toThrow('possui issues concluídas');
+      });
+
+      it('does not apply status check — allows removal even when EM_PROGRESSO', () => {
+        const task = baseTask();
+        task.addSubTask(makeDevSubTask('550e8400-e29b-41d4-a716-446655440053', []));
+        expect(task.getSubTasks()[0].getStatus()).toBe(SubTaskStatus.EM_PROGRESSO);
+        const subTaskId = task.getSubTasks()[0].getId();
+        expect(() => task.removeSubTask(subTaskId)).not.toThrow();
+      });
+    });
+
+    describe('assertCanBeDeleted()', () => {
+      it('allows deletion when development subtask has no completed issues', () => {
+        const task = baseTask();
+        task.addSubTask(
+          makeDevSubTask('550e8400-e29b-41d4-a716-446655440054', [{ status: false }]),
+        );
+        expect(() => task.assertCanBeDeleted()).not.toThrow();
+      });
+
+      it('blocks deletion when development subtask has a completed issue', () => {
+        const task = baseTask();
+        task.addSubTask(makeDevSubTask('550e8400-e29b-41d4-a716-446655440055', [{ status: true }]));
+        expect(() => task.assertCanBeDeleted()).toThrow('possui subtasks ativas');
+      });
+    });
+  });
 });
