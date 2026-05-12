@@ -15,6 +15,8 @@ export class UpdateDiscoveryFormUseCase {
     const task = await this.taskRepository.findById(TaskId(input.taskId));
     if (!task) throw new Error(`Task not found: ${input.taskId}`);
 
+    task.assertEditable();
+
     const subTask = task.getSubTasks().find((s) => s.getId() === input.subTaskId);
     if (!subTask) throw new Error(`SubTask not found: ${input.subTaskId}`);
 

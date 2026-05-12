@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { DomainException } from '../../domain/shared/domain.exception';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -22,6 +23,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return;
     }
 
+    if (exception instanceof DomainException) {
+      reply
+        .status(HttpStatus.UNPROCESSABLE_ENTITY)
+        .send({ statusCode: 422, message: exception.message });
+      return;
+    }
+
     if (exception instanceof Error) {
       const message = exception.message;
 
@@ -31,15 +39,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message.includes('não encontrado')
       ) {
         reply.status(HttpStatus.NOT_FOUND).send({ statusCode: 404, message });
-        return;
-      }
-
-      if (
-        message.includes('já adicionado') ||
-        message.includes('não pode') ||
-        message.includes('obrigatórios')
-      ) {
-        reply.status(HttpStatus.UNPROCESSABLE_ENTITY).send({ statusCode: 422, message });
         return;
       }
 
