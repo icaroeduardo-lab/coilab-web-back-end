@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, IsDate, Matches } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, IsDate, Matches } from 'class-validator';
 import { Entity } from './entity.base';
 import { ProjectId } from '../shared/entity-ids';
 import { SEQUENTIAL_NUMBER_REGEX } from '../shared/sequential-number';
@@ -22,7 +22,7 @@ export interface ProjectProps {
 }
 
 export class Project extends Entity {
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   private id: ProjectId;
 

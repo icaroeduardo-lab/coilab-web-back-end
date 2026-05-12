@@ -2,7 +2,6 @@ import 'reflect-metadata';
 import {
   IsNotEmpty,
   IsString,
-  IsUUID,
   IsInt,
   Min,
   IsDate,
@@ -41,11 +40,11 @@ export interface TaskProps {
 }
 
 export class Task extends Entity {
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   private id: TaskId;
 
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   private projectId: ProjectId;
 
@@ -71,7 +70,7 @@ export class Task extends Entity {
   @Min(0)
   private applicantId: ApplicantId;
 
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   private creatorId: UserId;
 

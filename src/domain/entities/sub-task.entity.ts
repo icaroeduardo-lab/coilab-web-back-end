@@ -4,7 +4,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
   IsDate,
   IsInt,
   Min,
@@ -39,15 +38,15 @@ export interface SubTaskProps {
 }
 
 export class SubTask extends Entity {
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   protected id: SubTaskId;
 
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   protected taskId: TaskId;
 
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   protected idUser: UserId;
 

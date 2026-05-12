@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { IsDate, IsNotEmpty, IsString, IsUrl, IsUUID } from 'class-validator';
+import { IsDate, IsNotEmpty, IsString, IsUrl } from 'class-validator';
 import { ValueObject } from './value-object.base';
 import { DesignId, UserId } from '../shared/entity-ids';
 
@@ -13,7 +13,7 @@ export interface DesignProps {
 }
 
 export class Design extends ValueObject {
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   private readonly id: DesignId;
 
@@ -29,7 +29,7 @@ export class Design extends ValueObject {
   @IsNotEmpty()
   private readonly urlImage: string;
 
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   private readonly user: UserId;
 
