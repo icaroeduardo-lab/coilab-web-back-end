@@ -15,6 +15,8 @@ export class RemoveIssueFromSubTaskUseCase {
     const task = await this.taskRepository.findById(TaskId(input.taskId));
     if (!task) throw new Error(`Task not found: ${input.taskId}`);
 
+    task.assertEditable();
+
     const subTask = task.getSubTasks().find((s) => s.getId() === input.subTaskId);
     if (!subTask) throw new Error(`SubTask not found: ${input.subTaskId}`);
     if (subTask.getTypeId() !== 4) throw new Error('SubTask não é do tipo Desenvolvimento');

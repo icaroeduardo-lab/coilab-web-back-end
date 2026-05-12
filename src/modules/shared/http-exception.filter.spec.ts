@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, ArgumentsHost, Logger } from '@nestjs/common';
 import { AllExceptionsFilter } from './http-exception.filter';
+import { DomainException } from '../../domain/shared/domain.exception';
 
 const fakeRequest = { method: 'GET', url: '/api/test' };
 
@@ -57,26 +58,14 @@ describe('AllExceptionsFilter', () => {
     expect(reply.status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
   });
 
-  it('maps "já adicionado" error to 422', () => {
+  it('maps DomainException to 422 with message', () => {
     const reply = makeReply();
-    filter.catch(new Error('Flow já adicionado: id'), makeHost(reply));
+    filter.catch(new DomainException('Regra de negócio violada'), makeHost(reply));
     expect(reply.status).toHaveBeenCalledWith(HttpStatus.UNPROCESSABLE_ENTITY);
-    expect(reply.send).toHaveBeenCalledWith({ statusCode: 422, message: 'Flow já adicionado: id' });
-  });
-
-  it('maps "não pode" error to 422', () => {
-    const reply = makeReply();
-    filter.catch(
-      new Error('Subtask com status "Aprovado" não pode ser modificada'),
-      makeHost(reply),
-    );
-    expect(reply.status).toHaveBeenCalledWith(HttpStatus.UNPROCESSABLE_ENTITY);
-  });
-
-  it('maps "obrigatórios" error to 422', () => {
-    const reply = makeReply();
-    filter.catch(new Error('Campos obrigatórios não preenchidos: complexity'), makeHost(reply));
-    expect(reply.status).toHaveBeenCalledWith(HttpStatus.UNPROCESSABLE_ENTITY);
+    expect(reply.send).toHaveBeenCalledWith({
+      statusCode: 422,
+      message: 'Regra de negócio violada',
+    });
   });
 
   it('returns 500 for unknown Error', () => {
