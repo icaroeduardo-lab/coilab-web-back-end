@@ -487,23 +487,33 @@ describe('Task Entity', () => {
     };
 
     it('blocks changeName', () => {
-      expect(() => makeConcludedTask().changeName('X')).toThrow('Task concluída não pode ser modificada');
+      expect(() => makeConcludedTask().changeName('X')).toThrow(
+        'Task concluída não pode ser modificada',
+      );
     });
 
     it('blocks changeDescription', () => {
-      expect(() => makeConcludedTask().changeDescription('X')).toThrow('Task concluída não pode ser modificada');
+      expect(() => makeConcludedTask().changeDescription('X')).toThrow(
+        'Task concluída não pode ser modificada',
+      );
     });
 
     it('blocks changePriority', () => {
-      expect(() => makeConcludedTask().changePriority(TaskPriority.ALTA)).toThrow('Task concluída não pode ser modificada');
+      expect(() => makeConcludedTask().changePriority(TaskPriority.ALTA)).toThrow(
+        'Task concluída não pode ser modificada',
+      );
     });
 
     it('blocks changeStatus', () => {
-      expect(() => makeConcludedTask().changeStatus(TaskStatus.EM_EXECUCAO)).toThrow('Task concluída não pode ser modificada');
+      expect(() => makeConcludedTask().changeStatus(TaskStatus.EM_EXECUCAO)).toThrow(
+        'Task concluída não pode ser modificada',
+      );
     });
 
     it('blocks addFlowId', () => {
-      expect(() => makeConcludedTask().addFlowId(FlowId(1))).toThrow('Task concluída não pode ser modificada');
+      expect(() => makeConcludedTask().addFlowId(FlowId(1))).toThrow(
+        'Task concluída não pode ser modificada',
+      );
     });
 
     it('blocks removeFlowId', () => {
@@ -547,61 +557,146 @@ describe('Task Entity', () => {
 
     it('allows CONCLUIDO when all subtasks are APROVADO', () => {
       const task = baseTask();
-      task.addSubTask(makeSubTask('550e8400-e29b-41d4-a716-446655440060', 1, SubTaskStatus.AGUARDANDO_CHECKOUT, '#20260060'));
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440060',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260060',
+        ),
+      );
       task.getSubTasks()[0].approve();
-      task.addSubTask(makeSubTask('550e8400-e29b-41d4-a716-446655440061', 2, SubTaskStatus.AGUARDANDO_CHECKOUT, '#20260061'));
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440061',
+          2,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260061',
+        ),
+      );
       task.getSubTasks()[1].approve();
       expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).not.toThrow();
     });
 
     it('allows CONCLUIDO when all subtasks are CANCELADO', () => {
       const task = baseTask();
-      task.addSubTask(makeSubTask('550e8400-e29b-41d4-a716-446655440062', 1, SubTaskStatus.EM_PROGRESSO, '#20260062'));
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440062',
+          1,
+          SubTaskStatus.EM_PROGRESSO,
+          '#20260062',
+        ),
+      );
       task.getSubTasks()[0].cancel('Cancelado');
       expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).not.toThrow();
     });
 
     it('allows CONCLUIDO when REPROVADO has substituta APROVADA do mesmo tipo', () => {
       const task = baseTask();
-      task.addSubTask(makeSubTask('550e8400-e29b-41d4-a716-446655440063', 1, SubTaskStatus.AGUARDANDO_CHECKOUT, '#20260063'));
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440063',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260063',
+        ),
+      );
       task.getSubTasks()[0].reject('Reprovado');
-      task.addSubTask(makeSubTask('550e8400-e29b-41d4-a716-446655440064', 1, SubTaskStatus.AGUARDANDO_CHECKOUT, '#20260064'));
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440064',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260064',
+        ),
+      );
       task.getSubTasks()[1].approve();
       expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).not.toThrow();
     });
 
     it('allows CONCLUIDO with mix of APROVADO and CANCELADO', () => {
       const task = baseTask();
-      task.addSubTask(makeSubTask('550e8400-e29b-41d4-a716-446655440065', 1, SubTaskStatus.AGUARDANDO_CHECKOUT, '#20260065'));
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440065',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260065',
+        ),
+      );
       task.getSubTasks()[0].approve();
-      task.addSubTask(makeSubTask('550e8400-e29b-41d4-a716-446655440066', 2, SubTaskStatus.EM_PROGRESSO, '#20260066'));
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440066',
+          2,
+          SubTaskStatus.EM_PROGRESSO,
+          '#20260066',
+        ),
+      );
       task.getSubTasks()[1].cancel('Cancelado');
       expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).not.toThrow();
     });
 
     it('blocks CONCLUIDO when subtask is NAO_INICIADO', () => {
       const task = baseTask();
-      task.addSubTask(makeSubTask('550e8400-e29b-41d4-a716-446655440067', 1, SubTaskStatus.NAO_INICIADO, '#20260067'));
-      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).toThrow('Tarfeas não podem ser concluídas com sub tarefas abertas.');
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440067',
+          1,
+          SubTaskStatus.NAO_INICIADO,
+          '#20260067',
+        ),
+      );
+      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).toThrow(
+        'Tarfeas não podem ser concluídas com sub tarefas abertas.',
+      );
     });
 
     it('blocks CONCLUIDO when subtask is EM_PROGRESSO', () => {
       const task = baseTask();
-      task.addSubTask(makeSubTask('550e8400-e29b-41d4-a716-446655440068', 1, SubTaskStatus.EM_PROGRESSO, '#20260068'));
-      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).toThrow('Tarfeas não podem ser concluídas com sub tarefas abertas.');
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440068',
+          1,
+          SubTaskStatus.EM_PROGRESSO,
+          '#20260068',
+        ),
+      );
+      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).toThrow(
+        'Tarfeas não podem ser concluídas com sub tarefas abertas.',
+      );
     });
 
     it('blocks CONCLUIDO when subtask is AGUARDANDO_CHECKOUT', () => {
       const task = baseTask();
-      task.addSubTask(makeSubTask('550e8400-e29b-41d4-a716-446655440069', 1, SubTaskStatus.AGUARDANDO_CHECKOUT, '#20260069'));
-      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).toThrow('Tarfeas não podem ser concluídas com sub tarefas abertas.');
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440069',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260069',
+        ),
+      );
+      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).toThrow(
+        'Tarfeas não podem ser concluídas com sub tarefas abertas.',
+      );
     });
 
     it('blocks CONCLUIDO when REPROVADO has no substituta APROVADA', () => {
       const task = baseTask();
-      task.addSubTask(makeSubTask('550e8400-e29b-41d4-a716-446655440070', 1, SubTaskStatus.AGUARDANDO_CHECKOUT, '#20260070'));
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440070',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260070',
+        ),
+      );
       task.getSubTasks()[0].reject('Reprovado');
-      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).toThrow('Tarfeas não podem ser concluídas com sub tarefas abertas.');
+      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).toThrow(
+        'Tarfeas não podem ser concluídas com sub tarefas abertas.',
+      );
     });
   });
 

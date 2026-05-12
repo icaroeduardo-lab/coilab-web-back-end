@@ -62,7 +62,10 @@ describe('AllExceptionsFilter', () => {
     const reply = makeReply();
     filter.catch(new DomainException('Regra de negócio violada'), makeHost(reply));
     expect(reply.status).toHaveBeenCalledWith(HttpStatus.UNPROCESSABLE_ENTITY);
-    expect(reply.send).toHaveBeenCalledWith({ statusCode: 422, message: 'Regra de negócio violada' });
+    expect(reply.send).toHaveBeenCalledWith({
+      statusCode: 422,
+      message: 'Regra de negócio violada',
+    });
   });
 
   it('returns 500 for unknown Error', () => {
