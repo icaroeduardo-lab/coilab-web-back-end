@@ -20,7 +20,7 @@ export class GetProjectUseCase {
       projectNumber: project.getProjectNumber(),
       name: project.getName(),
       description: project.getDescription(),
-      urlDocument: project.getUrlDocument(),
+      canvas: project.getCanvas(),
       status: project.getStatus(),
       createdAt: project.getCreatedAt(),
     };

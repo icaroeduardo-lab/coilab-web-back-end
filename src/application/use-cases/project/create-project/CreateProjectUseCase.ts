@@ -1,4 +1,4 @@
-import { Project } from '../../../../domain/entities/project.entity';
+import { Canvas, Project } from '../../../../domain/entities/project.entity';
 import { IProjectRepository } from '../../../../domain/repositories/IProjectRepository';
 import { ProjectId } from '../../../../domain/shared/entity-ids';
 import { generateNextNumber } from '../../../../domain/shared/sequential-number';
@@ -8,7 +8,7 @@ import { ProjectOutput } from '../shared/project-output';
 export interface CreateProjectInput {
   name: string;
   description: string;
-  urlDocument?: string;
+  canvas?: Canvas;
 }
 
 export class CreateProjectUseCase {
@@ -23,7 +23,7 @@ export class CreateProjectUseCase {
       name: input.name,
       projectNumber,
       description: input.description,
-      urlDocument: input.urlDocument,
+      canvas: input.canvas,
     });
 
     await this.projectRepository.save(project);
@@ -33,7 +33,7 @@ export class CreateProjectUseCase {
       projectNumber: project.getProjectNumber(),
       name: project.getName(),
       description: project.getDescription(),
-      urlDocument: project.getUrlDocument(),
+      canvas: project.getCanvas(),
       status: project.getStatus(),
       createdAt: project.getCreatedAt(),
     };

@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { CanvasDto } from './canvas.dto';
 
 export class CreateProjectDto {
   @ApiProperty({ example: 'Portal do Cliente' })
@@ -12,8 +14,9 @@ export class CreateProjectDto {
   @IsNotEmpty()
   description: string;
 
-  @ApiPropertyOptional({ example: 'https://docs.example.com/brief.pdf' })
-  @IsString()
+  @ApiPropertyOptional({ type: CanvasDto })
   @IsOptional()
-  urlDocument?: string;
+  @ValidateNested()
+  @Type(() => CanvasDto)
+  canvas?: CanvasDto;
 }

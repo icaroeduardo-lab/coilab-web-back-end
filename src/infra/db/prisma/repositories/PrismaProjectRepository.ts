@@ -1,7 +1,8 @@
 import { IProjectRepository } from '../../../../domain/repositories/IProjectRepository';
-import { Project, ProjectStatus } from '../../../../domain/entities/project.entity';
+import { Canvas, Project, ProjectStatus } from '../../../../domain/entities/project.entity';
 import { ProjectId } from '../../../../domain/shared/entity-ids';
 import { prisma } from '../prisma.client';
+import { Prisma } from '../../../../generated/prisma/client';
 import type { Project as PrismaProject } from '../../../../generated/prisma/client';
 
 const STATUS_NORMALIZE: Record<string, ProjectStatus> = {
@@ -26,7 +27,7 @@ function toDomain(row: PrismaProject): Project {
     name: row.name,
     projectNumber: normalizeProjectNumber(row.projectNumber),
     description: row.description,
-    urlDocument: row.urlDocument ?? undefined,
+    canvas: row.canvas ? (row.canvas as unknown as Canvas) : undefined,
     status: normalizeProjectStatus(row.status),
     createdAt: row.createdAt,
   });
@@ -65,14 +66,14 @@ export class PrismaProjectRepository implements IProjectRepository {
         name: project.getName(),
         projectNumber: project.getProjectNumber(),
         description: project.getDescription(),
-        urlDocument: project.getUrlDocument(),
+        canvas: (project.getCanvas() as Prisma.InputJsonValue) ?? Prisma.JsonNull,
         status: project.getStatus(),
         createdAt: project.getCreatedAt(),
       },
       update: {
         name: project.getName(),
         description: project.getDescription(),
-        urlDocument: project.getUrlDocument(),
+        canvas: (project.getCanvas() as Prisma.InputJsonValue) ?? Prisma.JsonNull,
         status: project.getStatus(),
       },
     });
