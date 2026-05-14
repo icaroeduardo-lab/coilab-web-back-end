@@ -36,7 +36,10 @@ export class UserController {
 
   @Get()
   @ApiOperation({ summary: 'Listar todos os usuários' })
-  @ApiResponse({ status: 200, schema: { type: 'array', items: { $ref: getSchemaPath(UserResponseDto) } } })
+  @ApiResponse({
+    status: 200,
+    schema: { type: 'array', items: { $ref: getSchemaPath(UserResponseDto) } },
+  })
   list() {
     return this.listUsers.execute();
   }

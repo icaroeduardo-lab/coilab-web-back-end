@@ -43,7 +43,12 @@ describe('ListUsersUseCase', () => {
   it('includes imageUrl when present', async () => {
     const repo = makeRepo();
     repo.findAll.mockResolvedValue([
-      new User({ id: UserId(randomUUID()), name: 'Carol', email: 'carol@example.com', imageUrl: 'https://img.example.com/carol.jpg' }),
+      new User({
+        id: UserId(randomUUID()),
+        name: 'Carol',
+        email: 'carol@example.com',
+        imageUrl: 'https://img.example.com/carol.jpg',
+      }),
     ]);
     const sut = new ListUsersUseCase(repo);
 
