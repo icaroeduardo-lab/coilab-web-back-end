@@ -55,15 +55,16 @@ describe('UpdateProjectUseCase', () => {
     expect(saved.getDescription()).toBe('Desc original');
   });
 
-  it('updates urlDocument', async () => {
+  it('updates canvas', async () => {
     const repo = makeRepo();
     const id = randomUUID();
     repo.findById.mockResolvedValue(makeProject(id));
     const sut = new UpdateProjectUseCase(repo);
 
-    await sut.execute({ id, urlDocument: 'https://docs.example.com/doc.pdf' });
+    await sut.execute({ id, canvas: { problem: 'Novo problema', notes: 'Nota' } });
 
     const saved: Project = repo.save.mock.calls[0][0];
-    expect(saved.getUrlDocument()).toBe('https://docs.example.com/doc.pdf');
+    expect(saved.getCanvas()?.problem).toBe('Novo problema');
+    expect(saved.getCanvas()?.notes).toBe('Nota');
   });
 });

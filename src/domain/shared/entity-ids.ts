@@ -1,7 +1,7 @@
-import { isUUID } from 'class-validator';
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function createId<T>(brand: string, value: string): T {
-  if (!isUUID(value)) {
+  if (!UUID_PATTERN.test(value)) {
     throw new Error(`Invalid ${brand}: "${value}" is not a valid UUID`);
   }
   return value as unknown as T;

@@ -23,6 +23,10 @@ import { UpdateDiscoveryFormUseCase } from '../../application/use-cases/task/upd
 import { AddDesignToSubTaskUseCase } from '../../application/use-cases/task/add-design-to-subtask/AddDesignToSubTaskUseCase';
 import { RemoveDesignFromSubTaskUseCase } from '../../application/use-cases/task/remove-design-from-subtask/RemoveDesignFromSubTaskUseCase';
 import { GetDesignUploadUrlUseCase } from '../../application/use-cases/task/get-design-upload-url/GetDesignUploadUrlUseCase';
+import { AddIssueToSubTaskUseCase } from '../../application/use-cases/task/add-issue-to-subtask/AddIssueToSubTaskUseCase';
+import { RemoveIssueFromSubTaskUseCase } from '../../application/use-cases/task/remove-issue-from-subtask/RemoveIssueFromSubTaskUseCase';
+import { UpdateIssueInSubTaskUseCase } from '../../application/use-cases/task/update-issue-in-subtask/UpdateIssueInSubTaskUseCase';
+import { ListTaskToolsUseCase } from '../../application/use-cases/task/list-task-tools/ListTaskToolsUseCase';
 import { S3StorageService } from '../../infra/storage/S3StorageService';
 import { TaskController } from './task.controller';
 
@@ -67,8 +71,12 @@ import { TaskController } from './task.controller';
     },
     {
       provide: ListTasksByProjectUseCase,
-      useFactory: (repo: ITaskRepository) => new ListTasksByProjectUseCase(repo),
-      inject: [REPOSITORY_TOKENS.TASK],
+      useFactory: (
+        task: ITaskRepository,
+        applicant: IApplicantRepository,
+        project: IProjectRepository,
+      ) => new ListTasksByProjectUseCase(task, applicant, project),
+      inject: [REPOSITORY_TOKENS.TASK, REPOSITORY_TOKENS.APPLICANT, REPOSITORY_TOKENS.PROJECT],
     },
     {
       provide: UpdateTaskUseCase,
@@ -117,6 +125,22 @@ import { TaskController } from './task.controller';
         new GetDesignUploadUrlUseCase(repo, storage),
       inject: [REPOSITORY_TOKENS.TASK, S3StorageService],
     },
+    {
+      provide: AddIssueToSubTaskUseCase,
+      useFactory: (repo: ITaskRepository) => new AddIssueToSubTaskUseCase(repo),
+      inject: [REPOSITORY_TOKENS.TASK],
+    },
+    {
+      provide: RemoveIssueFromSubTaskUseCase,
+      useFactory: (repo: ITaskRepository) => new RemoveIssueFromSubTaskUseCase(repo),
+      inject: [REPOSITORY_TOKENS.TASK],
+    },
+    {
+      provide: UpdateIssueInSubTaskUseCase,
+      useFactory: (repo: ITaskRepository) => new UpdateIssueInSubTaskUseCase(repo),
+      inject: [REPOSITORY_TOKENS.TASK],
+    },
+    { provide: ListTaskToolsUseCase, useValue: new ListTaskToolsUseCase() },
   ],
 })
 export class TaskModule {}

@@ -34,11 +34,11 @@ describe('User entity', () => {
     );
   });
 
-  it('throws when id is not a valid UUID', () => {
+  it('throws when id is empty', () => {
     expect(
       () =>
         new User({
-          id: 'not-a-uuid' as ReturnType<typeof UserId>,
+          id: '' as ReturnType<typeof UserId>,
           name: 'Dave',
           email: 'dave@example.com',
         }),

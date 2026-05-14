@@ -4,7 +4,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
   IsDate,
   IsInt,
   Min,
@@ -13,6 +12,7 @@ import {
 import { Entity } from './entity.base';
 import { SubTaskId, TaskId, TaskToolId, UserId } from '../shared/entity-ids';
 import { SEQUENTIAL_NUMBER_REGEX } from '../shared/sequential-number';
+import { DomainException } from '../shared/domain.exception';
 
 export enum SubTaskStatus {
   NAO_INICIADO = 'Não iniciado',
@@ -39,15 +39,15 @@ export interface SubTaskProps {
 }
 
 export class SubTask extends Entity {
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   protected id: SubTaskId;
 
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   protected taskId: TaskId;
 
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   protected idUser: UserId;
 
@@ -150,7 +150,7 @@ export class SubTask extends Entity {
       SubTaskStatus.CANCELADO,
     ];
     if (lockedStatuses.includes(this.status)) {
-      throw new Error(`Subtask com status "${this.status}" não pode ser modificada`);
+      throw new DomainException(`Subtask com status "${this.status}" não pode ser modificada`);
     }
   }
 
@@ -168,7 +168,7 @@ export class SubTask extends Entity {
 
   approve(): void {
     if (this.status !== SubTaskStatus.AGUARDANDO_CHECKOUT) {
-      throw new Error('A subtask precisa estar Aguardando Checkout para ser aprovada');
+      throw new DomainException('A subtask precisa estar Aguardando Checkout para ser aprovada');
     }
     this.status = SubTaskStatus.APROVADO;
     this.validate();
@@ -176,7 +176,7 @@ export class SubTask extends Entity {
 
   reject(reason: string): void {
     if (this.status !== SubTaskStatus.AGUARDANDO_CHECKOUT) {
-      throw new Error('A subtask precisa estar Aguardando Checkout para ser reprovada');
+      throw new DomainException('A subtask precisa estar Aguardando Checkout para ser reprovada');
     }
     this.status = SubTaskStatus.REPROVADO;
     this.reason = reason;
@@ -185,7 +185,7 @@ export class SubTask extends Entity {
 
   cancel(reason: string): void {
     if (this.status === SubTaskStatus.APROVADO) {
-      throw new Error('A subtask já foi aprovada e não pode ser cancelada');
+      throw new DomainException('A subtask já foi aprovada e não pode ser cancelada');
     }
     this.status = SubTaskStatus.CANCELADO;
     this.reason = reason;

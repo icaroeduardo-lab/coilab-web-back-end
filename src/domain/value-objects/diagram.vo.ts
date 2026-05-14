@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { IsDate, IsNotEmpty, IsString, IsUrl, IsUUID } from 'class-validator';
+import { IsDate, IsNotEmpty, IsString, IsUrl } from 'class-validator';
 import { ValueObject } from './value-object.base';
 import { UserId } from '../shared/entity-ids';
 
@@ -24,7 +24,7 @@ export class Diagram extends ValueObject {
   @IsNotEmpty()
   private readonly urlDiagram: string;
 
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   private readonly user: UserId;
 

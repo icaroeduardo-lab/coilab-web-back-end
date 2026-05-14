@@ -314,13 +314,14 @@ describe('Task Entity', () => {
         expectedDelivery: deliveryDate,
       });
 
-    it('allows DESENVOLVIMENTO when task has no subtasks', () => {
+    it('blocks DESENVOLVIMENTO when task has no subtasks', () => {
       const task = baseTask();
-      expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).not.toThrow();
-      expect(task.getStatus()).toBe(TaskStatus.DESENVOLVIMENTO);
+      expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).toThrow(
+        'Para ir para Desenvolvimento',
+      );
     });
 
-    it('allows DESENVOLVIMENTO when all subtasks are APROVADO', () => {
+    it('allows DESENVOLVIMENTO when all subtasks are APROVADO and dev subtask exists', () => {
       const task = baseTask();
       task.addSubTask(
         makeSubTask(
@@ -340,10 +341,19 @@ describe('Task Entity', () => {
         ),
       );
       task.getSubTasks()[1].approve();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440039',
+          4,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260019',
+        ),
+      );
+      task.getSubTasks()[2].approve();
       expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).not.toThrow();
     });
 
-    it('allows DESENVOLVIMENTO when REPROVADO has substituta APROVADA do mesmo tipo', () => {
+    it('allows DESENVOLVIMENTO when REPROVADO has substituta APROVADA do mesmo tipo and dev subtask exists', () => {
       const task = baseTask();
       task.addSubTask(
         makeSubTask(
@@ -363,21 +373,48 @@ describe('Task Entity', () => {
         ),
       );
       task.getSubTasks()[1].approve();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440040',
+          4,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260020',
+        ),
+      );
+      task.getSubTasks()[2].approve();
       expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).not.toThrow();
     });
 
-    it('allows DESENVOLVIMENTO when only CANCELADO subtasks exist', () => {
+    it('blocks DESENVOLVIMENTO when only CANCELADO subtasks exist (no active dev subtask)', () => {
       const task = baseTask();
       task.addSubTask(
         makeSubTask(
           '550e8400-e29b-41d4-a716-446655440034',
-          1,
+          4,
           SubTaskStatus.EM_PROGRESSO,
           '#20260014',
         ),
       );
       task.getSubTasks()[0].cancel('Cancelado');
-      expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).not.toThrow();
+      expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).toThrow(
+        'Para ir para Desenvolvimento',
+      );
+    });
+
+    it('blocks DESENVOLVIMENTO when no subtask of typeId 4 exists', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440041',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260021',
+        ),
+      );
+      task.getSubTasks()[0].approve();
+      expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).toThrow(
+        'Para ir para Desenvolvimento',
+      );
     });
 
     it('blocks DESENVOLVIMENTO when subtask is EM_PROGRESSO', () => {
@@ -439,6 +476,298 @@ describe('Task Entity', () => {
       expect(() => task.changeStatus(TaskStatus.DESENVOLVIMENTO)).toThrow(
         'Para ir para Desenvolvimento',
       );
+    });
+  });
+
+  describe('assertEditable() — blocks all mutations when CONCLUIDO', () => {
+    const makeConcludedTask = () => {
+      const task = baseTask();
+      task.changeStatus(TaskStatus.CONCLUIDO);
+      return task;
+    };
+
+    it('blocks changeName', () => {
+      expect(() => makeConcludedTask().changeName('X')).toThrow(
+        'Task concluída não pode ser modificada',
+      );
+    });
+
+    it('blocks changeDescription', () => {
+      expect(() => makeConcludedTask().changeDescription('X')).toThrow(
+        'Task concluída não pode ser modificada',
+      );
+    });
+
+    it('blocks changePriority', () => {
+      expect(() => makeConcludedTask().changePriority(TaskPriority.ALTA)).toThrow(
+        'Task concluída não pode ser modificada',
+      );
+    });
+
+    it('blocks changeStatus', () => {
+      expect(() => makeConcludedTask().changeStatus(TaskStatus.EM_EXECUCAO)).toThrow(
+        'Task concluída não pode ser modificada',
+      );
+    });
+
+    it('blocks addFlowId', () => {
+      expect(() => makeConcludedTask().addFlowId(FlowId(1))).toThrow(
+        'Task concluída não pode ser modificada',
+      );
+    });
+
+    it('blocks removeFlowId', () => {
+      const task = baseTask();
+      task.addFlowId(FlowId(1));
+      task.changeStatus(TaskStatus.CONCLUIDO);
+      expect(() => task.removeFlowId(FlowId(1))).toThrow('Task concluída não pode ser modificada');
+    });
+
+    it('blocks addSubTask', () => {
+      const task = makeConcludedTask();
+      const sub = new SubTask({
+        id: SubTaskId('550e8400-e29b-41d4-a716-446655440099'),
+        taskId,
+        idUser: userId,
+        status: SubTaskStatus.NAO_INICIADO,
+        typeId: TaskToolId(1),
+        taskNumber: '#20260099',
+        expectedDelivery: deliveryDate,
+      });
+      expect(() => task.addSubTask(sub)).toThrow('Task concluída não pode ser modificada');
+    });
+  });
+
+  describe('changeStatus() → CONCLUIDO guard', () => {
+    const makeSubTask = (id: string, typeId: number, status: SubTaskStatus, taskNumber: string) =>
+      new SubTask({
+        id: SubTaskId(id),
+        taskId,
+        idUser: userId,
+        status,
+        typeId: TaskToolId(typeId),
+        taskNumber,
+        expectedDelivery: deliveryDate,
+      });
+
+    it('allows CONCLUIDO when task has no subtasks', () => {
+      const task = baseTask();
+      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).not.toThrow();
+    });
+
+    it('allows CONCLUIDO when all subtasks are APROVADO', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440060',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260060',
+        ),
+      );
+      task.getSubTasks()[0].approve();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440061',
+          2,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260061',
+        ),
+      );
+      task.getSubTasks()[1].approve();
+      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).not.toThrow();
+    });
+
+    it('allows CONCLUIDO when all subtasks are CANCELADO', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440062',
+          1,
+          SubTaskStatus.EM_PROGRESSO,
+          '#20260062',
+        ),
+      );
+      task.getSubTasks()[0].cancel('Cancelado');
+      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).not.toThrow();
+    });
+
+    it('allows CONCLUIDO when REPROVADO has substituta APROVADA do mesmo tipo', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440063',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260063',
+        ),
+      );
+      task.getSubTasks()[0].reject('Reprovado');
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440064',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260064',
+        ),
+      );
+      task.getSubTasks()[1].approve();
+      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).not.toThrow();
+    });
+
+    it('allows CONCLUIDO with mix of APROVADO and CANCELADO', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440065',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260065',
+        ),
+      );
+      task.getSubTasks()[0].approve();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440066',
+          2,
+          SubTaskStatus.EM_PROGRESSO,
+          '#20260066',
+        ),
+      );
+      task.getSubTasks()[1].cancel('Cancelado');
+      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).not.toThrow();
+    });
+
+    it('blocks CONCLUIDO when subtask is NAO_INICIADO', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440067',
+          1,
+          SubTaskStatus.NAO_INICIADO,
+          '#20260067',
+        ),
+      );
+      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).toThrow(
+        'Tarfeas não podem ser concluídas com sub tarefas abertas.',
+      );
+    });
+
+    it('blocks CONCLUIDO when subtask is EM_PROGRESSO', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440068',
+          1,
+          SubTaskStatus.EM_PROGRESSO,
+          '#20260068',
+        ),
+      );
+      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).toThrow(
+        'Tarfeas não podem ser concluídas com sub tarefas abertas.',
+      );
+    });
+
+    it('blocks CONCLUIDO when subtask is AGUARDANDO_CHECKOUT', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440069',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260069',
+        ),
+      );
+      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).toThrow(
+        'Tarfeas não podem ser concluídas com sub tarefas abertas.',
+      );
+    });
+
+    it('blocks CONCLUIDO when REPROVADO has no substituta APROVADA', () => {
+      const task = baseTask();
+      task.addSubTask(
+        makeSubTask(
+          '550e8400-e29b-41d4-a716-446655440070',
+          1,
+          SubTaskStatus.AGUARDANDO_CHECKOUT,
+          '#20260070',
+        ),
+      );
+      task.getSubTasks()[0].reject('Reprovado');
+      expect(() => task.changeStatus(TaskStatus.CONCLUIDO)).toThrow(
+        'Tarfeas não podem ser concluídas com sub tarefas abertas.',
+      );
+    });
+  });
+
+  describe('Development subtask (typeId=4) guards', () => {
+    const makeDevSubTask = (id: string, issues: { status: boolean }[] = []) =>
+      new SubTask({
+        id: SubTaskId(id),
+        taskId,
+        idUser: userId,
+        status: SubTaskStatus.EM_PROGRESSO,
+        typeId: TaskToolId(4),
+        taskNumber: '#20260001',
+        expectedDelivery: deliveryDate,
+        metadata: { issues },
+      });
+
+    describe('removeSubTask()', () => {
+      it('allows removal when no issues', () => {
+        const task = baseTask();
+        task.addSubTask(makeDevSubTask('550e8400-e29b-41d4-a716-446655440050'));
+        const subTaskId = task.getSubTasks()[0].getId();
+        expect(() => task.removeSubTask(subTaskId)).not.toThrow();
+      });
+
+      it('allows removal when all issues have status=false', () => {
+        const task = baseTask();
+        task.addSubTask(
+          makeDevSubTask('550e8400-e29b-41d4-a716-446655440051', [
+            { status: false },
+            { status: false },
+          ]),
+        );
+        const subTaskId = task.getSubTasks()[0].getId();
+        expect(() => task.removeSubTask(subTaskId)).not.toThrow();
+      });
+
+      it('blocks removal when any issue has status=true', () => {
+        const task = baseTask();
+        task.addSubTask(
+          makeDevSubTask('550e8400-e29b-41d4-a716-446655440052', [
+            { status: false },
+            { status: true },
+          ]),
+        );
+        const subTaskId = task.getSubTasks()[0].getId();
+        expect(() => task.removeSubTask(subTaskId)).toThrow('possui issues concluídas');
+      });
+
+      it('does not apply status check — allows removal even when EM_PROGRESSO', () => {
+        const task = baseTask();
+        task.addSubTask(makeDevSubTask('550e8400-e29b-41d4-a716-446655440053', []));
+        expect(task.getSubTasks()[0].getStatus()).toBe(SubTaskStatus.EM_PROGRESSO);
+        const subTaskId = task.getSubTasks()[0].getId();
+        expect(() => task.removeSubTask(subTaskId)).not.toThrow();
+      });
+    });
+
+    describe('assertCanBeDeleted()', () => {
+      it('allows deletion when development subtask has no completed issues', () => {
+        const task = baseTask();
+        task.addSubTask(
+          makeDevSubTask('550e8400-e29b-41d4-a716-446655440054', [{ status: false }]),
+        );
+        expect(() => task.assertCanBeDeleted()).not.toThrow();
+      });
+
+      it('blocks deletion when development subtask has a completed issue', () => {
+        const task = baseTask();
+        task.addSubTask(makeDevSubTask('550e8400-e29b-41d4-a716-446655440055', [{ status: true }]));
+        expect(() => task.assertCanBeDeleted()).toThrow('possui subtasks ativas');
+      });
     });
   });
 });
