@@ -8,6 +8,15 @@ provider:
   region: us-east-1
   memorySize: 512
   timeout: 29
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+          Resource:
+            - arn:aws:s3:::${env:BUCKET_DESIGN}/*
+            - arn:aws:s3:::${env:BUCKET_PROJECTS_DOCUMENTS}/*
   environment:
     NODE_ENV: production
     DATABASE_URL: ${env:DATABASE_URL}
