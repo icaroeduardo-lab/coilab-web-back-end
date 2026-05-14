@@ -31,13 +31,6 @@ export interface CanvasRiskAndMitigation {
   mitigation?: string;
 }
 
-export interface CanvasTeamMember {
-  avatar?: string;
-  name?: string;
-  role?: string;
-  isLead?: boolean;
-}
-
 export interface Canvas {
   problem?: string;
   target?: string[];
@@ -47,7 +40,7 @@ export interface Canvas {
   resources?: CanvasResource[];
   risksAndMitigation?: CanvasRiskAndMitigation[];
   indicators?: string[];
-  team?: CanvasTeamMember[];
+  team?: string[];
   notes?: string;
 }
 
