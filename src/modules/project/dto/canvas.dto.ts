@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CanvasImpactDto {
@@ -50,28 +50,6 @@ export class CanvasRiskAndMitigationDto {
   @IsString()
   @IsOptional()
   mitigation?: string;
-}
-
-export class CanvasTeamMemberDto {
-  @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  avatar?: string;
-
-  @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  name?: string;
-
-  @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  role?: string;
-
-  @ApiPropertyOptional()
-  @IsBoolean()
-  @IsOptional()
-  isLead?: boolean;
 }
 
 export class CanvasDto {
@@ -125,12 +103,14 @@ export class CanvasDto {
   @IsOptional()
   indicators?: string[];
 
-  @ApiPropertyOptional({ type: [CanvasTeamMemberDto] })
-  @IsOptional()
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'Array of user IDs from the users table',
+  })
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CanvasTeamMemberDto)
-  team?: CanvasTeamMemberDto[];
+  @IsString({ each: true })
+  @IsOptional()
+  team?: string[];
 
   @ApiPropertyOptional()
   @IsString()
