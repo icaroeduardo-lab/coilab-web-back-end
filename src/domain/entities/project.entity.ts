@@ -11,12 +11,52 @@ export enum ProjectStatus {
   CANCELADO = 'cancelado',
 }
 
+export interface CanvasImpact {
+  description?: string;
+  labels?: string[];
+}
+
+export interface CanvasPart {
+  name?: string;
+  role?: string;
+}
+
+export interface CanvasResource {
+  type?: string;
+  description?: string[];
+}
+
+export interface CanvasRiskAndMitigation {
+  risk?: string;
+  mitigation?: string;
+}
+
+export interface CanvasTeamMember {
+  avatar?: string;
+  name?: string;
+  role?: string;
+  isLead?: boolean;
+}
+
+export interface Canvas {
+  problem?: string;
+  target?: string[];
+  objective?: string[];
+  impact?: CanvasImpact;
+  parts?: CanvasPart[];
+  resources?: CanvasResource[];
+  risksAndMitigation?: CanvasRiskAndMitigation[];
+  indicators?: string[];
+  team?: CanvasTeamMember[];
+  notes?: string;
+}
+
 export interface ProjectProps {
   id: ProjectId;
   name: string;
   projectNumber: string;
   description: string;
-  urlDocument?: string;
+  canvas?: Canvas;
   status?: ProjectStatus;
   createdAt?: Date;
 }
@@ -39,9 +79,8 @@ export class Project extends Entity {
   @IsNotEmpty()
   private description: string;
 
-  @IsString()
   @IsOptional()
-  private urlDocument?: string;
+  private canvas?: Canvas;
 
   @IsEnum(ProjectStatus)
   private status: ProjectStatus;
@@ -55,14 +94,13 @@ export class Project extends Entity {
     this.name = props.name;
     this.projectNumber = props.projectNumber;
     this.description = props.description;
-    this.urlDocument = props.urlDocument;
+    this.canvas = props.canvas;
     this.status = props.status ?? ProjectStatus.BACKLOG;
     this.createdAt = props.createdAt ?? new Date();
 
     this.validate();
   }
 
-  // Getters
   getId(): ProjectId {
     return this.id;
   }
@@ -75,8 +113,8 @@ export class Project extends Entity {
   getDescription(): string {
     return this.description;
   }
-  getUrlDocument(): string | undefined {
-    return this.urlDocument;
+  getCanvas(): Canvas | undefined {
+    return this.canvas;
   }
   getStatus(): ProjectStatus {
     return this.status;
@@ -85,7 +123,6 @@ export class Project extends Entity {
     return this.createdAt;
   }
 
-  // Business Rules
   changeName(name: string): void {
     this.name = name;
     this.validate();
@@ -101,8 +138,8 @@ export class Project extends Entity {
     this.validate();
   }
 
-  updateUrlDocument(url: string): void {
-    this.urlDocument = url;
+  updateCanvas(canvas: Canvas): void {
+    this.canvas = canvas;
     this.validate();
   }
 }

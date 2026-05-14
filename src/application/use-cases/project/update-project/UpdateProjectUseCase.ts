@@ -1,3 +1,4 @@
+import { Canvas } from '../../../../domain/entities/project.entity';
 import { IProjectRepository } from '../../../../domain/repositories/IProjectRepository';
 import { ProjectId } from '../../../../domain/shared/entity-ids';
 
@@ -5,7 +6,7 @@ export interface UpdateProjectInput {
   id: string;
   name?: string;
   description?: string;
-  urlDocument?: string;
+  canvas?: Canvas;
 }
 
 export class UpdateProjectUseCase {
@@ -19,7 +20,7 @@ export class UpdateProjectUseCase {
 
     if (input.name !== undefined) project.changeName(input.name);
     if (input.description !== undefined) project.changeDescription(input.description);
-    if (input.urlDocument !== undefined) project.updateUrlDocument(input.urlDocument);
+    if (input.canvas !== undefined) project.updateCanvas(input.canvas);
 
     await this.projectRepository.save(project);
   }

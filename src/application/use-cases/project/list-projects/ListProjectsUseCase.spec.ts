@@ -19,11 +19,11 @@ const makeProject = (id: string) =>
     name: 'P',
     projectNumber: '#20260001',
     description: 'D',
-    urlDocument: 'https://doc.example.com',
+    canvas: { problem: 'P' },
   });
 
 describe('ListProjectsUseCase', () => {
-  it('returns paginated projects without urlDocument', async () => {
+  it('returns paginated projects without canvas', async () => {
     const repo = makeRepo();
     repo.findAll.mockResolvedValue([makeProject(randomUUID()), makeProject(randomUUID())]);
     repo.count.mockResolvedValue(2);
@@ -33,7 +33,7 @@ describe('ListProjectsUseCase', () => {
 
     expect(result.total).toBe(2);
     expect(result.data).toHaveLength(2);
-    expect(result.data[0]).not.toHaveProperty('urlDocument');
+    expect(result.data[0]).not.toHaveProperty('canvas');
   });
 
   it('returns empty when no projects exist', async () => {

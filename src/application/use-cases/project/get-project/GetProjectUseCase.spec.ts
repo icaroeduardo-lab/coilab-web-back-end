@@ -19,11 +19,11 @@ const makeProject = (id: string) =>
     name: 'P',
     projectNumber: '#20260001',
     description: 'D',
-    urlDocument: 'https://doc.example.com',
+    canvas: { problem: 'Problema X' },
   });
 
 describe('GetProjectUseCase', () => {
-  it('returns project output with urlDocument', async () => {
+  it('returns project output with canvas', async () => {
     const repo = makeRepo();
     const id = randomUUID();
     repo.findById.mockResolvedValue(makeProject(id));
@@ -32,7 +32,7 @@ describe('GetProjectUseCase', () => {
     const result = await sut.execute({ id });
 
     expect(result.id).toBe(id);
-    expect(result.urlDocument).toBe('https://doc.example.com');
+    expect(result.canvas?.problem).toBe('Problema X');
   });
 
   it('throws when project not found', async () => {
