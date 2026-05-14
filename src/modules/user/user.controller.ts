@@ -8,6 +8,7 @@ import {
   getSchemaPath,
 } from '@nestjs/swagger';
 import { UpsertUserFromCognitoUseCase } from '../../application/use-cases/user/upsert-user-from-cognito/UpsertUserFromCognitoUseCase';
+import { ListUsersUseCase } from '../../application/use-cases/user/list-users/ListUsersUseCase';
 import { CurrentUser, JwtPayload } from '../auth/current-user.decorator';
 import { UserResponseDto } from './dto/user-response.dto';
 
@@ -18,6 +19,7 @@ import { UserResponseDto } from './dto/user-response.dto';
 export class UserController {
   constructor(
     @Inject(UpsertUserFromCognitoUseCase) private readonly upsertUser: UpsertUserFromCognitoUseCase,
+    @Inject(ListUsersUseCase) private readonly listUsers: ListUsersUseCase,
   ) {}
 
   @Get('me')
@@ -30,5 +32,12 @@ export class UserController {
       email: user.email,
       imageUrl: user.picture,
     });
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Listar todos os usuários' })
+  @ApiResponse({ status: 200, schema: { type: 'array', items: { $ref: getSchemaPath(UserResponseDto) } } })
+  list() {
+    return this.listUsers.execute();
   }
 }

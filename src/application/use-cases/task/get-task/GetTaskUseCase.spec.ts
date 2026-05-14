@@ -34,6 +34,7 @@ const makeTaskRepo = (): jest.Mocked<ITaskRepository> => ({
 
 const makeUserRepo = (): jest.Mocked<IUserRepository> => ({
   findById: jest.fn(),
+  findAll: jest.fn(),
   save: jest.fn(),
 });
 
