@@ -192,6 +192,15 @@ export class SubTask extends Entity {
     this.validate();
   }
 
+  reopen(): void {
+    if (this.status !== SubTaskStatus.AGUARDANDO_CHECKOUT) {
+      throw new DomainException('Apenas subtasks finalizadas podem ser reabertas');
+    }
+    this.status = SubTaskStatus.EM_PROGRESSO;
+    this.completionDate = undefined;
+    this.validate();
+  }
+
   updateStatus(status: SubTaskStatus): void {
     this.status = status;
     this.validate();

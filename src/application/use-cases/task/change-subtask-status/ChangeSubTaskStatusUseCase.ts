@@ -1,7 +1,8 @@
+import { DomainException } from '../../../../domain/shared/domain.exception';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { TaskId } from '../../../../domain/shared/entity-ids';
 
-export type SubTaskAction = 'start' | 'complete' | 'approve' | 'reject' | 'cancel';
+export type SubTaskAction = 'start' | 'complete' | 'approve' | 'reject' | 'cancel' | 'reopen';
 
 export interface ChangeSubTaskStatusInput {
   taskId: string;
@@ -37,12 +38,15 @@ export class ChangeSubTaskStatusUseCase {
         subTask.approve();
         break;
       case 'reject':
-        if (!input.reason) throw new Error('reason is required for reject');
+        if (!input.reason) throw new DomainException('reason is required for reject');
         subTask.reject(input.reason);
         break;
       case 'cancel':
-        if (!input.reason) throw new Error('reason is required for cancel');
+        if (!input.reason) throw new DomainException('reason is required for cancel');
         subTask.cancel(input.reason);
+        break;
+      case 'reopen':
+        subTask.reopen();
         break;
     }
 

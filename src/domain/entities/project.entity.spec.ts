@@ -65,7 +65,7 @@ describe('Project Entity', () => {
       resources: [{ type: 'humano', description: ['Dev', 'Designer'] }],
       risksAndMitigation: [{ risk: 'Atraso', mitigation: 'Buffer de sprint' }],
       indicators: ['NPS', 'Cycle time'],
-      team: [{ avatar: 'https://a.co/img', name: 'João', role: 'Lead Dev', isLead: true }],
+      team: ['a1b2c3d4-e5f6-7890-abcd-ef1234567890'],
       notes: 'Revisar após kickoff',
     };
 

@@ -1,10 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UpsertUserFromCognitoUseCase } from '../../application/use-cases/user/upsert-user-from-cognito/UpsertUserFromCognitoUseCase';
+import { ListUsersUseCase } from '../../application/use-cases/user/list-users/ListUsersUseCase';
 import { JwtPayload } from '../auth/current-user.decorator';
 import { randomUUID } from 'crypto';
 
 const mockUpsert = { execute: jest.fn() };
+const mockListUsers = { execute: jest.fn() };
 
 describe('UserController', () => {
   let controller: UserController;
@@ -13,7 +15,10 @@ describe('UserController', () => {
     jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UserController],
-      providers: [{ provide: UpsertUserFromCognitoUseCase, useValue: mockUpsert }],
+      providers: [
+        { provide: UpsertUserFromCognitoUseCase, useValue: mockUpsert },
+        { provide: ListUsersUseCase, useValue: mockListUsers },
+      ],
     }).compile();
     controller = module.get(UserController);
   });

@@ -19,6 +19,11 @@ export class PrismaUserRepository implements IUserRepository {
     return row ? toDomain(row) : null;
   }
 
+  async findAll(): Promise<User[]> {
+    const rows = await prisma.user.findMany({ orderBy: { name: 'asc' } });
+    return rows.map(toDomain);
+  }
+
   async save(user: User): Promise<void> {
     await prisma.user.upsert({
       where: { id: user.getId() },
