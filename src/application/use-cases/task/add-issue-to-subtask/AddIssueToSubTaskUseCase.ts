@@ -42,7 +42,8 @@ export class AddIssueToSubTaskUseCase {
 
     const subTask = task.getSubTasks().find((s) => s.getId() === input.subTaskId);
     if (!subTask) throw new Error(`SubTask not found: ${input.subTaskId}`);
-    if (subTask.getTypeId() !== 4) throw new Error('SubTask não é do tipo Desenvolvimento');
+    if (subTask.getTypeId() !== 4)
+      throw new DomainException('SubTask não é do tipo Desenvolvimento');
 
     const isCoilabWeb = task.getProjectId() === COILAB_WEB_PROJECT_ID;
 
