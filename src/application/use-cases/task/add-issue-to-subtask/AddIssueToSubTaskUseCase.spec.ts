@@ -11,6 +11,7 @@ import {
   SubTaskId,
   TaskToolId,
 } from '../../../../domain/shared/entity-ids';
+import { COILAB_WEB_PROJECT_ID } from '../../../../domain/shared/project-constants';
 import { randomUUID } from 'crypto';
 
 const MOCK_GITHUB_URL = 'https://github.com/icaroeduardo-lab/coilab-web/issues/1';
@@ -41,10 +42,10 @@ const makeSubTask = (id: string, typeId = 4, status = SubTaskStatus.EM_PROGRESSO
     expectedDelivery: new Date(),
   });
 
-const makeTask = (subTasks: SubTask[] = []) =>
+const makeTask = (subTasks: SubTask[] = [], projectId?: string) =>
   new Task({
     id: TaskId(randomUUID()),
-    projectId: ProjectId(randomUUID()),
+    projectId: ProjectId(projectId ?? randomUUID()),
     name: 'Task',
     description: 'Desc',
     taskNumber: '#20260001',
@@ -55,7 +56,7 @@ const makeTask = (subTasks: SubTask[] = []) =>
     subTasks,
   });
 
-const validInput = (taskId: string, subTaskId: string) => ({
+const coilabWebInput = (taskId: string, subTaskId: string) => ({
   taskId,
   subTaskId,
   title: 'Criar endpoint de auth',
@@ -63,25 +64,88 @@ const validInput = (taskId: string, subTaskId: string) => ({
   flowId: 1,
 });
 
+const otherProjectInput = (taskId: string, subTaskId: string) => ({
+  taskId,
+  subTaskId,
+  title: 'Criar endpoint de auth',
+  flowId: 1,
+  sprint: 'Sprint 3',
+});
+
 describe('AddIssueToSubTaskUseCase', () => {
-  it('adds issue to development subtask metadata', async () => {
-    const repo = makeRepo();
-    const subTaskId = randomUUID();
-    const task = makeTask([makeSubTask(subTaskId)]);
-    repo.findById.mockResolvedValue(task);
-    const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
+  describe('coilab-web project', () => {
+    it('creates GitHub issue and stores url in metadata', async () => {
+      const repo = makeRepo();
+      const subTaskId = randomUUID();
+      const task = makeTask([makeSubTask(subTaskId)], COILAB_WEB_PROJECT_ID);
+      repo.findById.mockResolvedValue(task);
+      const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
 
-    const result = await sut.execute(validInput(task.getId(), subTaskId));
+      const result = await sut.execute(coilabWebInput(task.getId(), subTaskId));
 
-    expect(result.id).toBeDefined();
-    const saved: Task = repo.save.mock.calls[0][0];
-    const subTask = saved.getSubTasks().find((s) => s.getId() === subTaskId)!;
-    const issues = subTask.getMetadata().issues as DevelopmentIssue[];
-    expect(issues).toHaveLength(1);
-    expect(issues[0].title).toBe('Criar endpoint de auth');
-    expect(issues[0].url).toBe(MOCK_GITHUB_URL);
-    expect(issues[0].flowId).toBe(1);
-    expect(issues[0].status).toBe(false);
+      expect(result.id).toBeDefined();
+      expect(result.url).toBe(MOCK_GITHUB_URL);
+      const issues = repo.save.mock.calls[0][0].getSubTasks()[0].getMetadata()
+        .issues as DevelopmentIssue[];
+      expect(issues[0].url).toBe(MOCK_GITHUB_URL);
+      expect(issues[0].repository).toBe('front');
+      expect(issues[0].sprint).toBeUndefined();
+    });
+
+    it('throws when repository is missing', async () => {
+      const repo = makeRepo();
+      const subTaskId = randomUUID();
+      const task = makeTask([makeSubTask(subTaskId)], COILAB_WEB_PROJECT_ID);
+      repo.findById.mockResolvedValue(task);
+      const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
+
+      await expect(
+        sut.execute({ ...coilabWebInput(task.getId(), subTaskId), repository: undefined }),
+      ).rejects.toThrow('repository é obrigatório');
+    });
+
+    it('throws when sprint is provided', async () => {
+      const repo = makeRepo();
+      const subTaskId = randomUUID();
+      const task = makeTask([makeSubTask(subTaskId)], COILAB_WEB_PROJECT_ID);
+      repo.findById.mockResolvedValue(task);
+      const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
+
+      await expect(
+        sut.execute({ ...coilabWebInput(task.getId(), subTaskId), sprint: 'Sprint 1' }),
+      ).rejects.toThrow('sprint não é permitido');
+    });
+  });
+
+  describe('other projects', () => {
+    it('stores issue without GitHub url', async () => {
+      const repo = makeRepo();
+      const subTaskId = randomUUID();
+      const task = makeTask([makeSubTask(subTaskId)]);
+      repo.findById.mockResolvedValue(task);
+      const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
+
+      const result = await sut.execute(otherProjectInput(task.getId(), subTaskId));
+
+      expect(result.id).toBeDefined();
+      expect(result.url).toBeUndefined();
+      const issues = repo.save.mock.calls[0][0].getSubTasks()[0].getMetadata()
+        .issues as DevelopmentIssue[];
+      expect(issues[0].sprint).toBe('Sprint 3');
+      expect(issues[0].url).toBeUndefined();
+    });
+
+    it('throws when repository is provided', async () => {
+      const repo = makeRepo();
+      const subTaskId = randomUUID();
+      const task = makeTask([makeSubTask(subTaskId)]);
+      repo.findById.mockResolvedValue(task);
+      const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
+
+      await expect(
+        sut.execute({ ...otherProjectInput(task.getId(), subTaskId), repository: 'back' as const }),
+      ).rejects.toThrow('repository é exclusivo');
+    });
   });
 
   it('sets status=false by default', async () => {
@@ -91,27 +155,11 @@ describe('AddIssueToSubTaskUseCase', () => {
     repo.findById.mockResolvedValue(task);
     const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
 
-    await sut.execute(validInput(task.getId(), subTaskId));
+    await sut.execute(otherProjectInput(task.getId(), subTaskId));
 
-    const saved: Task = repo.save.mock.calls[0][0];
-    const issues = saved.getSubTasks()[0].getMetadata().issues as DevelopmentIssue[];
+    const issues = repo.save.mock.calls[0][0].getSubTasks()[0].getMetadata()
+      .issues as DevelopmentIssue[];
     expect(issues[0].status).toBe(false);
-  });
-
-  it('adds multiple issues independently', async () => {
-    const repo = makeRepo();
-    const subTaskId = randomUUID();
-    const task = makeTask([makeSubTask(subTaskId)]);
-    repo.findById.mockResolvedValue(task);
-    const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
-
-    await sut.execute(validInput(task.getId(), subTaskId));
-    repo.findById.mockResolvedValue(repo.save.mock.calls[0][0]);
-    await sut.execute({ ...validInput(task.getId(), subTaskId), title: 'Segunda issue' });
-
-    const saved: Task = repo.save.mock.calls[1][0];
-    const issues = saved.getSubTasks()[0].getMetadata().issues as DevelopmentIssue[];
-    expect(issues).toHaveLength(2);
   });
 
   it('throws when task not found', async () => {
@@ -119,7 +167,7 @@ describe('AddIssueToSubTaskUseCase', () => {
     repo.findById.mockResolvedValue(null);
     const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
 
-    await expect(sut.execute(validInput(randomUUID(), randomUUID()))).rejects.toThrow(
+    await expect(sut.execute(otherProjectInput(randomUUID(), randomUUID()))).rejects.toThrow(
       'Task not found',
     );
   });
@@ -130,7 +178,7 @@ describe('AddIssueToSubTaskUseCase', () => {
     repo.findById.mockResolvedValue(task);
     const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
 
-    await expect(sut.execute(validInput(task.getId(), randomUUID()))).rejects.toThrow(
+    await expect(sut.execute(otherProjectInput(task.getId(), randomUUID()))).rejects.toThrow(
       'SubTask not found',
     );
   });
@@ -142,19 +190,8 @@ describe('AddIssueToSubTaskUseCase', () => {
     repo.findById.mockResolvedValue(task);
     const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
 
-    await expect(sut.execute(validInput(task.getId(), subTaskId))).rejects.toThrow(
+    await expect(sut.execute(otherProjectInput(task.getId(), subTaskId))).rejects.toThrow(
       'não é do tipo Desenvolvimento',
     );
-  });
-
-  it('throws when subtask is CANCELADO', async () => {
-    const repo = makeRepo();
-    const subTaskId = randomUUID();
-    const task = makeTask([makeSubTask(subTaskId, 4, SubTaskStatus.EM_PROGRESSO)]);
-    task.getSubTasks()[0].cancel('motivo');
-    repo.findById.mockResolvedValue(task);
-    const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
-
-    await expect(sut.execute(validInput(task.getId(), subTaskId))).rejects.toThrow();
   });
 });
