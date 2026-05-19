@@ -1,17 +1,27 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, Min } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsDateString, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
+import { GitHubRepo } from '../../../domain/repositories/IGitHubService';
 
 export class AddIssueDto {
-  @ApiProperty({ example: 'Criar endpoint de autenticação' })
+  @ApiPropertyOptional({ example: 'Criar endpoint de autenticação' })
   @IsString()
   @IsNotEmpty()
   title: string;
 
-  @ApiProperty({ example: 'https://github.com/org/repo/issues/42' })
-  @IsUrl()
-  url: string;
+  @ApiPropertyOptional({
+    enum: ['front', 'back'],
+    description: 'Repositório GitHub — obrigatório apenas para projetos coilab-web',
+  })
+  @IsIn(['front', 'back'])
+  @IsOptional()
+  repository?: GitHubRepo;
 
-  @ApiProperty({ example: 1, description: 'ID do flow (empresa responsável)' })
+  @ApiPropertyOptional({ example: 'Descrição detalhada da issue.' })
+  @IsString()
+  @IsOptional()
+  body?: string;
+
+  @ApiPropertyOptional({ example: 1, description: 'ID do flow (empresa responsável)' })
   @IsInt()
   @Min(1)
   flowId: number;
@@ -21,7 +31,10 @@ export class AddIssueDto {
   @IsOptional()
   completionDate?: string;
 
-  @ApiPropertyOptional({ example: 'Sprint 3' })
+  @ApiPropertyOptional({
+    example: 'Sprint 3',
+    description: 'Apenas para projetos que não são coilab-web',
+  })
   @IsString()
   @IsOptional()
   sprint?: string;

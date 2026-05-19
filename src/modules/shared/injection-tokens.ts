@@ -5,3 +5,7 @@ export const REPOSITORY_TOKENS = {
   APPLICANT: 'IApplicantRepository',
   USER: 'IUserRepository',
 } as const;
+
+export const SERVICE_TOKENS = {
+  GITHUB: 'IGitHubService',
+} as const;
