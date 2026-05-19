@@ -4,6 +4,7 @@ import {
   CreateGitHubIssueInput,
   CreateGitHubIssueOutput,
   IGitHubService,
+  UpdateGitHubIssueStateInput,
 } from '../../domain/repositories/IGitHubService';
 
 @Injectable()
@@ -19,12 +20,7 @@ export class GitHubService implements IGitHubService {
     const repo = this.repoMap[input.repository];
     const response = await fetch(`https://api.github.com/repos/${this.account}/${repo}/issues`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-        Accept: 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-        'Content-Type': 'application/json',
-      },
+      headers: this.headers(),
       body: JSON.stringify({ title: input.title, body: input.body }),
     });
 
@@ -35,5 +31,31 @@ export class GitHubService implements IGitHubService {
 
     const data = (await response.json()) as { html_url: string; number: number };
     return { url: data.html_url, number: data.number };
+  }
+
+  async updateIssueState(input: UpdateGitHubIssueStateInput): Promise<void> {
+    const repo = this.repoMap[input.repository];
+    const response = await fetch(
+      `https://api.github.com/repos/${this.account}/${repo}/issues/${input.issueNumber}`,
+      {
+        method: 'PATCH',
+        headers: this.headers(),
+        body: JSON.stringify({ state: input.state }),
+      },
+    );
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new DomainException(`GitHub API error ${response.status}: ${text}`);
+    }
+  }
+
+  private headers() {
+    return {
+      Authorization: `Bearer ${this.token}`,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      'Content-Type': 'application/json',
+    };
   }
 }

@@ -29,6 +29,7 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
 
 const makeGitHub = (): jest.Mocked<IGitHubService> => ({
   createIssue: jest.fn().mockResolvedValue({ url: MOCK_GITHUB_URL, number: 1 }),
+  updateIssueState: jest.fn().mockResolvedValue(undefined),
 });
 
 const makeSubTask = (id: string, typeId = 4, status = SubTaskStatus.EM_PROGRESSO) =>
@@ -61,7 +62,6 @@ const coilabWebInput = (taskId: string, subTaskId: string) => ({
   subTaskId,
   title: 'Criar endpoint de auth',
   repository: 'front' as const,
-  flowId: 1,
 });
 
 const otherProjectInput = (taskId: string, subTaskId: string) => ({
@@ -74,7 +74,7 @@ const otherProjectInput = (taskId: string, subTaskId: string) => ({
 
 describe('AddIssueToSubTaskUseCase', () => {
   describe('coilab-web project', () => {
-    it('creates GitHub issue and stores url in metadata', async () => {
+    it('creates GitHub issue and stores url in metadata with flowId=3', async () => {
       const repo = makeRepo();
       const subTaskId = randomUUID();
       const task = makeTask([makeSubTask(subTaskId)], COILAB_WEB_PROJECT_ID);
@@ -89,6 +89,7 @@ describe('AddIssueToSubTaskUseCase', () => {
         .issues as DevelopmentIssue[];
       expect(issues[0].url).toBe(MOCK_GITHUB_URL);
       expect(issues[0].repository).toBe('front');
+      expect(issues[0].flowId).toBe(3);
       expect(issues[0].sprint).toBeUndefined();
     });
 
@@ -145,6 +146,18 @@ describe('AddIssueToSubTaskUseCase', () => {
       await expect(
         sut.execute({ ...otherProjectInput(task.getId(), subTaskId), repository: 'back' as const }),
       ).rejects.toThrow('repository é exclusivo');
+    });
+
+    it('throws when flowId is missing', async () => {
+      const repo = makeRepo();
+      const subTaskId = randomUUID();
+      const task = makeTask([makeSubTask(subTaskId)]);
+      repo.findById.mockResolvedValue(task);
+      const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
+
+      await expect(
+        sut.execute({ ...otherProjectInput(task.getId(), subTaskId), flowId: undefined }),
+      ).rejects.toThrow('flowId é obrigatório');
     });
   });
 

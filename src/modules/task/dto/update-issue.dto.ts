@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsInt, IsOptional, IsString, IsUrl, Min } from 'class-validator';
+import { IsBoolean, IsDateString, IsInt, IsOptional, IsString, Min } from 'class-validator';
 
 export class UpdateIssueDto {
   @ApiPropertyOptional({ example: 'Criar endpoint de autenticação' })
@@ -7,10 +7,10 @@ export class UpdateIssueDto {
   @IsOptional()
   title?: string;
 
-  @ApiPropertyOptional({ example: 'https://github.com/org/repo/issues/42' })
-  @IsUrl()
+  @ApiPropertyOptional({ example: 'Descrição detalhada da issue.' })
+  @IsString()
   @IsOptional()
-  url?: string;
+  body?: string;
 
   @ApiPropertyOptional({ example: 1 })
   @IsInt()
@@ -28,7 +28,7 @@ export class UpdateIssueDto {
   @IsOptional()
   sprint?: string;
 
-  @ApiPropertyOptional({ example: true })
+  @ApiPropertyOptional({ example: true, description: 'true = closed, false = open' })
   @IsBoolean()
   @IsOptional()
   status?: boolean;

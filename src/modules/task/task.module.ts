@@ -140,8 +140,9 @@ import { TaskController } from './task.controller';
     },
     {
       provide: UpdateIssueInSubTaskUseCase,
-      useFactory: (repo: ITaskRepository) => new UpdateIssueInSubTaskUseCase(repo),
-      inject: [REPOSITORY_TOKENS.TASK],
+      useFactory: (repo: ITaskRepository, github: GitHubService) =>
+        new UpdateIssueInSubTaskUseCase(repo, github),
+      inject: [REPOSITORY_TOKENS.TASK, SERVICE_TOKENS.GITHUB],
     },
     { provide: ListTaskToolsUseCase, useValue: new ListTaskToolsUseCase() },
   ],
