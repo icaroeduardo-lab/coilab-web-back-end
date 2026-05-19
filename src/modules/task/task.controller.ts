@@ -255,11 +255,14 @@ export class TaskController {
   }
 
   @Post(':taskId/subtasks/:subTaskId/issues')
-  @HttpCode(201)
+  @HttpCode(202)
   @ApiOperation({ summary: 'Adicionar issue à subtarefa de Desenvolvimento' })
   @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
   @ApiParam({ name: 'subTaskId', description: 'UUID da subtarefa (typeId=4)' })
-  @ApiResponse({ status: 201, description: 'Issue adicionada.' })
+  @ApiResponse({
+    status: 202,
+    description: 'Issue aceita — será criada no GitHub e registrada no banco.',
+  })
   @ApiResponse({ status: 422, description: 'Subtarefa inválida ou não editável.' })
   async addIssue_(
     @Param('taskId') taskId: string,

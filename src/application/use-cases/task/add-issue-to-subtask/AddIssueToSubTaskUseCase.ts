@@ -8,10 +8,12 @@ import { generateId } from '../../../../shared/generate-id';
 export interface DevelopmentIssue {
   id: string;
   title: string;
+  body?: string;
   url?: string;
   githubNumber?: number;
   repository?: GitHubRepo;
   flowId: number;
+  createdAt: string;
   completionDate?: string;
   sprint?: string;
   status: boolean;
@@ -23,7 +25,7 @@ export interface AddIssueToSubTaskInput {
   title: string;
   repository?: GitHubRepo;
   body?: string;
-  flowId: number;
+  flowId?: number;
   completionDate?: string;
   sprint?: string;
 }
@@ -55,6 +57,7 @@ export class AddIssueToSubTaskUseCase {
     } else {
       if (input.repository)
         throw new DomainException('repository é exclusivo para projetos coilab-web');
+      if (!input.flowId) throw new DomainException('flowId é obrigatório para projetos externos');
     }
 
     const existing = (subTask.getMetadata().issues ?? []) as DevelopmentIssue[];
@@ -62,7 +65,9 @@ export class AddIssueToSubTaskUseCase {
     const issue: DevelopmentIssue = {
       id: issueId,
       title: input.title,
-      flowId: input.flowId,
+      body: input.body,
+      flowId: isCoilabWeb ? 3 : input.flowId!,
+      createdAt: new Date().toISOString(),
       completionDate: input.completionDate,
       status: false,
     };
