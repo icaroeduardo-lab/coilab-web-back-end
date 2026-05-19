@@ -1,3 +1,4 @@
+import { IGitHubService, GitHubRepo } from '../../../../domain/repositories/IGitHubService';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { TaskId } from '../../../../domain/shared/entity-ids';
 import { generateId } from '../../../../shared/generate-id';
@@ -6,6 +7,8 @@ export interface DevelopmentIssue {
   id: string;
   title: string;
   url: string;
+  githubNumber: number;
+  repository: GitHubRepo;
   flowId: number;
   completionDate?: string;
   sprint?: string;
@@ -16,16 +19,20 @@ export interface AddIssueToSubTaskInput {
   taskId: string;
   subTaskId: string;
   title: string;
-  url: string;
+  repository: GitHubRepo;
+  body?: string;
   flowId: number;
   completionDate?: string;
   sprint?: string;
 }
 
 export class AddIssueToSubTaskUseCase {
-  constructor(private readonly taskRepository: ITaskRepository) {}
+  constructor(
+    private readonly taskRepository: ITaskRepository,
+    private readonly gitHubService: IGitHubService,
+  ) {}
 
-  async execute(input: AddIssueToSubTaskInput): Promise<{ id: string }> {
+  async execute(input: AddIssueToSubTaskInput): Promise<{ id: string; url: string }> {
     const task = await this.taskRepository.findById(TaskId(input.taskId));
     if (!task) throw new Error(`Task not found: ${input.taskId}`);
 
@@ -35,12 +42,20 @@ export class AddIssueToSubTaskUseCase {
     if (!subTask) throw new Error(`SubTask not found: ${input.subTaskId}`);
     if (subTask.getTypeId() !== 4) throw new Error('SubTask não é do tipo Desenvolvimento');
 
+    const { url, number } = await this.gitHubService.createIssue({
+      repository: input.repository,
+      title: input.title,
+      body: input.body,
+    });
+
     const existing = (subTask.getMetadata().issues ?? []) as DevelopmentIssue[];
     const issueId = generateId();
     const issue: DevelopmentIssue = {
       id: issueId,
       title: input.title,
-      url: input.url,
+      url,
+      githubNumber: number,
+      repository: input.repository,
       flowId: input.flowId,
       completionDate: input.completionDate,
       sprint: input.sprint,
@@ -49,6 +64,6 @@ export class AddIssueToSubTaskUseCase {
 
     subTask.updateMetadata({ issues: [...existing, issue] });
     await this.taskRepository.save(task);
-    return { id: issueId };
+    return { id: issueId, url };
   }
 }

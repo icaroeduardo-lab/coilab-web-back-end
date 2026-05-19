@@ -27,7 +27,9 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
 const makeIssue = (overrides: Partial<DevelopmentIssue> = {}): DevelopmentIssue => ({
   id: randomUUID(),
   title: 'Issue original',
-  url: 'https://github.com/org/repo/issues/1',
+  url: 'https://github.com/icaroeduardo-lab/coilab-web/issues/1',
+  githubNumber: 1,
+  repository: 'front',
   flowId: 1,
   status: false,
   ...overrides,

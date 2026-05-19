@@ -1,5 +1,6 @@
 import { AddIssueToSubTaskUseCase, DevelopmentIssue } from './AddIssueToSubTaskUseCase';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
+import { IGitHubService } from '../../../../domain/repositories/IGitHubService';
 import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
 import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import {
@@ -12,6 +13,8 @@ import {
 } from '../../../../domain/shared/entity-ids';
 import { randomUUID } from 'crypto';
 
+const MOCK_GITHUB_URL = 'https://github.com/icaroeduardo-lab/coilab-web/issues/1';
+
 const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   findById: jest.fn(),
   findAll: jest.fn(),
@@ -21,6 +24,10 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
+});
+
+const makeGitHub = (): jest.Mocked<IGitHubService> => ({
+  createIssue: jest.fn().mockResolvedValue({ url: MOCK_GITHUB_URL, number: 1 }),
 });
 
 const makeSubTask = (id: string, typeId = 4, status = SubTaskStatus.EM_PROGRESSO) =>
@@ -52,7 +59,7 @@ const validInput = (taskId: string, subTaskId: string) => ({
   taskId,
   subTaskId,
   title: 'Criar endpoint de auth',
-  url: 'https://github.com/org/repo/issues/1',
+  repository: 'front' as const,
   flowId: 1,
 });
 
@@ -62,7 +69,7 @@ describe('AddIssueToSubTaskUseCase', () => {
     const subTaskId = randomUUID();
     const task = makeTask([makeSubTask(subTaskId)]);
     repo.findById.mockResolvedValue(task);
-    const sut = new AddIssueToSubTaskUseCase(repo);
+    const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
 
     const result = await sut.execute(validInput(task.getId(), subTaskId));
 
@@ -72,7 +79,7 @@ describe('AddIssueToSubTaskUseCase', () => {
     const issues = subTask.getMetadata().issues as DevelopmentIssue[];
     expect(issues).toHaveLength(1);
     expect(issues[0].title).toBe('Criar endpoint de auth');
-    expect(issues[0].url).toBe('https://github.com/org/repo/issues/1');
+    expect(issues[0].url).toBe(MOCK_GITHUB_URL);
     expect(issues[0].flowId).toBe(1);
     expect(issues[0].status).toBe(false);
   });
@@ -82,7 +89,7 @@ describe('AddIssueToSubTaskUseCase', () => {
     const subTaskId = randomUUID();
     const task = makeTask([makeSubTask(subTaskId)]);
     repo.findById.mockResolvedValue(task);
-    const sut = new AddIssueToSubTaskUseCase(repo);
+    const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
 
     await sut.execute(validInput(task.getId(), subTaskId));
 
@@ -96,7 +103,7 @@ describe('AddIssueToSubTaskUseCase', () => {
     const subTaskId = randomUUID();
     const task = makeTask([makeSubTask(subTaskId)]);
     repo.findById.mockResolvedValue(task);
-    const sut = new AddIssueToSubTaskUseCase(repo);
+    const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
 
     await sut.execute(validInput(task.getId(), subTaskId));
     repo.findById.mockResolvedValue(repo.save.mock.calls[0][0]);
@@ -110,7 +117,7 @@ describe('AddIssueToSubTaskUseCase', () => {
   it('throws when task not found', async () => {
     const repo = makeRepo();
     repo.findById.mockResolvedValue(null);
-    const sut = new AddIssueToSubTaskUseCase(repo);
+    const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
 
     await expect(sut.execute(validInput(randomUUID(), randomUUID()))).rejects.toThrow(
       'Task not found',
@@ -121,7 +128,7 @@ describe('AddIssueToSubTaskUseCase', () => {
     const repo = makeRepo();
     const task = makeTask([]);
     repo.findById.mockResolvedValue(task);
-    const sut = new AddIssueToSubTaskUseCase(repo);
+    const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
 
     await expect(sut.execute(validInput(task.getId(), randomUUID()))).rejects.toThrow(
       'SubTask not found',
@@ -133,7 +140,7 @@ describe('AddIssueToSubTaskUseCase', () => {
     const subTaskId = randomUUID();
     const task = makeTask([makeSubTask(subTaskId, 2)]);
     repo.findById.mockResolvedValue(task);
-    const sut = new AddIssueToSubTaskUseCase(repo);
+    const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
 
     await expect(sut.execute(validInput(task.getId(), subTaskId))).rejects.toThrow(
       'não é do tipo Desenvolvimento',
@@ -146,7 +153,7 @@ describe('AddIssueToSubTaskUseCase', () => {
     const task = makeTask([makeSubTask(subTaskId, 4, SubTaskStatus.EM_PROGRESSO)]);
     task.getSubTasks()[0].cancel('motivo');
     repo.findById.mockResolvedValue(task);
-    const sut = new AddIssueToSubTaskUseCase(repo);
+    const sut = new AddIssueToSubTaskUseCase(repo, makeGitHub());
 
     await expect(sut.execute(validInput(task.getId(), subTaskId))).rejects.toThrow();
   });

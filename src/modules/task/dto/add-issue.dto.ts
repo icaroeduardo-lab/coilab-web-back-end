@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsInt, IsNotEmpty, IsOptional, IsString, IsUrl, Min } from 'class-validator';
+import { IsDateString, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
+import { GitHubRepo } from '../../../domain/repositories/IGitHubService';
 
 export class AddIssueDto {
   @ApiProperty({ example: 'Criar endpoint de autenticação' })
@@ -7,9 +8,17 @@ export class AddIssueDto {
   @IsNotEmpty()
   title: string;
 
-  @ApiProperty({ example: 'https://github.com/org/repo/issues/42' })
-  @IsUrl()
-  url: string;
+  @ApiProperty({
+    enum: ['front', 'back'],
+    description: 'Repositório destino no GitHub',
+  })
+  @IsIn(['front', 'back'])
+  repository: GitHubRepo;
+
+  @ApiPropertyOptional({ example: 'Descrição detalhada da issue.' })
+  @IsString()
+  @IsOptional()
+  body?: string;
 
   @ApiProperty({ example: 1, description: 'ID do flow (empresa responsável)' })
   @IsInt()
