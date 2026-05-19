@@ -21,10 +21,14 @@ export class AddIssueDto {
   @IsOptional()
   body?: string;
 
-  @ApiPropertyOptional({ example: 1, description: 'ID do flow (empresa responsável)' })
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'ID do flow (empresa responsável) — ignorado para projetos coilab-web (sempre 3)',
+  })
   @IsInt()
   @Min(1)
-  flowId: number;
+  @IsOptional()
+  flowId?: number;
 
   @ApiPropertyOptional({ example: '2026-12-31' })
   @IsDateString()

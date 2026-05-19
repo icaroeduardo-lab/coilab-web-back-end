@@ -31,6 +31,7 @@ const makeIssue = (overrides: Partial<DevelopmentIssue> = {}): DevelopmentIssue 
   githubNumber: 1,
   repository: 'front',
   flowId: 1,
+  createdAt: new Date().toISOString(),
   status: false,
   ...overrides,
 });

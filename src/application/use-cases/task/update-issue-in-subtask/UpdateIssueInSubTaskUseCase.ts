@@ -1,5 +1,8 @@
+import { IGitHubService } from '../../../../domain/repositories/IGitHubService';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
+import { DomainException } from '../../../../domain/shared/domain.exception';
 import { TaskId } from '../../../../domain/shared/entity-ids';
+import { COILAB_WEB_PROJECT_ID } from '../../../../domain/shared/project-constants';
 import { DevelopmentIssue } from '../add-issue-to-subtask/AddIssueToSubTaskUseCase';
 
 export interface UpdateIssueInSubTaskInput {
@@ -7,7 +10,7 @@ export interface UpdateIssueInSubTaskInput {
   subTaskId: string;
   issueId: string;
   title?: string;
-  url?: string;
+  body?: string;
   flowId?: number;
   completionDate?: string;
   sprint?: string;
@@ -15,7 +18,10 @@ export interface UpdateIssueInSubTaskInput {
 }
 
 export class UpdateIssueInSubTaskUseCase {
-  constructor(private readonly taskRepository: ITaskRepository) {}
+  constructor(
+    private readonly taskRepository: ITaskRepository,
+    private readonly gitHubService: IGitHubService,
+  ) {}
 
   async execute(input: UpdateIssueInSubTaskInput): Promise<void> {
     const task = await this.taskRepository.findById(TaskId(input.taskId));
@@ -25,35 +31,48 @@ export class UpdateIssueInSubTaskUseCase {
 
     const subTask = task.getSubTasks().find((s) => s.getId() === input.subTaskId);
     if (!subTask) throw new Error(`SubTask not found: ${input.subTaskId}`);
-    if (subTask.getTypeId() !== 4) throw new Error('SubTask não é do tipo Desenvolvimento');
+    if (subTask.getTypeId() !== 4)
+      throw new DomainException('SubTask não é do tipo Desenvolvimento');
 
     const issues = (subTask.getMetadata().issues ?? []) as DevelopmentIssue[];
     const index = issues.findIndex((i) => i.id === input.issueId);
-    if (index === -1) throw new Error(`Issue não encontrada: ${input.issueId}`);
+    if (index === -1) throw new DomainException(`Issue não encontrada: ${input.issueId}`);
 
     const issue = issues[index];
 
     if (issue.status === true && input.status !== false) {
-      throw new Error('Issue concluída não pode ser editada');
+      throw new DomainException('Issue concluída não pode ser editada');
     }
 
-    if (input.status === true) {
+    const isCoilabWeb = task.getProjectId() === COILAB_WEB_PROJECT_ID;
+
+    if (!isCoilabWeb && input.status === true) {
       const effectiveSprint = input.sprint ?? issue.sprint;
       const effectiveCompletionDate = input.completionDate ?? issue.completionDate;
       if (!effectiveSprint || !effectiveCompletionDate) {
-        throw new Error('Para concluir uma issue é necessário informar sprint e completionDate');
+        throw new DomainException(
+          'Para concluir uma issue é necessário informar sprint e completionDate',
+        );
       }
     }
 
     const updated: DevelopmentIssue = {
       ...issue,
       ...(input.title !== undefined && { title: input.title }),
-      ...(input.url !== undefined && { url: input.url }),
-      ...(input.flowId !== undefined && { flowId: input.flowId }),
+      ...(input.body !== undefined && { body: input.body }),
+      ...(!isCoilabWeb && input.flowId !== undefined && { flowId: input.flowId }),
       ...(input.completionDate !== undefined && { completionDate: input.completionDate }),
       ...(input.sprint !== undefined && { sprint: input.sprint }),
       ...(input.status !== undefined && { status: input.status }),
     };
+
+    if (isCoilabWeb && input.status !== undefined && issue.githubNumber && issue.repository) {
+      await this.gitHubService.updateIssueState({
+        repository: issue.repository,
+        issueNumber: issue.githubNumber,
+        state: input.status ? 'closed' : 'open',
+      });
+    }
 
     const updatedIssues = [...issues];
     updatedIssues[index] = updated;
