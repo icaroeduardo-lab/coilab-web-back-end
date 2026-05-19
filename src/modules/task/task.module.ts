@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { REPOSITORY_TOKENS } from '../shared/injection-tokens';
+import { REPOSITORY_TOKENS, SERVICE_TOKENS } from '../shared/injection-tokens';
+import { GitHubService } from '../../infra/github/GitHubService';
 import { PrismaTaskRepository } from '../../infra/db/prisma/repositories/PrismaTaskRepository';
 import { PrismaProjectRepository } from '../../infra/db/prisma/repositories/PrismaProjectRepository';
 import { PrismaApplicantRepository } from '../../infra/db/prisma/repositories/PrismaApplicantRepository';
@@ -119,6 +120,7 @@ import { TaskController } from './task.controller';
       inject: [REPOSITORY_TOKENS.TASK],
     },
     S3StorageService,
+    { provide: SERVICE_TOKENS.GITHUB, useClass: GitHubService },
     {
       provide: GetDesignUploadUrlUseCase,
       useFactory: (repo: ITaskRepository, storage: S3StorageService) =>
@@ -127,8 +129,9 @@ import { TaskController } from './task.controller';
     },
     {
       provide: AddIssueToSubTaskUseCase,
-      useFactory: (repo: ITaskRepository) => new AddIssueToSubTaskUseCase(repo),
-      inject: [REPOSITORY_TOKENS.TASK],
+      useFactory: (repo: ITaskRepository, github: GitHubService) =>
+        new AddIssueToSubTaskUseCase(repo, github),
+      inject: [REPOSITORY_TOKENS.TASK, SERVICE_TOKENS.GITHUB],
     },
     {
       provide: RemoveIssueFromSubTaskUseCase,
