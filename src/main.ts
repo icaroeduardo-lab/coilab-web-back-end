@@ -14,6 +14,25 @@ const logger = new Logger('Bootstrap');
 async function bootstrap(): Promise<NestFastifyApplication> {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
 
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .addHook('preParsing', async (_req: any, _reply: any, payload: any) => {
+      const chunks: Buffer[] = [];
+      for await (const chunk of payload) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      }
+      const rawBody = Buffer.concat(chunks);
+      _req.rawBody = rawBody;
+      const { Readable } = await import('stream');
+      const readable = new Readable();
+      readable.push(rawBody);
+      readable.push(null);
+      return readable;
+    });
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await app.register(helmet as any, { contentSecurityPolicy: false });
 

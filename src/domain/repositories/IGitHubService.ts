@@ -12,13 +12,15 @@ export interface CreateGitHubIssueOutput {
   number: number;
 }
 
-export interface UpdateGitHubIssueStateInput {
+export interface UpdateGitHubIssueInput {
   repository: GitHubRepo;
   issueNumber: number;
-  state: GitHubIssueState;
+  title?: string;
+  body?: string;
+  state?: GitHubIssueState;
 }
 
 export interface IGitHubService {
   createIssue(input: CreateGitHubIssueInput): Promise<CreateGitHubIssueOutput>;
-  updateIssueState(input: UpdateGitHubIssueStateInput): Promise<void>;
+  updateIssue(input: UpdateGitHubIssueInput): Promise<void>;
 }

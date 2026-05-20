@@ -9,6 +9,7 @@ import { ApplicantModule } from './modules/applicant/applicant.module';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
+import { WebhookModule } from './modules/webhook/webhook.module';
 import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 import { envValidationSchema } from './config/env.validation';
 
@@ -23,6 +24,7 @@ import { envValidationSchema } from './config/env.validation';
     FlowModule,
     ApplicantModule,
     UserModule,
+    WebhookModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
