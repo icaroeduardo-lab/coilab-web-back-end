@@ -29,7 +29,7 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
 
 const makeGitHub = (): jest.Mocked<IGitHubService> => ({
   createIssue: jest.fn(),
-  updateIssueState: jest.fn().mockResolvedValue(undefined),
+  updateIssue: jest.fn().mockResolvedValue(undefined),
 });
 
 const makeIssue = (overrides: Partial<DevelopmentIssue> = {}): DevelopmentIssue => ({
@@ -153,7 +153,7 @@ describe('UpdateIssueInSubTaskUseCase', () => {
   });
 
   describe('coilab-web project', () => {
-    it('calls GitHub updateIssueState when status changes to closed', async () => {
+    it('calls GitHub updateIssue when status changes to closed', async () => {
       const repo = makeRepo();
       const github = makeGitHub();
       const subTaskId = randomUUID();
@@ -164,14 +164,14 @@ describe('UpdateIssueInSubTaskUseCase', () => {
 
       await sut.execute({ taskId: task.getId(), subTaskId, issueId: issue.id, status: true });
 
-      expect(github.updateIssueState).toHaveBeenCalledWith({
+      expect(github.updateIssue).toHaveBeenCalledWith({
         repository: 'front',
         issueNumber: 1,
         state: 'closed',
       });
     });
 
-    it('does not call GitHub when status is not changed', async () => {
+    it('calls GitHub updateIssue when title and body change', async () => {
       const repo = makeRepo();
       const github = makeGitHub();
       const subTaskId = randomUUID();
@@ -180,9 +180,34 @@ describe('UpdateIssueInSubTaskUseCase', () => {
       repo.findById.mockResolvedValue(task);
       const sut = new UpdateIssueInSubTaskUseCase(repo, github);
 
-      await sut.execute({ taskId: task.getId(), subTaskId, issueId: issue.id, title: 'Novo' });
+      await sut.execute({
+        taskId: task.getId(),
+        subTaskId,
+        issueId: issue.id,
+        title: 'Novo título',
+        body: 'Nova descrição',
+      });
 
-      expect(github.updateIssueState).not.toHaveBeenCalled();
+      expect(github.updateIssue).toHaveBeenCalledWith({
+        repository: 'front',
+        issueNumber: 1,
+        title: 'Novo título',
+        body: 'Nova descrição',
+      });
+    });
+
+    it('does not call GitHub when only non-GitHub fields change', async () => {
+      const repo = makeRepo();
+      const github = makeGitHub();
+      const subTaskId = randomUUID();
+      const issue = makeIssue();
+      const task = makeTask([makeDevSubTask(subTaskId, [issue])], COILAB_WEB_PROJECT_ID);
+      repo.findById.mockResolvedValue(task);
+      const sut = new UpdateIssueInSubTaskUseCase(repo, github);
+
+      await sut.execute({ taskId: task.getId(), subTaskId, issueId: issue.id, flowId: 2 });
+
+      expect(github.updateIssue).not.toHaveBeenCalled();
     });
   });
 

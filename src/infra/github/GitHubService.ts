@@ -4,7 +4,7 @@ import {
   CreateGitHubIssueInput,
   CreateGitHubIssueOutput,
   IGitHubService,
-  UpdateGitHubIssueStateInput,
+  UpdateGitHubIssueInput,
 } from '../../domain/repositories/IGitHubService';
 
 @Injectable()
@@ -33,15 +33,16 @@ export class GitHubService implements IGitHubService {
     return { url: data.html_url, number: data.number };
   }
 
-  async updateIssueState(input: UpdateGitHubIssueStateInput): Promise<void> {
+  async updateIssue(input: UpdateGitHubIssueInput): Promise<void> {
     const repo = this.repoMap[input.repository];
+    const payload: Record<string, unknown> = {};
+    if (input.title !== undefined) payload.title = input.title;
+    if (input.body !== undefined) payload.body = input.body;
+    if (input.state !== undefined) payload.state = input.state;
+
     const response = await fetch(
       `https://api.github.com/repos/${this.account}/${repo}/issues/${input.issueNumber}`,
-      {
-        method: 'PATCH',
-        headers: this.headers(),
-        body: JSON.stringify({ state: input.state }),
-      },
+      { method: 'PATCH', headers: this.headers(), body: JSON.stringify(payload) },
     );
 
     if (!response.ok) {

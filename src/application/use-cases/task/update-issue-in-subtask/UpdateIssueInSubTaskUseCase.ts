@@ -1,4 +1,4 @@
-import { IGitHubService } from '../../../../domain/repositories/IGitHubService';
+import { GitHubIssueState, IGitHubService } from '../../../../domain/repositories/IGitHubService';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { DomainException } from '../../../../domain/shared/domain.exception';
 import { TaskId } from '../../../../domain/shared/entity-ids';
@@ -66,12 +66,22 @@ export class UpdateIssueInSubTaskUseCase {
       ...(reopening && { completionDate: undefined }),
     };
 
-    if (isCoilabWeb && input.status !== undefined && issue.githubNumber && issue.repository) {
-      await this.gitHubService.updateIssueState({
-        repository: issue.repository,
-        issueNumber: issue.githubNumber,
-        state: input.status ? 'closed' : 'open',
-      });
+    if (isCoilabWeb && issue.githubNumber && issue.repository) {
+      const hasGitHubChanges =
+        input.title !== undefined || input.body !== undefined || input.status !== undefined;
+
+      if (hasGitHubChanges) {
+        const state: GitHubIssueState | undefined =
+          input.status !== undefined ? (input.status ? 'closed' : 'open') : undefined;
+
+        await this.gitHubService.updateIssue({
+          repository: issue.repository,
+          issueNumber: issue.githubNumber,
+          ...(input.title !== undefined && { title: input.title }),
+          ...(input.body !== undefined && { body: input.body }),
+          ...(state !== undefined && { state }),
+        });
+      }
     }
 
     const updatedIssues = [...issues];
