@@ -35,6 +35,7 @@ import { AddIssueToSubTaskUseCase } from '../../application/use-cases/task/add-i
 import { RemoveIssueFromSubTaskUseCase } from '../../application/use-cases/task/remove-issue-from-subtask/RemoveIssueFromSubTaskUseCase';
 import { UpdateIssueInSubTaskUseCase } from '../../application/use-cases/task/update-issue-in-subtask/UpdateIssueInSubTaskUseCase';
 import { ListTaskToolsUseCase } from '../../application/use-cases/task/list-task-tools/ListTaskToolsUseCase';
+import { CompleteDevSubTaskUseCase } from '../../application/use-cases/task/complete-dev-subtask/CompleteDevSubTaskUseCase';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ChangeTaskStatusDto } from './dto/change-task-status.dto';
@@ -76,6 +77,8 @@ export class TaskController {
     private readonly updateIssue: UpdateIssueInSubTaskUseCase,
     @Inject(ListTaskToolsUseCase)
     private readonly listTaskTools: ListTaskToolsUseCase,
+    @Inject(CompleteDevSubTaskUseCase)
+    private readonly completeDevSubTask: CompleteDevSubTaskUseCase,
   ) {}
 
   @Post()
@@ -252,6 +255,22 @@ export class TaskController {
     @Param('designId') designId: string,
   ) {
     await this.removeDesign.execute({ taskId, subTaskId, designId });
+  }
+
+  @Patch(':taskId/subtasks/:subTaskId/complete')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Finalizar subtarefa de Desenvolvimento e fechar todas as issues abertas',
+  })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiParam({ name: 'subTaskId', description: 'UUID da subtarefa (typeId=4)' })
+  @ApiResponse({ status: 204, description: 'Subtarefa finalizada e issues fechadas.' })
+  @ApiResponse({ status: 422, description: 'Subtarefa inválida ou não é do tipo Desenvolvimento.' })
+  async completeDevSubTask_(
+    @Param('taskId') taskId: string,
+    @Param('subTaskId') subTaskId: string,
+  ) {
+    await this.completeDevSubTask.execute({ taskId, subTaskId });
   }
 
   @Post(':taskId/subtasks/:subTaskId/issues')

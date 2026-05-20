@@ -28,6 +28,7 @@ import { AddIssueToSubTaskUseCase } from '../../application/use-cases/task/add-i
 import { RemoveIssueFromSubTaskUseCase } from '../../application/use-cases/task/remove-issue-from-subtask/RemoveIssueFromSubTaskUseCase';
 import { UpdateIssueInSubTaskUseCase } from '../../application/use-cases/task/update-issue-in-subtask/UpdateIssueInSubTaskUseCase';
 import { ListTaskToolsUseCase } from '../../application/use-cases/task/list-task-tools/ListTaskToolsUseCase';
+import { CompleteDevSubTaskUseCase } from '../../application/use-cases/task/complete-dev-subtask/CompleteDevSubTaskUseCase';
 import { S3StorageService } from '../../infra/storage/S3StorageService';
 import { TaskController } from './task.controller';
 
@@ -145,6 +146,12 @@ import { TaskController } from './task.controller';
       inject: [REPOSITORY_TOKENS.TASK, SERVICE_TOKENS.GITHUB],
     },
     { provide: ListTaskToolsUseCase, useValue: new ListTaskToolsUseCase() },
+    {
+      provide: CompleteDevSubTaskUseCase,
+      useFactory: (repo: ITaskRepository, github: GitHubService) =>
+        new CompleteDevSubTaskUseCase(repo, github),
+      inject: [REPOSITORY_TOKENS.TASK, SERVICE_TOKENS.GITHUB],
+    },
   ],
 })
 export class TaskModule {}
