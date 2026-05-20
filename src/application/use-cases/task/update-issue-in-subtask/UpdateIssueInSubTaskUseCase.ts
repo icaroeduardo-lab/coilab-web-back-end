@@ -39,7 +39,7 @@ export class UpdateIssueInSubTaskUseCase {
 
     const issue = issues[index];
 
-    if (issue.status === true && input.status !== false) {
+    if (issue.status === true) {
       throw new DomainException('Issue concluída não pode ser editada');
     }
 
