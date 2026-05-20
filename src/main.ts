@@ -14,6 +14,23 @@ const logger = new Logger('Bootstrap');
 async function bootstrap(): Promise<NestFastifyApplication> {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
 
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .addContentTypeParser(
+      'application/json',
+      { parseAs: 'buffer' },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (req: any, body: Buffer, done: any) => {
+        req.rawBody = body;
+        try {
+          done(null, JSON.parse(body.toString()));
+        } catch (err) {
+          done(err, undefined);
+        }
+      },
+    );
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await app.register(helmet as any, { contentSecurityPolicy: false });
 

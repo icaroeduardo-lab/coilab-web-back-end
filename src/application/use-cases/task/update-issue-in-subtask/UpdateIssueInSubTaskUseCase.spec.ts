@@ -21,6 +21,7 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
   findLastSubTaskNumber: jest.fn(),
+  findByGitHubIssueNumber: jest.fn(),
   count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),

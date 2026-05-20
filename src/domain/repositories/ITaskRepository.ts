@@ -6,6 +6,7 @@ export interface ITaskRepository {
   findAll(opts?: { skip?: number; take?: number }): Promise<Task[]>;
   count(): Promise<number>;
   findByProjectId(projectId: ProjectId): Promise<Task[]>;
+  findByGitHubIssueNumber(issueNumber: number, repository: string): Promise<Task | null>;
   findLastTaskNumber(): Promise<string | null>;
   findLastSubTaskNumber(): Promise<string | null>;
   save(task: Task): Promise<void>;
