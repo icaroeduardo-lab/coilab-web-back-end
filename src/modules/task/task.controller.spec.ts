@@ -18,6 +18,7 @@ import { RemoveIssueFromSubTaskUseCase } from '../../application/use-cases/task/
 import { UpdateIssueInSubTaskUseCase } from '../../application/use-cases/task/update-issue-in-subtask/UpdateIssueInSubTaskUseCase';
 import { ListTaskToolsUseCase } from '../../application/use-cases/task/list-task-tools/ListTaskToolsUseCase';
 import { CompleteDevSubTaskUseCase } from '../../application/use-cases/task/complete-dev-subtask/CompleteDevSubTaskUseCase';
+import { CancelDevSubTaskUseCase } from '../../application/use-cases/task/cancel-dev-subtask/CancelDevSubTaskUseCase';
 import { TaskPriority, TaskStatus } from '../../domain/entities/task.entity';
 import { JwtPayload } from '../auth/current-user.decorator';
 import { randomUUID } from 'crypto';
@@ -40,6 +41,7 @@ const mockRemoveIssue = { execute: jest.fn() };
 const mockUpdateIssue = { execute: jest.fn() };
 const mockListTaskTools = { execute: jest.fn() };
 const mockCompleteDevSubTask = { execute: jest.fn() };
+const mockCancelDevSubTask = { execute: jest.fn() };
 
 const fakeUser: JwtPayload = {
   sub: randomUUID(),
@@ -73,6 +75,7 @@ describe('TaskController', () => {
         { provide: UpdateIssueInSubTaskUseCase, useValue: mockUpdateIssue },
         { provide: ListTaskToolsUseCase, useValue: mockListTaskTools },
         { provide: CompleteDevSubTaskUseCase, useValue: mockCompleteDevSubTask },
+        { provide: CancelDevSubTaskUseCase, useValue: mockCancelDevSubTask },
       ],
     }).compile();
     controller = module.get(TaskController);
@@ -345,6 +348,21 @@ describe('TaskController', () => {
       mockCompleteDevSubTask.execute.mockResolvedValue(undefined);
       await controller.completeDevSubTask_(taskId, subTaskId);
       expect(mockCompleteDevSubTask.execute).toHaveBeenCalledWith({ taskId, subTaskId });
+    });
+  });
+
+  describe('cancelDevSubTask_', () => {
+    it('calls cancelDevSubTask.execute with taskId, subTaskId and reason', async () => {
+      const taskId = randomUUID();
+      const subTaskId = randomUUID();
+      const dto = { reason: 'Mudança de escopo' } as never;
+      mockCancelDevSubTask.execute.mockResolvedValue(undefined);
+      await controller.cancelDevSubTask_(taskId, subTaskId, dto);
+      expect(mockCancelDevSubTask.execute).toHaveBeenCalledWith({
+        taskId,
+        subTaskId,
+        reason: 'Mudança de escopo',
+      });
     });
   });
 });
