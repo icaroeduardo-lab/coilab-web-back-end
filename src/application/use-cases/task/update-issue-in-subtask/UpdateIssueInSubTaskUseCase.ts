@@ -12,7 +12,6 @@ export interface UpdateIssueInSubTaskInput {
   title?: string;
   body?: string;
   flowId?: number;
-  completionDate?: string;
   sprint?: string;
   status?: boolean;
 }
@@ -48,22 +47,23 @@ export class UpdateIssueInSubTaskUseCase {
 
     if (!isCoilabWeb && input.status === true) {
       const effectiveSprint = input.sprint ?? issue.sprint;
-      const effectiveCompletionDate = input.completionDate ?? issue.completionDate;
-      if (!effectiveSprint || !effectiveCompletionDate) {
-        throw new DomainException(
-          'Para concluir uma issue é necessário informar sprint e completionDate',
-        );
+      if (!effectiveSprint) {
+        throw new DomainException('Para concluir uma issue é necessário informar sprint');
       }
     }
+
+    const closing = input.status === true;
+    const reopening = input.status === false;
 
     const updated: DevelopmentIssue = {
       ...issue,
       ...(input.title !== undefined && { title: input.title }),
       ...(input.body !== undefined && { body: input.body }),
       ...(!isCoilabWeb && input.flowId !== undefined && { flowId: input.flowId }),
-      ...(input.completionDate !== undefined && { completionDate: input.completionDate }),
       ...(input.sprint !== undefined && { sprint: input.sprint }),
       ...(input.status !== undefined && { status: input.status }),
+      ...(closing && { completionDate: new Date().toISOString() }),
+      ...(reopening && { completionDate: undefined }),
     };
 
     if (isCoilabWeb && input.status !== undefined && issue.githubNumber && issue.repository) {

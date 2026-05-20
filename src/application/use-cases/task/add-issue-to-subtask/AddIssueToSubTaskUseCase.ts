@@ -26,7 +26,6 @@ export interface AddIssueToSubTaskInput {
   repository?: GitHubRepo;
   body?: string;
   flowId?: number;
-  completionDate?: string;
   sprint?: string;
 }
 
@@ -68,7 +67,6 @@ export class AddIssueToSubTaskUseCase {
       body: input.body,
       flowId: isCoilabWeb ? 3 : input.flowId!,
       createdAt: new Date().toISOString(),
-      completionDate: input.completionDate,
       status: false,
     };
 

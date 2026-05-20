@@ -94,7 +94,7 @@ describe('UpdateIssueInSubTaskUseCase', () => {
   });
 
   describe('non-coilab-web project', () => {
-    it('sets status=true when sprint and completionDate in payload', async () => {
+    it('sets status=true, auto-sets completionDate, stores sprint', async () => {
       const repo = makeRepo();
       const subTaskId = randomUUID();
       const issue = makeIssue({ repository: undefined, githubNumber: undefined });
@@ -108,23 +108,22 @@ describe('UpdateIssueInSubTaskUseCase', () => {
         issueId: issue.id,
         status: true,
         sprint: 'Sprint 2',
-        completionDate: '2026-12-31',
       });
 
       const saved: Task = repo.save.mock.calls[0][0];
       const issues = saved.getSubTasks()[0].getMetadata().issues as DevelopmentIssue[];
       expect(issues[0].status).toBe(true);
       expect(issues[0].sprint).toBe('Sprint 2');
+      expect(issues[0].completionDate).toBeDefined();
     });
 
-    it('sets status=true when sprint and completionDate already on issue', async () => {
+    it('sets status=true when sprint already on issue', async () => {
       const repo = makeRepo();
       const subTaskId = randomUUID();
       const issue = makeIssue({
         repository: undefined,
         githubNumber: undefined,
         sprint: 'Sprint 1',
-        completionDate: '2026-11-30',
       });
       const task = makeTask([makeDevSubTask(subTaskId, [issue])]);
       repo.findById.mockResolvedValue(task);
@@ -135,9 +134,31 @@ describe('UpdateIssueInSubTaskUseCase', () => {
       const saved: Task = repo.save.mock.calls[0][0];
       const issues = saved.getSubTasks()[0].getMetadata().issues as DevelopmentIssue[];
       expect(issues[0].status).toBe(true);
+      expect(issues[0].completionDate).toBeDefined();
     });
 
-    it('throws when setting status=true without sprint or completionDate', async () => {
+    it('clears completionDate when reopened', async () => {
+      const repo = makeRepo();
+      const subTaskId = randomUUID();
+      const issue = makeIssue({
+        repository: undefined,
+        githubNumber: undefined,
+        status: true,
+        completionDate: '2026-05-01T00:00:00.000Z',
+      });
+      const task = makeTask([makeDevSubTask(subTaskId, [issue])]);
+      repo.findById.mockResolvedValue(task);
+      const sut = new UpdateIssueInSubTaskUseCase(repo, makeGitHub());
+
+      await sut.execute({ taskId: task.getId(), subTaskId, issueId: issue.id, status: false });
+
+      const saved: Task = repo.save.mock.calls[0][0];
+      const issues = saved.getSubTasks()[0].getMetadata().issues as DevelopmentIssue[];
+      expect(issues[0].status).toBe(false);
+      expect(issues[0].completionDate).toBeUndefined();
+    });
+
+    it('throws when setting status=true without sprint', async () => {
       const repo = makeRepo();
       const subTaskId = randomUUID();
       const issue = makeIssue({ repository: undefined, githubNumber: undefined });
@@ -147,7 +168,7 @@ describe('UpdateIssueInSubTaskUseCase', () => {
 
       await expect(
         sut.execute({ taskId: task.getId(), subTaskId, issueId: issue.id, status: true }),
-      ).rejects.toThrow('sprint e completionDate');
+      ).rejects.toThrow('sprint');
     });
   });
 

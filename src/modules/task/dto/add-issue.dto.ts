@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
+import { IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 import { GitHubRepo } from '../../../domain/repositories/IGitHubService';
 
 export class AddIssueDto {
@@ -29,11 +29,6 @@ export class AddIssueDto {
   @Min(1)
   @IsOptional()
   flowId?: number;
-
-  @ApiPropertyOptional({ example: '2026-12-31' })
-  @IsDateString()
-  @IsOptional()
-  completionDate?: string;
 
   @ApiPropertyOptional({
     example: 'Sprint 3',
