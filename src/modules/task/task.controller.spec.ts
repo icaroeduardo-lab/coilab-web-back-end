@@ -261,4 +261,77 @@ describe('TaskController', () => {
       expect(mockRemoveDesign.execute).toHaveBeenCalledWith({ taskId, subTaskId, designId });
     });
   });
+
+  describe('listTools', () => {
+    it('calls listTaskTools.execute and returns result', async () => {
+      const output = [{ id: 1, name: 'Desenvolvimento' }];
+      mockListTaskTools.execute.mockResolvedValue(output);
+      const result = await controller.listTools();
+      expect(mockListTaskTools.execute).toHaveBeenCalled();
+      expect(result).toBe(output);
+    });
+  });
+
+  describe('getDesignUploadUrl_', () => {
+    it('calls getDesignUploadUrl.execute with taskId and filename', async () => {
+      const taskId = randomUUID();
+      const output = {
+        uploadUrl: 'https://s3.example.com/upload',
+        fileUrl: 'https://s3.example.com/file',
+      };
+      mockGetDesignUploadUrl.execute.mockResolvedValue(output);
+      const result = await controller.getDesignUploadUrl_(taskId, 'tela-login.png');
+      expect(mockGetDesignUploadUrl.execute).toHaveBeenCalledWith({
+        taskId,
+        filename: 'tela-login.png',
+      });
+      expect(result).toBe(output);
+    });
+  });
+
+  describe('addIssue_', () => {
+    it('calls addIssue.execute with taskId, subTaskId and dto', async () => {
+      const taskId = randomUUID();
+      const subTaskId = randomUUID();
+      const dto = { title: 'Nova issue', repository: 'front' as const } as never;
+      const output = { id: randomUUID(), url: 'https://github.com/org/repo/issues/1' };
+      mockAddIssue.execute.mockResolvedValue(output);
+      const result = await controller.addIssue_(taskId, subTaskId, dto);
+      expect(mockAddIssue.execute).toHaveBeenCalledWith({
+        taskId,
+        subTaskId,
+        title: 'Nova issue',
+        repository: 'front',
+      });
+      expect(result).toBe(output);
+    });
+  });
+
+  describe('updateIssue_', () => {
+    it('calls updateIssue.execute with taskId, subTaskId, issueId and dto', async () => {
+      const taskId = randomUUID();
+      const subTaskId = randomUUID();
+      const issueId = randomUUID();
+      const dto = { title: 'Título atualizado' } as never;
+      mockUpdateIssue.execute.mockResolvedValue(undefined);
+      await controller.updateIssue_(taskId, subTaskId, issueId, dto);
+      expect(mockUpdateIssue.execute).toHaveBeenCalledWith({
+        taskId,
+        subTaskId,
+        issueId,
+        title: 'Título atualizado',
+      });
+    });
+  });
+
+  describe('removeIssue_', () => {
+    it('calls removeIssue.execute with taskId, subTaskId and issueId', async () => {
+      const taskId = randomUUID();
+      const subTaskId = randomUUID();
+      const issueId = randomUUID();
+      mockRemoveIssue.execute.mockResolvedValue(undefined);
+      await controller.removeIssue_(taskId, subTaskId, issueId);
+      expect(mockRemoveIssue.execute).toHaveBeenCalledWith({ taskId, subTaskId, issueId });
+    });
+  });
 });

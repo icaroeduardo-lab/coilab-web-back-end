@@ -22,17 +22,16 @@ interface GitHubIssuePayload {
   repository: { name: string };
 }
 
-const REPO_MAP: Record<string, GitHubRepo> = {
-  [process.env.GITHUB_REPO_FRONT ?? '']: 'front',
-  [process.env.GITHUB_REPO_BACK ?? '']: 'back',
-};
-
 @ApiExcludeController()
 @Public()
 @Controller('webhooks')
 export class WebhookController {
   private readonly logger = new Logger(WebhookController.name);
   private readonly secret = process.env.GITHUB_WEBHOOK_SECRET ?? '';
+  private readonly repoMap: Record<string, GitHubRepo> = {
+    [process.env.GITHUB_REPO_FRONT ?? '']: 'front',
+    [process.env.GITHUB_REPO_BACK ?? '']: 'back',
+  };
 
   constructor(
     @Inject(SyncGitHubIssueStatusUseCase)
@@ -55,7 +54,7 @@ export class WebhookController {
     if (!['opened', 'closed', 'reopened'].includes(action)) return { ignored: true };
 
     const repoName = payload.repository.name;
-    const repository = REPO_MAP[repoName];
+    const repository = this.repoMap[repoName];
     if (!repository) {
       this.logger.warn(`Webhook from unknown repo: ${repoName}`);
       return { ignored: true };

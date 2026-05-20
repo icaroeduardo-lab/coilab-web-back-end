@@ -91,4 +91,16 @@ describe('UserController', () => {
       });
     });
   });
+
+  describe('list', () => {
+    it('calls listUsers.execute and returns result', async () => {
+      const output = [{ id: randomUUID(), name: 'João', email: 'joao@email.com' }];
+      mockListUsers.execute.mockResolvedValue(output);
+
+      const result = await controller.list();
+
+      expect(mockListUsers.execute).toHaveBeenCalled();
+      expect(result).toBe(output);
+    });
+  });
 });
