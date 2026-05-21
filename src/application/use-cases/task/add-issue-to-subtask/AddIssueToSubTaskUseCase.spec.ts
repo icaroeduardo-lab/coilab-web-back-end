@@ -22,6 +22,7 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
   findLastSubTaskNumber: jest.fn(),
+  findByGitHubIssueNumber: jest.fn(),
   count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
@@ -29,7 +30,7 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
 
 const makeGitHub = (): jest.Mocked<IGitHubService> => ({
   createIssue: jest.fn().mockResolvedValue({ url: MOCK_GITHUB_URL, number: 1 }),
-  updateIssueState: jest.fn().mockResolvedValue(undefined),
+  updateIssue: jest.fn().mockResolvedValue(undefined),
 });
 
 const makeSubTask = (id: string, typeId = 4, status = SubTaskStatus.EM_PROGRESSO) =>

@@ -1,4 +1,4 @@
-import { IGitHubService } from '../../../../domain/repositories/IGitHubService';
+import { GitHubIssueState, IGitHubService } from '../../../../domain/repositories/IGitHubService';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { DomainException } from '../../../../domain/shared/domain.exception';
 import { TaskId } from '../../../../domain/shared/entity-ids';
@@ -12,7 +12,6 @@ export interface UpdateIssueInSubTaskInput {
   title?: string;
   body?: string;
   flowId?: number;
-  completionDate?: string;
   sprint?: string;
   status?: boolean;
 }
@@ -40,7 +39,7 @@ export class UpdateIssueInSubTaskUseCase {
 
     const issue = issues[index];
 
-    if (issue.status === true && input.status !== false) {
+    if (issue.status === true) {
       throw new DomainException('Issue concluída não pode ser editada');
     }
 
@@ -48,30 +47,44 @@ export class UpdateIssueInSubTaskUseCase {
 
     if (!isCoilabWeb && input.status === true) {
       const effectiveSprint = input.sprint ?? issue.sprint;
-      const effectiveCompletionDate = input.completionDate ?? issue.completionDate;
-      if (!effectiveSprint || !effectiveCompletionDate) {
-        throw new DomainException(
-          'Para concluir uma issue é necessário informar sprint e completionDate',
-        );
+      if (!effectiveSprint) {
+        throw new DomainException('Para concluir uma issue é necessário informar sprint');
       }
     }
+
+    const closing = input.status === true;
+    const reopening = input.status === false;
 
     const updated: DevelopmentIssue = {
       ...issue,
       ...(input.title !== undefined && { title: input.title }),
       ...(input.body !== undefined && { body: input.body }),
       ...(!isCoilabWeb && input.flowId !== undefined && { flowId: input.flowId }),
-      ...(input.completionDate !== undefined && { completionDate: input.completionDate }),
       ...(input.sprint !== undefined && { sprint: input.sprint }),
       ...(input.status !== undefined && { status: input.status }),
+      ...(closing && {
+        completionDate: new Date().toISOString(),
+        closeReason: 'completed' as const,
+      }),
+      ...(reopening && { completionDate: undefined, closeReason: undefined }),
     };
 
-    if (isCoilabWeb && input.status !== undefined && issue.githubNumber && issue.repository) {
-      await this.gitHubService.updateIssueState({
-        repository: issue.repository,
-        issueNumber: issue.githubNumber,
-        state: input.status ? 'closed' : 'open',
-      });
+    if (isCoilabWeb && issue.githubNumber && issue.repository) {
+      const hasGitHubChanges =
+        input.title !== undefined || input.body !== undefined || input.status !== undefined;
+
+      if (hasGitHubChanges) {
+        const state: GitHubIssueState | undefined =
+          input.status !== undefined ? (input.status ? 'closed' : 'open') : undefined;
+
+        await this.gitHubService.updateIssue({
+          repository: issue.repository,
+          issueNumber: issue.githubNumber,
+          ...(input.title !== undefined && { title: input.title }),
+          ...(input.body !== undefined && { body: input.body }),
+          ...(state !== undefined && { state }),
+        });
+      }
     }
 
     const updatedIssues = [...issues];

@@ -1,5 +1,6 @@
 export type GitHubRepo = 'front' | 'back';
 export type GitHubIssueState = 'open' | 'closed';
+export type GitHubIssueStateReason = 'completed' | 'not_planned' | 'reopened';
 
 export interface CreateGitHubIssueInput {
   repository: GitHubRepo;
@@ -12,13 +13,16 @@ export interface CreateGitHubIssueOutput {
   number: number;
 }
 
-export interface UpdateGitHubIssueStateInput {
+export interface UpdateGitHubIssueInput {
   repository: GitHubRepo;
   issueNumber: number;
-  state: GitHubIssueState;
+  title?: string;
+  body?: string;
+  state?: GitHubIssueState;
+  stateReason?: GitHubIssueStateReason;
 }
 
 export interface IGitHubService {
   createIssue(input: CreateGitHubIssueInput): Promise<CreateGitHubIssueOutput>;
-  updateIssueState(input: UpdateGitHubIssueStateInput): Promise<void>;
+  updateIssue(input: UpdateGitHubIssueInput): Promise<void>;
 }

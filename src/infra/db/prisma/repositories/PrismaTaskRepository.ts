@@ -174,6 +174,16 @@ export class PrismaTaskRepository implements ITaskRepository {
     return rows.map((r) => taskToDomain(r as TaskWithRelations));
   }
 
+  async findByGitHubIssueNumber(issueNumber: number, repository: string): Promise<Task | null> {
+    const rows = await prisma.$queryRaw<{ taskId: string }[]>`
+      SELECT "taskId" FROM sub_tasks
+      WHERE metadata->'issues' @> ${JSON.stringify([{ githubNumber: issueNumber, repository }])}::jsonb
+      LIMIT 1
+    `;
+    if (!rows.length) return null;
+    return this.findById(rows[0].taskId as TaskId);
+  }
+
   async findLastTaskNumber(): Promise<string | null> {
     const row = await prisma.task.findFirst({ orderBy: { taskNumber: 'desc' } });
     return row?.taskNumber ?? null;

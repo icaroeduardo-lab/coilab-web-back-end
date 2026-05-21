@@ -192,6 +192,16 @@ export class SubTask extends Entity {
     this.validate();
   }
 
+  cancelWithMetadata(reason: string, metadata: Record<string, unknown>): void {
+    if (this.status === SubTaskStatus.APROVADO) {
+      throw new DomainException('A subtask já foi aprovada e não pode ser cancelada');
+    }
+    this.metadata = { ...this.metadata, ...metadata };
+    this.status = SubTaskStatus.CANCELADO;
+    this.reason = reason;
+    this.validate();
+  }
+
   reopen(): void {
     if (this.status !== SubTaskStatus.AGUARDANDO_CHECKOUT) {
       throw new DomainException('Apenas subtasks finalizadas podem ser reabertas');

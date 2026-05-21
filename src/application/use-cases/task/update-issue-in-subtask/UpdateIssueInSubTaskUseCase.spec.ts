@@ -21,6 +21,7 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   findByProjectId: jest.fn(),
   findLastTaskNumber: jest.fn(),
   findLastSubTaskNumber: jest.fn(),
+  findByGitHubIssueNumber: jest.fn(),
   count: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
@@ -28,7 +29,7 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
 
 const makeGitHub = (): jest.Mocked<IGitHubService> => ({
   createIssue: jest.fn(),
-  updateIssueState: jest.fn().mockResolvedValue(undefined),
+  updateIssue: jest.fn().mockResolvedValue(undefined),
 });
 
 const makeIssue = (overrides: Partial<DevelopmentIssue> = {}): DevelopmentIssue => ({
@@ -94,7 +95,7 @@ describe('UpdateIssueInSubTaskUseCase', () => {
   });
 
   describe('non-coilab-web project', () => {
-    it('sets status=true when sprint and completionDate in payload', async () => {
+    it('sets status=true, auto-sets completionDate, stores sprint', async () => {
       const repo = makeRepo();
       const subTaskId = randomUUID();
       const issue = makeIssue({ repository: undefined, githubNumber: undefined });
@@ -108,23 +109,22 @@ describe('UpdateIssueInSubTaskUseCase', () => {
         issueId: issue.id,
         status: true,
         sprint: 'Sprint 2',
-        completionDate: '2026-12-31',
       });
 
       const saved: Task = repo.save.mock.calls[0][0];
       const issues = saved.getSubTasks()[0].getMetadata().issues as DevelopmentIssue[];
       expect(issues[0].status).toBe(true);
       expect(issues[0].sprint).toBe('Sprint 2');
+      expect(issues[0].completionDate).toBeDefined();
     });
 
-    it('sets status=true when sprint and completionDate already on issue', async () => {
+    it('sets status=true when sprint already on issue', async () => {
       const repo = makeRepo();
       const subTaskId = randomUUID();
       const issue = makeIssue({
         repository: undefined,
         githubNumber: undefined,
         sprint: 'Sprint 1',
-        completionDate: '2026-11-30',
       });
       const task = makeTask([makeDevSubTask(subTaskId, [issue])]);
       repo.findById.mockResolvedValue(task);
@@ -135,9 +135,10 @@ describe('UpdateIssueInSubTaskUseCase', () => {
       const saved: Task = repo.save.mock.calls[0][0];
       const issues = saved.getSubTasks()[0].getMetadata().issues as DevelopmentIssue[];
       expect(issues[0].status).toBe(true);
+      expect(issues[0].completionDate).toBeDefined();
     });
 
-    it('throws when setting status=true without sprint or completionDate', async () => {
+    it('throws when setting status=true without sprint', async () => {
       const repo = makeRepo();
       const subTaskId = randomUUID();
       const issue = makeIssue({ repository: undefined, githubNumber: undefined });
@@ -147,12 +148,12 @@ describe('UpdateIssueInSubTaskUseCase', () => {
 
       await expect(
         sut.execute({ taskId: task.getId(), subTaskId, issueId: issue.id, status: true }),
-      ).rejects.toThrow('sprint e completionDate');
+      ).rejects.toThrow('sprint');
     });
   });
 
   describe('coilab-web project', () => {
-    it('calls GitHub updateIssueState when status changes to closed', async () => {
+    it('calls GitHub updateIssue when status changes to closed', async () => {
       const repo = makeRepo();
       const github = makeGitHub();
       const subTaskId = randomUUID();
@@ -163,32 +164,14 @@ describe('UpdateIssueInSubTaskUseCase', () => {
 
       await sut.execute({ taskId: task.getId(), subTaskId, issueId: issue.id, status: true });
 
-      expect(github.updateIssueState).toHaveBeenCalledWith({
+      expect(github.updateIssue).toHaveBeenCalledWith({
         repository: 'front',
         issueNumber: 1,
         state: 'closed',
       });
     });
 
-    it('calls GitHub updateIssueState when status changes to open', async () => {
-      const repo = makeRepo();
-      const github = makeGitHub();
-      const subTaskId = randomUUID();
-      const issue = makeIssue({ status: true });
-      const task = makeTask([makeDevSubTask(subTaskId, [issue])], COILAB_WEB_PROJECT_ID);
-      repo.findById.mockResolvedValue(task);
-      const sut = new UpdateIssueInSubTaskUseCase(repo, github);
-
-      await sut.execute({ taskId: task.getId(), subTaskId, issueId: issue.id, status: false });
-
-      expect(github.updateIssueState).toHaveBeenCalledWith({
-        repository: 'front',
-        issueNumber: 1,
-        state: 'open',
-      });
-    });
-
-    it('does not call GitHub when status is not changed', async () => {
+    it('calls GitHub updateIssue when title and body change', async () => {
       const repo = makeRepo();
       const github = makeGitHub();
       const subTaskId = randomUUID();
@@ -197,13 +180,38 @@ describe('UpdateIssueInSubTaskUseCase', () => {
       repo.findById.mockResolvedValue(task);
       const sut = new UpdateIssueInSubTaskUseCase(repo, github);
 
-      await sut.execute({ taskId: task.getId(), subTaskId, issueId: issue.id, title: 'Novo' });
+      await sut.execute({
+        taskId: task.getId(),
+        subTaskId,
+        issueId: issue.id,
+        title: 'Novo título',
+        body: 'Nova descrição',
+      });
 
-      expect(github.updateIssueState).not.toHaveBeenCalled();
+      expect(github.updateIssue).toHaveBeenCalledWith({
+        repository: 'front',
+        issueNumber: 1,
+        title: 'Novo título',
+        body: 'Nova descrição',
+      });
+    });
+
+    it('does not call GitHub when only non-GitHub fields change', async () => {
+      const repo = makeRepo();
+      const github = makeGitHub();
+      const subTaskId = randomUUID();
+      const issue = makeIssue();
+      const task = makeTask([makeDevSubTask(subTaskId, [issue])], COILAB_WEB_PROJECT_ID);
+      repo.findById.mockResolvedValue(task);
+      const sut = new UpdateIssueInSubTaskUseCase(repo, github);
+
+      await sut.execute({ taskId: task.getId(), subTaskId, issueId: issue.id, flowId: 2 });
+
+      expect(github.updateIssue).not.toHaveBeenCalled();
     });
   });
 
-  it('throws when editing issue with status=true', async () => {
+  it('throws when editing closed issue (any field)', async () => {
     const repo = makeRepo();
     const subTaskId = randomUUID();
     const issue = makeIssue({ status: true, sprint: 'Sprint 1', completionDate: '2026-12-31' });
@@ -213,6 +221,19 @@ describe('UpdateIssueInSubTaskUseCase', () => {
 
     await expect(
       sut.execute({ taskId: task.getId(), subTaskId, issueId: issue.id, title: 'Novo título' }),
+    ).rejects.toThrow('Issue concluída não pode ser editada');
+  });
+
+  it('throws when trying to reopen closed issue via API', async () => {
+    const repo = makeRepo();
+    const subTaskId = randomUUID();
+    const issue = makeIssue({ status: true, completionDate: '2026-05-01T00:00:00.000Z' });
+    const task = makeTask([makeDevSubTask(subTaskId, [issue])]);
+    repo.findById.mockResolvedValue(task);
+    const sut = new UpdateIssueInSubTaskUseCase(repo, makeGitHub());
+
+    await expect(
+      sut.execute({ taskId: task.getId(), subTaskId, issueId: issue.id, status: false }),
     ).rejects.toThrow('Issue concluída não pode ser editada');
   });
 
