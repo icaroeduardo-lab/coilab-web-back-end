@@ -40,6 +40,7 @@ export class CompleteDevSubTaskUseCase {
             repository: issue.repository,
             issueNumber: issue.githubNumber,
             state: 'closed',
+            stateReason: 'completed',
           });
         }
 

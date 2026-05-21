@@ -108,6 +108,7 @@ describe('CancelDevSubTaskUseCase', () => {
       repository: 'back',
       issueNumber: 42,
       state: 'closed',
+      stateReason: 'not_planned',
     });
   });
 

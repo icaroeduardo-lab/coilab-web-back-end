@@ -108,6 +108,7 @@ describe('CompleteDevSubTaskUseCase', () => {
       repository: 'back',
       issueNumber: 42,
       state: 'closed',
+      stateReason: 'completed',
     });
   });
 

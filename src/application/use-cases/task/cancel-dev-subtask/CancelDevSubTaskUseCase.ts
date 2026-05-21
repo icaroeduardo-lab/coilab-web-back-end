@@ -40,6 +40,7 @@ export class CancelDevSubTaskUseCase {
             repository: issue.repository,
             issueNumber: issue.githubNumber,
             state: 'closed',
+            stateReason: 'not_planned',
           });
         }
 

@@ -39,6 +39,7 @@ export class GitHubService implements IGitHubService {
     if (input.title !== undefined) payload.title = input.title;
     if (input.body !== undefined) payload.body = input.body;
     if (input.state !== undefined) payload.state = input.state;
+    if (input.stateReason !== undefined) payload.state_reason = input.stateReason;
 
     const response = await fetch(
       `https://api.github.com/repos/${this.account}/${repo}/issues/${input.issueNumber}`,
