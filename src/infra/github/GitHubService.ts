@@ -9,11 +9,11 @@ import {
 
 @Injectable()
 export class GitHubService implements IGitHubService {
-  private readonly token = process.env.GITHUB_TOKEN!;
-  private readonly account = process.env.GITHUB_ACCOUNT!;
+  private readonly token = process.env.REPO_TOKEN!;
+  private readonly account = process.env.REPO_ACCOUNT!;
   private readonly repoMap = {
-    front: process.env.GITHUB_REPO_FRONT!,
-    back: process.env.GITHUB_REPO_BACK!,
+    front: process.env.REPO_FRONT!,
+    back: process.env.REPO_BACK!,
   };
 
   async createIssue(input: CreateGitHubIssueInput): Promise<CreateGitHubIssueOutput> {

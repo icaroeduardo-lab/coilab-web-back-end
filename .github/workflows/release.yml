@@ -19,7 +19,7 @@ jobs:
         id: tag
         uses: mathieudutour/github-tag-action@v6.2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          REPO_token: ${{ secrets.REPO_TOKEN }}
           default_bump: patch
           release_branches: main
 

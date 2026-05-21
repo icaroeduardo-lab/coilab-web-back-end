@@ -12,5 +12,5 @@ export const envValidationSchema = Joi.object({
     is: 'production',
     then: Joi.required(),
   }),
-  GITHUB_WEBHOOK_SECRET: Joi.string().when('NODE_ENV', { is: 'production', then: Joi.required() }),
+  WEBHOOK_SECRET: Joi.string().when('NODE_ENV', { is: 'production', then: Joi.required() }),
 });
