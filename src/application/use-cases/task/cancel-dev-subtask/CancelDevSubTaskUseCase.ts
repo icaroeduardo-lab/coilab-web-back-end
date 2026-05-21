@@ -29,21 +29,21 @@ export class CancelDevSubTaskUseCase {
     const isCoilabWeb = task.getProjectId() === COILAB_WEB_PROJECT_ID;
     const issues = (subTask.getMetadata().issues ?? []) as DevelopmentIssue[];
 
+    const completionDate = new Date().toISOString();
+
     const updatedIssues = await Promise.all(
       issues.map(async (issue) => {
-        if (!issue.status) return issue;
+        if (issue.status) return issue;
 
         if (isCoilabWeb && issue.githubNumber && issue.repository) {
           await this.gitHubService.updateIssue({
             repository: issue.repository,
             issueNumber: issue.githubNumber,
-            state: 'open',
+            state: 'closed',
           });
         }
 
-        const updated = { ...issue, status: false };
-        delete updated.completionDate;
-        return updated;
+        return { ...issue, status: true, completionDate };
       }),
     );
 

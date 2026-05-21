@@ -40,8 +40,7 @@ const makeIssue = (overrides: Partial<DevelopmentIssue> = {}): DevelopmentIssue 
   repository: 'front',
   flowId: 3,
   createdAt: new Date().toISOString(),
-  status: true,
-  completionDate: '2026-05-01T00:00:00.000Z',
+  status: false,
   ...overrides,
 });
 
@@ -50,7 +49,7 @@ const makeDevSubTask = (id: string, issues: DevelopmentIssue[] = [], typeId = 4)
     id: SubTaskId(id),
     taskId: TaskId(randomUUID()),
     idUser: UserId(randomUUID()),
-    status: SubTaskStatus.AGUARDANDO_CHECKOUT,
+    status: SubTaskStatus.EM_PROGRESSO,
     typeId: TaskToolId(typeId),
     taskNumber: '#20260001',
     expectedDelivery: new Date(),
@@ -72,7 +71,7 @@ const makeTask = (subTasks: SubTask[] = [], projectId?: string) =>
   });
 
 describe('CancelDevSubTaskUseCase', () => {
-  it('reopens all closed issues and cancels subtask', async () => {
+  it('closes all open issues and cancels subtask', async () => {
     const repo = makeRepo();
     const github = makeGitHub();
     const subTaskId = randomUUID();
@@ -87,14 +86,14 @@ describe('CancelDevSubTaskUseCase', () => {
     const saved: Task = repo.save.mock.calls[0][0];
     const subTask = saved.getSubTasks()[0];
     const issues = subTask.getMetadata().issues as DevelopmentIssue[];
-    expect(issues[0].status).toBe(false);
-    expect(issues[0].completionDate).toBeUndefined();
-    expect(issues[1].status).toBe(false);
-    expect(issues[1].completionDate).toBeUndefined();
+    expect(issues[0].status).toBe(true);
+    expect(issues[0].completionDate).toBeDefined();
+    expect(issues[1].status).toBe(true);
+    expect(issues[1].completionDate).toBeDefined();
     expect(subTask.getStatus()).toBe(SubTaskStatus.CANCELADO);
   });
 
-  it('calls GitHub updateIssue state=open for each coilab-web closed issue', async () => {
+  it('calls GitHub updateIssue state=closed for each coilab-web open issue', async () => {
     const repo = makeRepo();
     const github = makeGitHub();
     const subTaskId = randomUUID();
@@ -108,7 +107,7 @@ describe('CancelDevSubTaskUseCase', () => {
     expect(github.updateIssue).toHaveBeenCalledWith({
       repository: 'back',
       issueNumber: 42,
-      state: 'open',
+      state: 'closed',
     });
   });
 
@@ -126,14 +125,18 @@ describe('CancelDevSubTaskUseCase', () => {
     expect(github.updateIssue).not.toHaveBeenCalled();
   });
 
-  it('skips already-open issues', async () => {
+  it('skips already-closed issues', async () => {
     const repo = makeRepo();
     const github = makeGitHub();
     const subTaskId = randomUUID();
-    const openIssue = makeIssue({ status: false, completionDate: undefined, githubNumber: 1 });
-    const closedIssue = makeIssue({ githubNumber: 2 });
+    const closedIssue = makeIssue({
+      status: true,
+      completionDate: '2026-05-01T00:00:00.000Z',
+      githubNumber: 1,
+    });
+    const openIssue = makeIssue({ githubNumber: 2 });
     const task = makeTask(
-      [makeDevSubTask(subTaskId, [openIssue, closedIssue])],
+      [makeDevSubTask(subTaskId, [closedIssue, openIssue])],
       COILAB_WEB_PROJECT_ID,
     );
     repo.findById.mockResolvedValue(task);
