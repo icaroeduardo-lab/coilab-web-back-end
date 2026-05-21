@@ -14,7 +14,7 @@ import {
 import { COILAB_WEB_PROJECT_ID } from '../../../../domain/shared/project-constants';
 import { randomUUID } from 'crypto';
 
-const MOCK_GITHUB_URL = 'https://github.com/icaroeduardo-lab/coilab-web/issues/1';
+const MOCK_REPO_URL = 'https://github.com/icaroeduardo-lab/coilab-web/issues/1';
 
 const makeRepo = (): jest.Mocked<ITaskRepository> => ({
   findById: jest.fn(),
@@ -29,7 +29,7 @@ const makeRepo = (): jest.Mocked<ITaskRepository> => ({
 });
 
 const makeGitHub = (): jest.Mocked<IGitHubService> => ({
-  createIssue: jest.fn().mockResolvedValue({ url: MOCK_GITHUB_URL, number: 1 }),
+  createIssue: jest.fn().mockResolvedValue({ url: MOCK_REPO_URL, number: 1 }),
   updateIssue: jest.fn().mockResolvedValue(undefined),
 });
 
@@ -85,10 +85,10 @@ describe('AddIssueToSubTaskUseCase', () => {
       const result = await sut.execute(coilabWebInput(task.getId(), subTaskId));
 
       expect(result.id).toBeDefined();
-      expect(result.url).toBe(MOCK_GITHUB_URL);
+      expect(result.url).toBe(MOCK_REPO_URL);
       const issues = repo.save.mock.calls[0][0].getSubTasks()[0].getMetadata()
         .issues as DevelopmentIssue[];
-      expect(issues[0].url).toBe(MOCK_GITHUB_URL);
+      expect(issues[0].url).toBe(MOCK_REPO_URL);
       expect(issues[0].repository).toBe('front');
       expect(issues[0].flowId).toBe(3);
       expect(issues[0].sprint).toBeUndefined();
