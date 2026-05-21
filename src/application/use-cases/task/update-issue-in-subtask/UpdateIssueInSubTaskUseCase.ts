@@ -62,8 +62,11 @@ export class UpdateIssueInSubTaskUseCase {
       ...(!isCoilabWeb && input.flowId !== undefined && { flowId: input.flowId }),
       ...(input.sprint !== undefined && { sprint: input.sprint }),
       ...(input.status !== undefined && { status: input.status }),
-      ...(closing && { completionDate: new Date().toISOString() }),
-      ...(reopening && { completionDate: undefined }),
+      ...(closing && {
+        completionDate: new Date().toISOString(),
+        closeReason: 'completed' as const,
+      }),
+      ...(reopening && { completionDate: undefined, closeReason: undefined }),
     };
 
     if (isCoilabWeb && issue.githubNumber && issue.repository) {

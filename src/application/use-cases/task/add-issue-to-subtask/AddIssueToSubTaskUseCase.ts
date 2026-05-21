@@ -5,6 +5,8 @@ import { TaskId } from '../../../../domain/shared/entity-ids';
 import { COILAB_WEB_PROJECT_ID } from '../../../../domain/shared/project-constants';
 import { generateId } from '../../../../shared/generate-id';
 
+export type IssueCloseReason = 'completed' | 'not_planned';
+
 export interface DevelopmentIssue {
   id: string;
   title: string;
@@ -15,6 +17,7 @@ export interface DevelopmentIssue {
   flowId: number;
   createdAt: string;
   completionDate?: string;
+  closeReason?: IssueCloseReason;
   sprint?: string;
   status: boolean;
 }

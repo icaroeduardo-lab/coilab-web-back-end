@@ -44,7 +44,7 @@ export class CancelDevSubTaskUseCase {
           });
         }
 
-        return { ...issue, status: true, completionDate };
+        return { ...issue, status: true, completionDate, closeReason: 'not_planned' as const };
       }),
     );
 

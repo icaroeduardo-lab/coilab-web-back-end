@@ -44,7 +44,7 @@ export class CompleteDevSubTaskUseCase {
           });
         }
 
-        return { ...issue, status: true, completionDate };
+        return { ...issue, status: true, completionDate, closeReason: 'completed' as const };
       }),
     );
 
