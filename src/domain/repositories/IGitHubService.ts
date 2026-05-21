@@ -1,5 +1,6 @@
 export type GitHubRepo = 'front' | 'back';
 export type GitHubIssueState = 'open' | 'closed';
+export type GitHubIssueStateReason = 'completed' | 'not_planned' | 'reopened';
 
 export interface CreateGitHubIssueInput {
   repository: GitHubRepo;
@@ -18,6 +19,7 @@ export interface UpdateGitHubIssueInput {
   title?: string;
   body?: string;
   state?: GitHubIssueState;
+  stateReason?: GitHubIssueStateReason;
 }
 
 export interface IGitHubService {

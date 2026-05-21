@@ -33,6 +33,7 @@ export class SyncGitHubIssueStatusUseCase {
         ...issue,
         status: closed,
         completionDate: closed ? new Date().toISOString() : undefined,
+        closeReason: closed ? 'completed' : undefined,
       };
 
       const updatedIssues = [...issues];

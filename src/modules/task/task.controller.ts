@@ -35,6 +35,8 @@ import { AddIssueToSubTaskUseCase } from '../../application/use-cases/task/add-i
 import { RemoveIssueFromSubTaskUseCase } from '../../application/use-cases/task/remove-issue-from-subtask/RemoveIssueFromSubTaskUseCase';
 import { UpdateIssueInSubTaskUseCase } from '../../application/use-cases/task/update-issue-in-subtask/UpdateIssueInSubTaskUseCase';
 import { ListTaskToolsUseCase } from '../../application/use-cases/task/list-task-tools/ListTaskToolsUseCase';
+import { CompleteDevSubTaskUseCase } from '../../application/use-cases/task/complete-dev-subtask/CompleteDevSubTaskUseCase';
+import { CancelDevSubTaskUseCase } from '../../application/use-cases/task/cancel-dev-subtask/CancelDevSubTaskUseCase';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ChangeTaskStatusDto } from './dto/change-task-status.dto';
@@ -44,6 +46,7 @@ import { UpdateDiscoveryFormDto } from './dto/update-discovery-form.dto';
 import { AddDesignDto } from './dto/add-design.dto';
 import { AddIssueDto } from './dto/add-issue.dto';
 import { UpdateIssueDto } from './dto/update-issue.dto';
+import { CancelDevSubTaskDto } from './dto/cancel-dev-subtask.dto';
 import { CurrentUser, JwtPayload } from '../auth/current-user.decorator';
 
 @ApiTags('Tasks')
@@ -76,6 +79,10 @@ export class TaskController {
     private readonly updateIssue: UpdateIssueInSubTaskUseCase,
     @Inject(ListTaskToolsUseCase)
     private readonly listTaskTools: ListTaskToolsUseCase,
+    @Inject(CompleteDevSubTaskUseCase)
+    private readonly completeDevSubTask: CompleteDevSubTaskUseCase,
+    @Inject(CancelDevSubTaskUseCase)
+    private readonly cancelDevSubTask: CancelDevSubTaskUseCase,
   ) {}
 
   @Post()
@@ -252,6 +259,39 @@ export class TaskController {
     @Param('designId') designId: string,
   ) {
     await this.removeDesign.execute({ taskId, subTaskId, designId });
+  }
+
+  @Patch(':taskId/subtasks/:subTaskId/complete')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Finalizar subtarefa de Desenvolvimento e fechar todas as issues abertas',
+  })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiParam({ name: 'subTaskId', description: 'UUID da subtarefa (typeId=4)' })
+  @ApiResponse({ status: 204, description: 'Subtarefa finalizada e issues fechadas.' })
+  @ApiResponse({ status: 422, description: 'Subtarefa inválida ou não é do tipo Desenvolvimento.' })
+  async completeDevSubTask_(
+    @Param('taskId') taskId: string,
+    @Param('subTaskId') subTaskId: string,
+  ) {
+    await this.completeDevSubTask.execute({ taskId, subTaskId });
+  }
+
+  @Patch(':taskId/subtasks/:subTaskId/cancel')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Cancelar subtarefa de Desenvolvimento e reabrir todas as issues fechadas',
+  })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiParam({ name: 'subTaskId', description: 'UUID da subtarefa (typeId=4)' })
+  @ApiResponse({ status: 204, description: 'Subtarefa cancelada e issues reabertas.' })
+  @ApiResponse({ status: 422, description: 'Subtarefa inválida ou não é do tipo Desenvolvimento.' })
+  async cancelDevSubTask_(
+    @Param('taskId') taskId: string,
+    @Param('subTaskId') subTaskId: string,
+    @Body() dto: CancelDevSubTaskDto,
+  ) {
+    await this.cancelDevSubTask.execute({ taskId, subTaskId, reason: dto.reason });
   }
 
   @Post(':taskId/subtasks/:subTaskId/issues')
