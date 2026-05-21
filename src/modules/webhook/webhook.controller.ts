@@ -29,8 +29,8 @@ export class WebhookController {
   private readonly logger = new Logger(WebhookController.name);
   private readonly secret = process.env.WEBHOOK_SECRET ?? '';
   private readonly repoMap: Record<string, GitHubRepo> = {
-    [process.env.REPO_REPO_FRONT ?? '']: 'front',
-    [process.env.REPO_REPO_BACK ?? '']: 'back',
+    [process.env.REPO_FRONT ?? '']: 'front',
+    [process.env.REPO_BACK ?? '']: 'back',
   };
 
   constructor(
