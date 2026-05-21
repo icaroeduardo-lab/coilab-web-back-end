@@ -40,3 +40,9 @@ jobs:
           CORS_ORIGIN: ${{ secrets.CORS_ORIGIN }}
           BUCKET_DESIGN: ${{ secrets.BUCKET_DESIGN }}
           BUCKET_PROJECTS_DOCUMENTS: ${{ secrets.BUCKET_PROJECTS_DOCUMENTS }}
+          REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+          REPO_ACCOUNT: ${{ secrets.REPO_ACCOUNT }}
+          REPO_FRONT: ${{ secrets.REPO_FRONT }}
+          REPO_BACK: ${{ secrets.REPO_BACK }}
+          COILAB_WEB_PROJECT_ID: ${{ secrets.COILAB_WEB_PROJECT_ID }}
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
