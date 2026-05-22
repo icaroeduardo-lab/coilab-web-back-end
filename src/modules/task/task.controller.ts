@@ -47,6 +47,11 @@ import { AddDesignDto } from './dto/add-design.dto';
 import { AddIssueDto } from './dto/add-issue.dto';
 import { UpdateIssueDto } from './dto/update-issue.dto';
 import { CancelDevSubTaskDto } from './dto/cancel-dev-subtask.dto';
+import {
+  TaskResponseDto,
+  TaskListResponseDto,
+  TaskDetailResponseDto,
+} from './dto/task-response.dto';
 import { CurrentUser, JwtPayload } from '../auth/current-user.decorator';
 
 @ApiTags('Tasks')
@@ -87,7 +92,7 @@ export class TaskController {
 
   @Post()
   @ApiOperation({ summary: 'Criar tarefa' })
-  @ApiResponse({ status: 201, description: 'Tarefa criada.' })
+  @ApiResponse({ status: 201, description: 'Tarefa criada.', type: TaskResponseDto })
   @ApiResponse({ status: 422, description: 'Dados inválidos.' })
   create(@CurrentUser() user: JwtPayload, @Body() dto: CreateTaskDto) {
     return this.createTask.execute({
@@ -112,7 +117,7 @@ export class TaskController {
   @ApiOperation({ summary: 'Listar todas as tarefas (paginado)' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
-  @ApiResponse({ status: 200, description: 'Página de tarefas.' })
+  @ApiResponse({ status: 200, description: 'Página de tarefas.', type: TaskListResponseDto })
   list(@Query('page') page?: number, @Query('limit') limit?: number) {
     return this.listAllTasks.execute({ page: Number(page), limit: Number(limit) });
   }
@@ -120,7 +125,7 @@ export class TaskController {
   @Get('project/:projectId')
   @ApiOperation({ summary: 'Listar tarefas por projeto' })
   @ApiParam({ name: 'projectId', description: 'UUID do projeto' })
-  @ApiResponse({ status: 200, description: 'Tarefas do projeto.' })
+  @ApiResponse({ status: 200, description: 'Tarefas do projeto.', type: [TaskListResponseDto] })
   listByProjectId(@Param('projectId') projectId: string) {
     return this.listByProject.execute({ projectId });
   }
@@ -128,7 +133,7 @@ export class TaskController {
   @Get(':id')
   @ApiOperation({ summary: 'Buscar tarefa por ID' })
   @ApiParam({ name: 'id', description: 'UUID da tarefa' })
-  @ApiResponse({ status: 200, description: 'Tarefa encontrada.' })
+  @ApiResponse({ status: 200, description: 'Tarefa encontrada.', type: TaskDetailResponseDto })
   @ApiResponse({ status: 404, description: 'Tarefa não encontrada.' })
   get(@Param('id') id: string) {
     return this.getTask.execute({ id });
