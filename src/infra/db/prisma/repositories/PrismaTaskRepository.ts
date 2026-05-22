@@ -31,6 +31,15 @@ const ID_TO_STATUS: Record<number, TaskStatus> = Object.fromEntries(
   Object.entries(STATUS_TO_ID).map(([k, v]) => [v, k as TaskStatus]),
 );
 
+const TASK_TYPE_TO_ID: Record<TaskType, number> = {
+  [TaskType.FEATURE]: 1,
+  [TaskType.BUG]: 2,
+};
+
+const ID_TO_TASK_TYPE: Record<number, TaskType> = Object.fromEntries(
+  Object.entries(TASK_TYPE_TO_ID).map(([k, v]) => [v, k as TaskType]),
+);
+
 const SUB_STATUS_TO_ID: Record<SubTaskStatus, number> = {
   [SubTaskStatus.NAO_INICIADO]: 1,
   [SubTaskStatus.EM_PROGRESSO]: 2,
@@ -93,9 +102,7 @@ function taskToDomain(row: TaskWithRelations): Task {
     description: row.description,
     taskNumber: normalizeTaskNumber(row.taskNumber),
     priority: normalizePriority(row.priority),
-    type: (Object.values(TaskType).includes(row.type as TaskType)
-      ? row.type
-      : TaskType.FEATURE) as TaskType,
+    type: ID_TO_TASK_TYPE[row.typeId] ?? TaskType.FEATURE,
     status: ID_TO_STATUS[row.statusId] ?? TaskStatus.BACKLOG,
     applicantId: ApplicantId(row.applicantId),
     creatorId: UserId(row.creatorId),
@@ -211,7 +218,7 @@ export class PrismaTaskRepository implements ITaskRepository {
           description: task.getDescription(),
           taskNumber: task.getTaskNumber(),
           priority: task.getPriority(),
-          type: task.getType(),
+          typeId: TASK_TYPE_TO_ID[task.getType()],
           statusId: STATUS_TO_ID[task.getStatus()],
           applicantId: task.getApplicantId(),
           creatorId: task.getCreatorId(),
@@ -221,7 +228,7 @@ export class PrismaTaskRepository implements ITaskRepository {
           name: task.getName(),
           description: task.getDescription(),
           priority: task.getPriority(),
-          type: task.getType(),
+          typeId: TASK_TYPE_TO_ID[task.getType()],
           statusId: STATUS_TO_ID[task.getStatus()],
           applicantId: task.getApplicantId(),
           projectId: task.getProjectId(),
