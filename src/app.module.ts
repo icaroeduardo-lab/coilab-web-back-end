@@ -31,6 +31,4 @@ import { envValidationSchema } from './config/env.validation';
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
-
-// Comentário de teste
 export class AppModule {}
