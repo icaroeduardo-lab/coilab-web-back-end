@@ -25,6 +25,11 @@ export enum TaskPriority {
   ALTA = 'alta',
 }
 
+export enum TaskType {
+  FEATURE = 'feature',
+  BUG = 'bug',
+}
+
 export interface TaskProps {
   id: TaskId;
   projectId: ProjectId;
@@ -38,6 +43,7 @@ export interface TaskProps {
   subTasks?: SubTask[];
   flowIds?: FlowId[];
   createdAt?: Date;
+  type?: TaskType;
 }
 
 export class Task extends Entity {
@@ -86,6 +92,9 @@ export class Task extends Entity {
   @IsDate()
   private createdAt: Date;
 
+  @IsEnum(TaskType)
+  private type: TaskType;
+
   constructor(props: TaskProps) {
     super();
     this.id = props.id;
@@ -100,6 +109,7 @@ export class Task extends Entity {
     this.subTasks = props.subTasks ?? [];
     this.flowIds = props.flowIds ?? [];
     this.createdAt = props.createdAt ?? new Date();
+    this.type = props.type ?? TaskType.FEATURE;
 
     this.applyStatusRules();
     this.validate();
@@ -246,6 +256,15 @@ export class Task extends Entity {
   }
   getCreatedAt(): Date {
     return this.createdAt;
+  }
+  getType(): TaskType {
+    return this.type;
+  }
+
+  changeType(type: TaskType) {
+    this.assertEditable();
+    this.type = type;
+    this.validate();
   }
 
   assertEditable(): void {

@@ -1,6 +1,6 @@
 import { CreateTaskUseCase } from './CreateTaskUseCase';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
-import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
+import { Task, TaskPriority, TaskStatus, TaskType } from '../../../../domain/entities/task.entity';
 import { TaskOutput } from '../shared/task-output';
 import { randomUUID } from 'crypto';
 
@@ -21,6 +21,7 @@ const baseInput = () => ({
   name: 'Task 1',
   description: 'Desc',
   priority: TaskPriority.MEDIA,
+  type: TaskType.FEATURE,
   applicantId: 1,
   creatorId: randomUUID(),
 });

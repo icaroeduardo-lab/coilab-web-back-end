@@ -61,6 +61,7 @@ model Task {
   description String
   taskNumber  String     @unique
   priority    String
+  type        String     @default("feature")
   creatorId   String     @db.Uuid
   createdAt   DateTime   @default(now())
   applicantId Int

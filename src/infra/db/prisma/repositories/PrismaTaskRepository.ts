@@ -1,5 +1,5 @@
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
-import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
+import { Task, TaskPriority, TaskStatus, TaskType } from '../../../../domain/entities/task.entity';
 import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import {
   TaskId,
@@ -93,6 +93,9 @@ function taskToDomain(row: TaskWithRelations): Task {
     description: row.description,
     taskNumber: normalizeTaskNumber(row.taskNumber),
     priority: normalizePriority(row.priority),
+    type: (Object.values(TaskType).includes(row.type as TaskType)
+      ? row.type
+      : TaskType.FEATURE) as TaskType,
     status: ID_TO_STATUS[row.statusId] ?? TaskStatus.BACKLOG,
     applicantId: ApplicantId(row.applicantId),
     creatorId: UserId(row.creatorId),
@@ -208,6 +211,7 @@ export class PrismaTaskRepository implements ITaskRepository {
           description: task.getDescription(),
           taskNumber: task.getTaskNumber(),
           priority: task.getPriority(),
+          type: task.getType(),
           statusId: STATUS_TO_ID[task.getStatus()],
           applicantId: task.getApplicantId(),
           creatorId: task.getCreatorId(),
@@ -217,6 +221,7 @@ export class PrismaTaskRepository implements ITaskRepository {
           name: task.getName(),
           description: task.getDescription(),
           priority: task.getPriority(),
+          type: task.getType(),
           statusId: STATUS_TO_ID[task.getStatus()],
           applicantId: task.getApplicantId(),
           projectId: task.getProjectId(),

@@ -55,6 +55,7 @@ export class GetTaskUseCase {
       taskNumber: task.getTaskNumber(),
       priority: task.getPriority(),
       status: task.getStatus(),
+      type: task.getType(),
       project: { id: project.getId(), name: project.getName() },
       applicant: { id: applicant.getId(), name: applicant.getName() },
       creator: { id: creator.getId(), name: creator.getName(), imageUrl: creator.getImageUrl() },

@@ -1,4 +1,4 @@
-import { TaskPriority } from '../../../../domain/entities/task.entity';
+import { TaskPriority, TaskType } from '../../../../domain/entities/task.entity';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { TaskId, ProjectId, ApplicantId, FlowId } from '../../../../domain/shared/entity-ids';
 
@@ -7,6 +7,7 @@ export interface UpdateTaskInput {
   name?: string;
   description?: string;
   priority?: TaskPriority;
+  type?: TaskType;
   projectId?: string;
   applicantId?: number;
   flowIdsToAdd?: number[];
@@ -26,6 +27,7 @@ export class UpdateTaskUseCase {
     if (input.name !== undefined) task.changeName(input.name);
     if (input.description !== undefined) task.changeDescription(input.description);
     if (input.priority !== undefined) task.changePriority(input.priority);
+    if (input.type !== undefined) task.changeType(input.type);
     if (input.projectId !== undefined) task.changeProjectId(ProjectId(input.projectId));
     if (input.applicantId !== undefined) task.changeApplicantId(ApplicantId(input.applicantId));
     if (input.flowIdsToAdd) {

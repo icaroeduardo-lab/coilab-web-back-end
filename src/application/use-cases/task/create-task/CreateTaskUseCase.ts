@@ -1,4 +1,4 @@
-import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
+import { Task, TaskPriority, TaskStatus, TaskType } from '../../../../domain/entities/task.entity';
 import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import {
@@ -26,6 +26,7 @@ export interface CreateTaskInput {
   name: string;
   description: string;
   priority: TaskPriority;
+  type: TaskType;
   applicantId: number;
   creatorId: string;
   flowIds?: number[];
@@ -67,6 +68,7 @@ export class CreateTaskUseCase {
       description: input.description,
       taskNumber,
       priority: input.priority,
+      type: input.type,
       status: TaskStatus.BACKLOG,
       applicantId: ApplicantId(input.applicantId),
       creatorId: UserId(input.creatorId),
@@ -83,6 +85,7 @@ export class CreateTaskUseCase {
       taskNumber: task.getTaskNumber(),
       priority: task.getPriority(),
       status: task.getStatus(),
+      type: task.getType(),
     };
   }
 }

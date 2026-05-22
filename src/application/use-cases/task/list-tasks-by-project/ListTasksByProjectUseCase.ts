@@ -56,6 +56,7 @@ export class ListTasksByProjectUseCase {
         taskNumber: task.getTaskNumber(),
         priority: task.getPriority(),
         status: task.getStatus(),
+        type: task.getType(),
         description: task.getDescription(),
         createdAt: task.getCreatedAt(),
         applicant: { id: applicant.getId(), name: applicant.getName() },
