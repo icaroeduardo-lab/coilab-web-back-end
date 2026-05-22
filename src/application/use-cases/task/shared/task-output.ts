@@ -1,4 +1,4 @@
-import { TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
+import { TaskPriority, TaskStatus, TaskType } from '../../../../domain/entities/task.entity';
 import { SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 
 export interface TaskOutput {
@@ -8,6 +8,7 @@ export interface TaskOutput {
   taskNumber: string;
   priority: TaskPriority;
   status: TaskStatus;
+  type: TaskType;
 }
 
 export interface CreatorOutput {

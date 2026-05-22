@@ -12,7 +12,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-import { TaskPriority } from '../../../domain/entities/task.entity';
+import { TaskPriority, TaskType } from '../../../domain/entities/task.entity';
 
 class SubTaskDto {
   @ApiProperty({ example: 1, description: 'ID do tipo de subtarefa (TaskToolId)' })
@@ -44,6 +44,10 @@ export class CreateTaskDto {
   @ApiProperty({ enum: TaskPriority, enumName: 'TaskPriority' })
   @IsEnum(TaskPriority)
   priority: TaskPriority;
+
+  @ApiProperty({ enum: TaskType, enumName: 'TaskType' })
+  @IsEnum(TaskType)
+  type: TaskType;
 
   @ApiProperty({ example: 1, description: 'ID inteiro do setor solicitante' })
   @IsInt()
