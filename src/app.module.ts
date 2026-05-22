@@ -31,5 +31,4 @@ import { envValidationSchema } from './config/env.validation';
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
-
 export class AppModule {}
