@@ -32,5 +32,4 @@ import { envValidationSchema } from './config/env.validation';
   ],
 })
 
-// Comentário de teste
 export class AppModule {}
