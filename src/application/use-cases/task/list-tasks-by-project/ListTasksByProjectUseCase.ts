@@ -3,7 +3,7 @@ import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository
 import { IApplicantRepository } from '../../../../domain/repositories/IApplicantRepository';
 import { IProjectRepository } from '../../../../domain/repositories/IProjectRepository';
 import { ApplicantId, ProjectId } from '../../../../domain/shared/entity-ids';
-import { SubTaskSummaryOutput, TaskListOutput } from '../shared/task-output';
+import { SubTaskSummaryOutput, TaskListOutput, TASK_TYPE_TO_ID } from '../shared/task-output';
 
 function latestSubTaskPerType(subTasks: SubTask[]): SubTaskSummaryOutput[] {
   const map = new Map<number, SubTask>();
@@ -56,7 +56,7 @@ export class ListTasksByProjectUseCase {
         taskNumber: task.getTaskNumber(),
         priority: task.getPriority(),
         status: task.getStatus(),
-        type: task.getType(),
+        typeId: TASK_TYPE_TO_ID[task.getType()],
         description: task.getDescription(),
         createdAt: task.getCreatedAt(),
         applicant: { id: applicant.getId(), name: applicant.getName() },

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TaskPriority, TaskStatus, TaskType } from '../../../domain/entities/task.entity';
+import { TaskPriority, TaskStatus } from '../../../domain/entities/task.entity';
 import { SubTaskStatus } from '../../../domain/entities/sub-task.entity';
 
 export class TaskTypeResponseDto {
@@ -98,8 +98,8 @@ export class TaskResponseDto {
   @ApiProperty({ enum: TaskStatus, enumName: 'TaskStatus' })
   status: TaskStatus;
 
-  @ApiProperty({ enum: TaskType, enumName: 'TaskType' })
-  type: TaskType;
+  @ApiProperty({ example: 1, description: '1 = feature, 2 = bug' })
+  typeId: number;
 }
 
 export class TaskListItemResponseDto {
@@ -118,8 +118,8 @@ export class TaskListItemResponseDto {
   @ApiProperty({ enum: TaskStatus, enumName: 'TaskStatus' })
   status: TaskStatus;
 
-  @ApiProperty({ enum: TaskType, enumName: 'TaskType' })
-  type: TaskType;
+  @ApiProperty({ example: 1, description: '1 = feature, 2 = bug' })
+  typeId: number;
 
   @ApiProperty()
   description: string;
@@ -167,8 +167,8 @@ export class TaskDetailResponseDto {
   @ApiProperty({ enum: TaskStatus, enumName: 'TaskStatus' })
   status: TaskStatus;
 
-  @ApiProperty({ enum: TaskType, enumName: 'TaskType' })
-  type: TaskType;
+  @ApiProperty({ example: 1, description: '1 = feature, 2 = bug' })
+  typeId: number;
 
   @ApiProperty()
   description: string;

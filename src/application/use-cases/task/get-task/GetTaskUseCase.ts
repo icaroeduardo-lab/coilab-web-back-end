@@ -4,7 +4,7 @@ import { IApplicantRepository } from '../../../../domain/repositories/IApplicant
 import { IFlowRepository } from '../../../../domain/repositories/IFlowRepository';
 import { IProjectRepository } from '../../../../domain/repositories/IProjectRepository';
 import { TaskId } from '../../../../domain/shared/entity-ids';
-import { TaskDetailOutput, SubTaskOutput } from '../shared/task-output';
+import { TaskDetailOutput, SubTaskOutput, TASK_TYPE_TO_ID } from '../shared/task-output';
 import { Task } from '../../../../domain/entities/task.entity';
 
 export interface GetTaskInput {
@@ -55,7 +55,7 @@ export class GetTaskUseCase {
       taskNumber: task.getTaskNumber(),
       priority: task.getPriority(),
       status: task.getStatus(),
-      type: task.getType(),
+      typeId: TASK_TYPE_TO_ID[task.getType()],
       project: { id: project.getId(), name: project.getName() },
       applicant: { id: applicant.getId(), name: applicant.getName() },
       creator: { id: creator.getId(), name: creator.getName(), imageUrl: creator.getImageUrl() },
