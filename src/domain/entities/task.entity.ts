@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { randomUUID } from 'crypto';
 import {
   IsNotEmpty,
   IsString,
@@ -12,6 +13,7 @@ import {
 } from 'class-validator';
 import { Entity } from './entity.base';
 import { SubTask, SubTaskStatus } from './sub-task.entity';
+import { ChecklistItem } from './checklist-item.entity';
 import { TaskStatus } from './task-status.enum';
 import { ProjectId, TaskId, ApplicantId, UserId, FlowId } from '../shared/entity-ids';
 import { SEQUENTIAL_NUMBER_REGEX } from '../shared/sequential-number';
@@ -42,6 +44,7 @@ export interface TaskProps {
   creatorId: UserId;
   subTasks?: SubTask[];
   flowIds?: FlowId[];
+  checklistItems?: ChecklistItem[];
   createdAt?: Date;
   type?: TaskType;
 }
@@ -89,6 +92,9 @@ export class Task extends Entity {
   @Min(0, { each: true })
   private flowIds: FlowId[];
 
+  @ValidateNested({ each: true })
+  private checklistItems: ChecklistItem[];
+
   @IsDate()
   private createdAt: Date;
 
@@ -108,6 +114,7 @@ export class Task extends Entity {
     this.creatorId = props.creatorId;
     this.subTasks = props.subTasks ?? [];
     this.flowIds = props.flowIds ?? [];
+    this.checklistItems = props.checklistItems ?? [];
     this.createdAt = props.createdAt ?? new Date();
     this.type = props.type ?? TaskType.FEATURE;
 
@@ -259,6 +266,51 @@ export class Task extends Entity {
   }
   getType(): TaskType {
     return this.type;
+  }
+
+  getChecklistItems(): ChecklistItem[] {
+    return this.checklistItems;
+  }
+
+  addChecklistItem(label: string): void {
+    this.assertEditable();
+    const item = new ChecklistItem({
+      id: randomUUID(),
+      label,
+      checked: false,
+      order: this.checklistItems.length,
+    });
+    this.checklistItems.push(item);
+    this.validate();
+  }
+
+  removeChecklistItem(id: string): void {
+    this.assertEditable();
+    const exists = this.checklistItems.some((i) => i.getId() === id);
+    if (!exists) {
+      throw new DomainException(`Item de checklist não encontrado: ${id}`);
+    }
+    this.checklistItems = this.checklistItems.filter((i) => i.getId() !== id);
+    this.validate();
+  }
+
+  toggleChecklistItem(id: string): void {
+    this.assertEditable();
+    const item = this.checklistItems.find((i) => i.getId() === id);
+    if (!item) {
+      throw new DomainException(`Item de checklist não encontrado: ${id}`);
+    }
+    item.toggle();
+  }
+
+  reorderChecklistItem(id: string, order: number): void {
+    this.assertEditable();
+    const item = this.checklistItems.find((i) => i.getId() === id);
+    if (!item) {
+      throw new DomainException(`Item de checklist não encontrado: ${id}`);
+    }
+    item.updateOrder(order);
+    this.validate();
   }
 
   changeType(type: TaskType) {

@@ -700,6 +700,144 @@ describe('Task Entity', () => {
     });
   });
 
+  describe('Checklist', () => {
+    it('task começa com checklist vazio', () => {
+      expect(baseTask().getChecklistItems()).toHaveLength(0);
+    });
+
+    describe('addChecklistItem()', () => {
+      it('adiciona item com checked=false e order sequencial', () => {
+        const task = baseTask();
+        task.addChecklistItem('Primeiro item');
+        task.addChecklistItem('Segundo item');
+        const items = task.getChecklistItems();
+        expect(items).toHaveLength(2);
+        expect(items[0].getLabel()).toBe('Primeiro item');
+        expect(items[0].isChecked()).toBe(false);
+        expect(items[0].getOrder()).toBe(0);
+        expect(items[1].getOrder()).toBe(1);
+      });
+
+      it('gera id único por item', () => {
+        const task = baseTask();
+        task.addChecklistItem('A');
+        task.addChecklistItem('B');
+        const ids = task.getChecklistItems().map((i) => i.getId());
+        expect(new Set(ids).size).toBe(2);
+      });
+
+      it('lança exceção quando label é vazio', () => {
+        expect(() => baseTask().addChecklistItem('')).toThrow(
+          'Label do item de checklist não pode ser vazio',
+        );
+      });
+
+      it('lança exceção quando label contém apenas espaços', () => {
+        expect(() => baseTask().addChecklistItem('   ')).toThrow(
+          'Label do item de checklist não pode ser vazio',
+        );
+      });
+
+      it('bloqueia quando task está CONCLUIDO', () => {
+        const task = baseTask();
+        task.changeStatus(TaskStatus.CONCLUIDO);
+        expect(() => task.addChecklistItem('Item')).toThrow(
+          'Task concluída não pode ser modificada',
+        );
+      });
+    });
+
+    describe('removeChecklistItem()', () => {
+      it('remove item existente', () => {
+        const task = baseTask();
+        task.addChecklistItem('Item');
+        const id = task.getChecklistItems()[0].getId();
+        task.removeChecklistItem(id);
+        expect(task.getChecklistItems()).toHaveLength(0);
+      });
+
+      it('lança exceção quando id não existe', () => {
+        expect(() => baseTask().removeChecklistItem('id-inexistente')).toThrow(
+          'Item de checklist não encontrado: id-inexistente',
+        );
+      });
+
+      it('bloqueia quando task está CONCLUIDO', () => {
+        const task = baseTask();
+        task.changeStatus(TaskStatus.CONCLUIDO);
+        expect(() => task.removeChecklistItem('qualquer')).toThrow(
+          'Task concluída não pode ser modificada',
+        );
+      });
+    });
+
+    describe('toggleChecklistItem()', () => {
+      it('alterna checked de false para true', () => {
+        const task = baseTask();
+        task.addChecklistItem('Item');
+        const id = task.getChecklistItems()[0].getId();
+        task.toggleChecklistItem(id);
+        expect(task.getChecklistItems()[0].isChecked()).toBe(true);
+      });
+
+      it('alterna checked de true para false', () => {
+        const task = baseTask();
+        task.addChecklistItem('Item');
+        const id = task.getChecklistItems()[0].getId();
+        task.toggleChecklistItem(id);
+        task.toggleChecklistItem(id);
+        expect(task.getChecklistItems()[0].isChecked()).toBe(false);
+      });
+
+      it('lança exceção quando id não existe', () => {
+        expect(() => baseTask().toggleChecklistItem('id-inexistente')).toThrow(
+          'Item de checklist não encontrado: id-inexistente',
+        );
+      });
+
+      it('bloqueia quando task está CONCLUIDO', () => {
+        const task = baseTask();
+        task.changeStatus(TaskStatus.CONCLUIDO);
+        expect(() => task.toggleChecklistItem('qualquer')).toThrow(
+          'Task concluída não pode ser modificada',
+        );
+      });
+    });
+
+    describe('reorderChecklistItem()', () => {
+      it('atualiza order do item', () => {
+        const task = baseTask();
+        task.addChecklistItem('Item');
+        const id = task.getChecklistItems()[0].getId();
+        task.reorderChecklistItem(id, 5);
+        expect(task.getChecklistItems()[0].getOrder()).toBe(5);
+      });
+
+      it('lança exceção quando id não existe', () => {
+        expect(() => baseTask().reorderChecklistItem('id-inexistente', 0)).toThrow(
+          'Item de checklist não encontrado: id-inexistente',
+        );
+      });
+
+      it('lança exceção quando order é negativo', () => {
+        const task = baseTask();
+        task.addChecklistItem('Item');
+        const id = task.getChecklistItems()[0].getId();
+        expect(() => task.reorderChecklistItem(id, -1)).toThrow(
+          'Ordem do item de checklist deve ser um inteiro não negativo',
+        );
+      });
+
+      it('bloqueia quando task está CONCLUIDO', () => {
+        const task = baseTask();
+        task.changeStatus(TaskStatus.CONCLUIDO);
+        expect(() => task.reorderChecklistItem('qualquer', 0)).toThrow(
+          'Task concluída não pode ser modificada',
+        );
+      });
+    });
+  });
+
   describe('Development subtask (typeId=4) guards', () => {
     const makeDevSubTask = (id: string, issues: { status: boolean }[] = []) =>
       new SubTask({

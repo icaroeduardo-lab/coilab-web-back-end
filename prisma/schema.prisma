@@ -66,8 +66,9 @@ model Task {
   createdAt   DateTime       @default(now())
   applicantId Int
   statusId    Int
-  subTasks    SubTask[]
-  flows       TaskFlow[]
+  subTasks        SubTask[]
+  flows           TaskFlow[]
+  checklistItems  TaskChecklistItem[]
   applicant   Applicant      @relation("applicant", fields: [applicantId], references: [id])
   creator     User           @relation("creator", fields: [creatorId], references: [id])
   project     Project        @relation(fields: [projectId], references: [id])
@@ -132,4 +133,17 @@ model SubTask {
 
   @@index([taskId])
   @@map("sub_tasks")
+}
+
+model TaskChecklistItem {
+  id        String   @id @db.Uuid
+  taskId    String   @db.Uuid
+  label     String
+  checked   Boolean  @default(false)
+  order     Int
+  createdAt DateTime @default(now())
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("task_checklist_items")
 }

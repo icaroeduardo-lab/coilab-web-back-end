@@ -1,6 +1,16 @@
 import { TaskPriority, TaskStatus, TaskType } from '../../../../domain/entities/task.entity';
 import { SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 
+export const TASK_TYPE_TO_ID: Record<TaskType, number> = {
+  [TaskType.FEATURE]: 1,
+  [TaskType.BUG]: 2,
+};
+
+export const ID_TO_TASK_TYPE: Record<number, TaskType> = {
+  1: TaskType.FEATURE,
+  2: TaskType.BUG,
+};
+
 export interface TaskOutput {
   id: string;
   projectId: string;
@@ -8,7 +18,7 @@ export interface TaskOutput {
   taskNumber: string;
   priority: TaskPriority;
   status: TaskStatus;
-  type: TaskType;
+  typeId: number;
 }
 
 export interface CreatorOutput {

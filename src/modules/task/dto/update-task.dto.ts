@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsEnum, IsInt, IsOptional, IsString, IsUUID, Min } from 'class-validator';
-import { TaskPriority, TaskType } from '../../../domain/entities/task.entity';
+import { TaskPriority } from '../../../domain/entities/task.entity';
 
 export class UpdateTaskDto {
   @ApiPropertyOptional({ example: 'Novo nome da tarefa' })
@@ -18,10 +18,11 @@ export class UpdateTaskDto {
   @IsOptional()
   priority?: TaskPriority;
 
-  @ApiPropertyOptional({ enum: TaskType, enumName: 'TaskType' })
-  @IsEnum(TaskType)
+  @ApiPropertyOptional({ example: 1, description: '1 = feature, 2 = bug' })
+  @IsInt()
+  @Min(1)
   @IsOptional()
-  type?: TaskType;
+  typeId?: number;
 
   @ApiPropertyOptional({ example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' })
   @IsUUID()

@@ -1,4 +1,4 @@
-import { Task, TaskPriority, TaskStatus, TaskType } from '../../../../domain/entities/task.entity';
+import { Task, TaskPriority, TaskStatus } from '../../../../domain/entities/task.entity';
 import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import {
@@ -13,7 +13,7 @@ import {
 
 import { generateNextNumber } from '../../../../domain/shared/sequential-number';
 import { generateId } from '../../../../shared/generate-id';
-import { TaskOutput } from '../shared/task-output';
+import { TaskOutput, TASK_TYPE_TO_ID, ID_TO_TASK_TYPE } from '../shared/task-output';
 
 export interface CreateTaskSubTaskInput {
   typeId: number;
@@ -26,7 +26,7 @@ export interface CreateTaskInput {
   name: string;
   description: string;
   priority: TaskPriority;
-  type: TaskType;
+  typeId: number;
   applicantId: number;
   creatorId: string;
   flowIds?: number[];
@@ -68,7 +68,7 @@ export class CreateTaskUseCase {
       description: input.description,
       taskNumber,
       priority: input.priority,
-      type: input.type,
+      type: ID_TO_TASK_TYPE[input.typeId],
       status: TaskStatus.BACKLOG,
       applicantId: ApplicantId(input.applicantId),
       creatorId: UserId(input.creatorId),
@@ -85,7 +85,7 @@ export class CreateTaskUseCase {
       taskNumber: task.getTaskNumber(),
       priority: task.getPriority(),
       status: task.getStatus(),
-      type: task.getType(),
+      typeId: TASK_TYPE_TO_ID[task.getType()],
     };
   }
 }
