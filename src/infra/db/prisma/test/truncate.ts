@@ -1,6 +1,7 @@
 import { prisma } from '../prisma.client';
 
 export async function truncateAll(): Promise<void> {
+  await prisma.taskChecklistItem.deleteMany();
   await prisma.taskFlow.deleteMany();
   await prisma.subTask.deleteMany();
   await prisma.task.deleteMany();

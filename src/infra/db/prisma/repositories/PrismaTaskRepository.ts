@@ -1,6 +1,7 @@
 import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository';
 import { Task, TaskPriority, TaskStatus, TaskType } from '../../../../domain/entities/task.entity';
 import { SubTask, SubTaskStatus } from '../../../../domain/entities/sub-task.entity';
+import { ChecklistItem } from '../../../../domain/entities/checklist-item.entity';
 import {
   TaskId,
   ProjectId,
@@ -16,6 +17,7 @@ import { Prisma } from '../../../../generated/prisma/client';
 import type {
   Task as PrismaTask,
   SubTask as PrismaSubTask,
+  TaskChecklistItem as PrismaChecklistItem,
 } from '../../../../generated/prisma/client';
 
 const STATUS_TO_ID: Record<TaskStatus, number> = {
@@ -56,7 +58,17 @@ const ID_TO_SUB_STATUS: Record<number, SubTaskStatus> = Object.fromEntries(
 type TaskWithRelations = PrismaTask & {
   subTasks: PrismaSubTask[];
   flows: { flowId: number }[];
+  checklistItems: PrismaChecklistItem[];
 };
+
+function checklistItemToDomain(row: PrismaChecklistItem): ChecklistItem {
+  return new ChecklistItem({
+    id: row.id,
+    label: row.label,
+    checked: row.checked,
+    order: row.order,
+  });
+}
 
 function subTaskToDomain(row: PrismaSubTask): SubTask {
   return new SubTask({
@@ -109,6 +121,7 @@ function taskToDomain(row: TaskWithRelations): Task {
     createdAt: row.createdAt,
     subTasks: row.subTasks.map(subTaskToDomain),
     flowIds: row.flows.map((f) => FlowId(f.flowId)),
+    checklistItems: row.checklistItems.map(checklistItemToDomain),
   });
 }
 
@@ -154,6 +167,7 @@ function serializeSubTask(
 const taskInclude = {
   subTasks: true,
   flows: { select: { flowId: true } },
+  checklistItems: { orderBy: { order: 'asc' as const } },
 } as const;
 
 export class PrismaTaskRepository implements ITaskRepository {
@@ -244,6 +258,20 @@ export class PrismaTaskRepository implements ITaskRepository {
       if (flowIds.length > 0) {
         await tx.taskFlow.createMany({
           data: flowIds.map((flowId) => ({ taskId: task.getId(), flowId })),
+        });
+      }
+
+      const checklistItems = task.getChecklistItems();
+      await tx.taskChecklistItem.deleteMany({ where: { taskId: task.getId() } });
+      if (checklistItems.length > 0) {
+        await tx.taskChecklistItem.createMany({
+          data: checklistItems.map((item) => ({
+            id: item.getId(),
+            taskId: task.getId(),
+            label: item.getLabel(),
+            checked: item.isChecked(),
+            order: item.getOrder(),
+          })),
         });
       }
     });
