@@ -48,6 +48,13 @@ export interface SubTaskOutput {
   metadata: Record<string, unknown>;
 }
 
+export interface ChecklistItemOutput {
+  id: string;
+  label: string;
+  checked: boolean;
+  order: number;
+}
+
 export interface ProjectOutput {
   id: string;
   name: string;
@@ -73,5 +80,6 @@ export interface TaskDetailOutput extends Omit<TaskOutput, 'projectId'> {
   creator: CreatorOutput;
   flows: FlowOutput[];
   subTasks: SubTaskOutput[];
+  checklistItems: ChecklistItemOutput[];
   createdAt: Date;
 }

@@ -45,6 +45,20 @@ export class FlowResponseDto {
   name: string;
 }
 
+export class ChecklistItemResponseDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  label: string;
+
+  @ApiProperty()
+  checked: boolean;
+
+  @ApiProperty()
+  order: number;
+}
+
 export class SubTaskSummaryResponseDto {
   @ApiProperty()
   typeId: number;
@@ -190,4 +204,7 @@ export class TaskDetailResponseDto {
 
   @ApiProperty({ type: [SubTaskResponseDto] })
   subTasks: SubTaskResponseDto[];
+
+  @ApiProperty({ type: [ChecklistItemResponseDto] })
+  checklistItems: ChecklistItemResponseDto[];
 }

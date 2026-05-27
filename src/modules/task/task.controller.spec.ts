@@ -19,6 +19,10 @@ import { UpdateIssueInSubTaskUseCase } from '../../application/use-cases/task/up
 import { ListTaskToolsUseCase } from '../../application/use-cases/task/list-task-tools/ListTaskToolsUseCase';
 import { CompleteDevSubTaskUseCase } from '../../application/use-cases/task/complete-dev-subtask/CompleteDevSubTaskUseCase';
 import { CancelDevSubTaskUseCase } from '../../application/use-cases/task/cancel-dev-subtask/CancelDevSubTaskUseCase';
+import { AddChecklistItemUseCase } from '../../application/use-cases/task/add-checklist-item/AddChecklistItemUseCase';
+import { RemoveChecklistItemUseCase } from '../../application/use-cases/task/remove-checklist-item/RemoveChecklistItemUseCase';
+import { ToggleChecklistItemUseCase } from '../../application/use-cases/task/toggle-checklist-item/ToggleChecklistItemUseCase';
+import { ReorderChecklistItemUseCase } from '../../application/use-cases/task/reorder-checklist-item/ReorderChecklistItemUseCase';
 import { TaskPriority, TaskStatus } from '../../domain/entities/task.entity';
 import { JwtPayload } from '../auth/current-user.decorator';
 import { randomUUID } from 'crypto';
@@ -42,6 +46,10 @@ const mockUpdateIssue = { execute: jest.fn() };
 const mockListTaskTools = { execute: jest.fn() };
 const mockCompleteDevSubTask = { execute: jest.fn() };
 const mockCancelDevSubTask = { execute: jest.fn() };
+const mockAddChecklistItem = { execute: jest.fn() };
+const mockRemoveChecklistItem = { execute: jest.fn() };
+const mockToggleChecklistItem = { execute: jest.fn() };
+const mockReorderChecklistItem = { execute: jest.fn() };
 
 const fakeUser: JwtPayload = {
   sub: randomUUID(),
@@ -76,6 +84,10 @@ describe('TaskController', () => {
         { provide: ListTaskToolsUseCase, useValue: mockListTaskTools },
         { provide: CompleteDevSubTaskUseCase, useValue: mockCompleteDevSubTask },
         { provide: CancelDevSubTaskUseCase, useValue: mockCancelDevSubTask },
+        { provide: AddChecklistItemUseCase, useValue: mockAddChecklistItem },
+        { provide: RemoveChecklistItemUseCase, useValue: mockRemoveChecklistItem },
+        { provide: ToggleChecklistItemUseCase, useValue: mockToggleChecklistItem },
+        { provide: ReorderChecklistItemUseCase, useValue: mockReorderChecklistItem },
       ],
     }).compile();
     controller = module.get(TaskController);
@@ -363,6 +375,50 @@ describe('TaskController', () => {
         subTaskId,
         reason: 'Mudança de escopo',
       });
+    });
+  });
+
+  describe('addChecklistItem_', () => {
+    it('calls addChecklistItem.execute with taskId and label', async () => {
+      const taskId = randomUUID();
+      const dto = { label: 'Revisar requisitos' } as never;
+      mockAddChecklistItem.execute.mockResolvedValue(undefined);
+      await controller.addChecklistItem_(taskId, dto);
+      expect(mockAddChecklistItem.execute).toHaveBeenCalledWith({
+        taskId,
+        label: 'Revisar requisitos',
+      });
+    });
+  });
+
+  describe('removeChecklistItem_', () => {
+    it('calls removeChecklistItem.execute with taskId and itemId', async () => {
+      const taskId = randomUUID();
+      const itemId = randomUUID();
+      mockRemoveChecklistItem.execute.mockResolvedValue(undefined);
+      await controller.removeChecklistItem_(taskId, itemId);
+      expect(mockRemoveChecklistItem.execute).toHaveBeenCalledWith({ taskId, itemId });
+    });
+  });
+
+  describe('toggleChecklistItem_', () => {
+    it('calls toggleChecklistItem.execute with taskId and itemId', async () => {
+      const taskId = randomUUID();
+      const itemId = randomUUID();
+      mockToggleChecklistItem.execute.mockResolvedValue(undefined);
+      await controller.toggleChecklistItem_(taskId, itemId);
+      expect(mockToggleChecklistItem.execute).toHaveBeenCalledWith({ taskId, itemId });
+    });
+  });
+
+  describe('reorderChecklistItem_', () => {
+    it('calls reorderChecklistItem.execute with taskId, itemId and order', async () => {
+      const taskId = randomUUID();
+      const itemId = randomUUID();
+      const dto = { order: 2 } as never;
+      mockReorderChecklistItem.execute.mockResolvedValue(undefined);
+      await controller.reorderChecklistItem_(taskId, itemId, dto);
+      expect(mockReorderChecklistItem.execute).toHaveBeenCalledWith({ taskId, itemId, order: 2 });
     });
   });
 });
