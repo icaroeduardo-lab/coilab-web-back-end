@@ -30,6 +30,10 @@ import { UpdateIssueInSubTaskUseCase } from '../../application/use-cases/task/up
 import { ListTaskToolsUseCase } from '../../application/use-cases/task/list-task-tools/ListTaskToolsUseCase';
 import { CompleteDevSubTaskUseCase } from '../../application/use-cases/task/complete-dev-subtask/CompleteDevSubTaskUseCase';
 import { CancelDevSubTaskUseCase } from '../../application/use-cases/task/cancel-dev-subtask/CancelDevSubTaskUseCase';
+import { AddChecklistItemUseCase } from '../../application/use-cases/task/add-checklist-item/AddChecklistItemUseCase';
+import { RemoveChecklistItemUseCase } from '../../application/use-cases/task/remove-checklist-item/RemoveChecklistItemUseCase';
+import { ToggleChecklistItemUseCase } from '../../application/use-cases/task/toggle-checklist-item/ToggleChecklistItemUseCase';
+import { ReorderChecklistItemUseCase } from '../../application/use-cases/task/reorder-checklist-item/ReorderChecklistItemUseCase';
 import { S3StorageService } from '../../infra/storage/S3StorageService';
 import { TaskController } from './task.controller';
 
@@ -158,6 +162,26 @@ import { TaskController } from './task.controller';
       useFactory: (repo: ITaskRepository, github: GitHubService) =>
         new CancelDevSubTaskUseCase(repo, github),
       inject: [REPOSITORY_TOKENS.TASK, SERVICE_TOKENS.GITHUB],
+    },
+    {
+      provide: AddChecklistItemUseCase,
+      useFactory: (repo: ITaskRepository) => new AddChecklistItemUseCase(repo),
+      inject: [REPOSITORY_TOKENS.TASK],
+    },
+    {
+      provide: RemoveChecklistItemUseCase,
+      useFactory: (repo: ITaskRepository) => new RemoveChecklistItemUseCase(repo),
+      inject: [REPOSITORY_TOKENS.TASK],
+    },
+    {
+      provide: ToggleChecklistItemUseCase,
+      useFactory: (repo: ITaskRepository) => new ToggleChecklistItemUseCase(repo),
+      inject: [REPOSITORY_TOKENS.TASK],
+    },
+    {
+      provide: ReorderChecklistItemUseCase,
+      useFactory: (repo: ITaskRepository) => new ReorderChecklistItemUseCase(repo),
+      inject: [REPOSITORY_TOKENS.TASK],
     },
   ],
 })

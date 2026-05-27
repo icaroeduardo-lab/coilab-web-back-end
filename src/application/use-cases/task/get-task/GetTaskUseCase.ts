@@ -4,7 +4,12 @@ import { IApplicantRepository } from '../../../../domain/repositories/IApplicant
 import { IFlowRepository } from '../../../../domain/repositories/IFlowRepository';
 import { IProjectRepository } from '../../../../domain/repositories/IProjectRepository';
 import { TaskId } from '../../../../domain/shared/entity-ids';
-import { TaskDetailOutput, SubTaskOutput, TASK_TYPE_TO_ID } from '../shared/task-output';
+import {
+  TaskDetailOutput,
+  SubTaskOutput,
+  ChecklistItemOutput,
+  TASK_TYPE_TO_ID,
+} from '../shared/task-output';
 import { Task } from '../../../../domain/entities/task.entity';
 
 export interface GetTaskInput {
@@ -21,6 +26,15 @@ function mapSubTasks(task: Task): SubTaskOutput[] {
     completionDate: s.getCompletionDate(),
     reason: s.getReason(),
     metadata: s.getMetadata(),
+  }));
+}
+
+function mapChecklistItems(task: Task): ChecklistItemOutput[] {
+  return task.getChecklistItems().map((i) => ({
+    id: i.getId(),
+    label: i.getLabel(),
+    checked: i.isChecked(),
+    order: i.getOrder(),
   }));
 }
 
@@ -61,6 +75,7 @@ export class GetTaskUseCase {
       creator: { id: creator.getId(), name: creator.getName(), imageUrl: creator.getImageUrl() },
       flows: flows.map((f) => ({ id: f.getId(), name: f.getName() })),
       subTasks: mapSubTasks(task),
+      checklistItems: mapChecklistItems(task),
       createdAt: task.getCreatedAt(),
     };
   }

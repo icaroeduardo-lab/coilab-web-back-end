@@ -37,6 +37,10 @@ import { UpdateIssueInSubTaskUseCase } from '../../application/use-cases/task/up
 import { ListTaskToolsUseCase } from '../../application/use-cases/task/list-task-tools/ListTaskToolsUseCase';
 import { CompleteDevSubTaskUseCase } from '../../application/use-cases/task/complete-dev-subtask/CompleteDevSubTaskUseCase';
 import { CancelDevSubTaskUseCase } from '../../application/use-cases/task/cancel-dev-subtask/CancelDevSubTaskUseCase';
+import { AddChecklistItemUseCase } from '../../application/use-cases/task/add-checklist-item/AddChecklistItemUseCase';
+import { RemoveChecklistItemUseCase } from '../../application/use-cases/task/remove-checklist-item/RemoveChecklistItemUseCase';
+import { ToggleChecklistItemUseCase } from '../../application/use-cases/task/toggle-checklist-item/ToggleChecklistItemUseCase';
+import { ReorderChecklistItemUseCase } from '../../application/use-cases/task/reorder-checklist-item/ReorderChecklistItemUseCase';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ChangeTaskStatusDto } from './dto/change-task-status.dto';
@@ -47,6 +51,8 @@ import { AddDesignDto } from './dto/add-design.dto';
 import { AddIssueDto } from './dto/add-issue.dto';
 import { UpdateIssueDto } from './dto/update-issue.dto';
 import { CancelDevSubTaskDto } from './dto/cancel-dev-subtask.dto';
+import { AddChecklistItemDto } from './dto/add-checklist-item.dto';
+import { ReorderChecklistItemDto } from './dto/reorder-checklist-item.dto';
 import {
   TaskResponseDto,
   TaskListResponseDto,
@@ -88,6 +94,14 @@ export class TaskController {
     private readonly completeDevSubTask: CompleteDevSubTaskUseCase,
     @Inject(CancelDevSubTaskUseCase)
     private readonly cancelDevSubTask: CancelDevSubTaskUseCase,
+    @Inject(AddChecklistItemUseCase)
+    private readonly addChecklistItem: AddChecklistItemUseCase,
+    @Inject(RemoveChecklistItemUseCase)
+    private readonly removeChecklistItem: RemoveChecklistItemUseCase,
+    @Inject(ToggleChecklistItemUseCase)
+    private readonly toggleChecklistItem: ToggleChecklistItemUseCase,
+    @Inject(ReorderChecklistItemUseCase)
+    private readonly reorderChecklistItem: ReorderChecklistItemUseCase,
   ) {}
 
   @Post()
@@ -348,5 +362,52 @@ export class TaskController {
     @Param('issueId') issueId: string,
   ) {
     await this.removeIssue.execute({ taskId, subTaskId, issueId });
+  }
+
+  @Post(':taskId/checklist')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Adicionar item ao checklist da tarefa' })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiResponse({ status: 204, description: 'Item adicionado.' })
+  @ApiResponse({ status: 422, description: 'Label inválido ou tarefa concluída.' })
+  async addChecklistItem_(@Param('taskId') taskId: string, @Body() dto: AddChecklistItemDto) {
+    await this.addChecklistItem.execute({ taskId, label: dto.label });
+  }
+
+  @Delete(':taskId/checklist/:itemId')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Remover item do checklist da tarefa' })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiParam({ name: 'itemId', description: 'UUID do item de checklist' })
+  @ApiResponse({ status: 204, description: 'Item removido.' })
+  @ApiResponse({ status: 422, description: 'Item não encontrado ou tarefa concluída.' })
+  async removeChecklistItem_(@Param('taskId') taskId: string, @Param('itemId') itemId: string) {
+    await this.removeChecklistItem.execute({ taskId, itemId });
+  }
+
+  @Patch(':taskId/checklist/:itemId/toggle')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Alternar estado checked do item de checklist' })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiParam({ name: 'itemId', description: 'UUID do item de checklist' })
+  @ApiResponse({ status: 204, description: 'Estado alternado.' })
+  @ApiResponse({ status: 422, description: 'Item não encontrado ou tarefa concluída.' })
+  async toggleChecklistItem_(@Param('taskId') taskId: string, @Param('itemId') itemId: string) {
+    await this.toggleChecklistItem.execute({ taskId, itemId });
+  }
+
+  @Patch(':taskId/checklist/:itemId/order')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Reordenar item do checklist' })
+  @ApiParam({ name: 'taskId', description: 'UUID da tarefa' })
+  @ApiParam({ name: 'itemId', description: 'UUID do item de checklist' })
+  @ApiResponse({ status: 204, description: 'Ordem atualizada.' })
+  @ApiResponse({ status: 422, description: 'Ordem inválida ou tarefa concluída.' })
+  async reorderChecklistItem_(
+    @Param('taskId') taskId: string,
+    @Param('itemId') itemId: string,
+    @Body() dto: ReorderChecklistItemDto,
+  ) {
+    await this.reorderChecklistItem.execute({ taskId, itemId, order: dto.order });
   }
 }
