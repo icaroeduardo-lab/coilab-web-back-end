@@ -252,7 +252,12 @@ export class TaskController {
     @Param('subTaskId') subTaskId: string,
     @Body() dto: AddDesignDto,
   ) {
-    return this.addDesign.execute({ taskId, subTaskId, userId: user.sub, ...dto });
+    return this.addDesign.execute({
+      taskId,
+      subTaskId,
+      user: { id: user.sub, name: user.name, avatar: user.picture },
+      ...dto,
+    });
   }
 
   @Get(':taskId/subtasks/:subTaskId/designs/upload-url')
