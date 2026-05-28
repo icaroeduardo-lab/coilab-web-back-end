@@ -2,10 +2,16 @@ import { ITaskRepository } from '../../../../domain/repositories/ITaskRepository
 import { TaskId } from '../../../../domain/shared/entity-ids';
 import { generateId } from '../../../../shared/generate-id';
 
+export interface DesignUser {
+  id: string;
+  name: string;
+  avatar?: string;
+}
+
 export interface AddDesignToSubTaskInput {
   taskId: string;
   subTaskId: string;
-  userId: string;
+  user: DesignUser;
   title: string;
   description: string;
   urlImage: string;
@@ -16,7 +22,7 @@ export interface DesignItem {
   title: string;
   description: string;
   urlImage: string;
-  userId: string;
+  user: DesignUser;
   dateUpload: string;
 }
 
@@ -39,7 +45,7 @@ export class AddDesignToSubTaskUseCase {
       title: input.title,
       description: input.description,
       urlImage: input.urlImage,
-      userId: input.userId,
+      user: input.user,
       dateUpload: new Date().toISOString(),
     };
 

@@ -248,7 +248,7 @@ describe('TaskController', () => {
   });
 
   describe('addDesign_', () => {
-    it('calls addDesign.execute with userId from token and dto spread', async () => {
+    it('calls addDesign.execute with user object from token and dto spread', async () => {
       const taskId = randomUUID();
       const subTaskId = randomUUID();
       const dto = {
@@ -261,7 +261,7 @@ describe('TaskController', () => {
       expect(mockAddDesign.execute).toHaveBeenCalledWith({
         taskId,
         subTaskId,
-        userId: fakeUser.sub,
+        user: { id: fakeUser.sub, name: fakeUser.name, avatar: fakeUser.picture },
         title: 'Tela',
         description: 'D',
         urlImage: 'https://img.example.com/a.png',

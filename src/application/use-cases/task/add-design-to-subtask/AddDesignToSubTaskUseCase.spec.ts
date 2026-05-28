@@ -52,7 +52,7 @@ const makeTask = (subTasks: SubTask[] = []) =>
 const validInput = (taskId: string, subTaskId: string) => ({
   taskId,
   subTaskId,
-  userId: randomUUID(),
+  user: { id: randomUUID(), name: 'João Silva', avatar: 'https://example.com/avatar.png' },
   title: 'Tela inicial',
   description: 'Layout da home',
   urlImage: 'https://example.com/image.png',
