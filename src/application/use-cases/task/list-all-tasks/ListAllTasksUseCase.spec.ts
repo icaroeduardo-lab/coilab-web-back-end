@@ -236,4 +236,76 @@ describe('ListAllTasksUseCase', () => {
 
     expect(result.data[0].subTasks[0].status).toBe(SubTaskStatus.EM_PROGRESSO);
   });
+
+  it('filters out completed tasks older than 30 days', async () => {
+    const taskRepo = makeTaskRepo();
+    const applicantRepo = makeApplicantRepo();
+    const projectRepo = makeProjectRepo();
+    const projectId = randomUUID();
+    const applicantId = 1;
+
+    const thirtyOneDaysAgo = new Date();
+    thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 31);
+
+    const completedOldTask = new Task({
+      id: TaskId(randomUUID()),
+      projectId: ProjectId(projectId),
+      name: 'Old Completed Task',
+      description: 'Desc',
+      taskNumber: '#20260002',
+      priority: TaskPriority.MEDIA,
+      status: TaskStatus.CONCLUIDO,
+      applicantId: ApplicantId(applicantId),
+      creatorId: UserId(randomUUID()),
+      createdAt: thirtyOneDaysAgo,
+    });
+
+    const incompleteTask = makeTask(applicantId, projectId);
+
+    taskRepo.findAll.mockResolvedValue([completedOldTask, incompleteTask]);
+    taskRepo.count.mockResolvedValue(2);
+    applicantRepo.findByIds.mockResolvedValue([makeApplicant(applicantId)]);
+    projectRepo.findByIds.mockResolvedValue([makeProject(projectId)]);
+    const sut = new ListAllTasksUseCase(taskRepo, applicantRepo, projectRepo);
+
+    const result = await sut.execute();
+
+    expect(result.data).toHaveLength(1);
+    expect(result.data[0].status).toBe(TaskStatus.BACKLOG);
+  });
+
+  it('includes completed tasks within last 30 days', async () => {
+    const taskRepo = makeTaskRepo();
+    const applicantRepo = makeApplicantRepo();
+    const projectRepo = makeProjectRepo();
+    const projectId = randomUUID();
+    const applicantId = 1;
+
+    const tenDaysAgo = new Date();
+    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+
+    const completedRecentTask = new Task({
+      id: TaskId(randomUUID()),
+      projectId: ProjectId(projectId),
+      name: 'Recent Completed Task',
+      description: 'Desc',
+      taskNumber: '#20260003',
+      priority: TaskPriority.MEDIA,
+      status: TaskStatus.CONCLUIDO,
+      applicantId: ApplicantId(applicantId),
+      creatorId: UserId(randomUUID()),
+      createdAt: tenDaysAgo,
+    });
+
+    taskRepo.findAll.mockResolvedValue([completedRecentTask]);
+    taskRepo.count.mockResolvedValue(1);
+    applicantRepo.findByIds.mockResolvedValue([makeApplicant(applicantId)]);
+    projectRepo.findByIds.mockResolvedValue([makeProject(projectId)]);
+    const sut = new ListAllTasksUseCase(taskRepo, applicantRepo, projectRepo);
+
+    const result = await sut.execute();
+
+    expect(result.data).toHaveLength(1);
+    expect(result.data[0].status).toBe(TaskStatus.CONCLUIDO);
+  });
 });
