@@ -41,6 +41,7 @@ import { AddChecklistItemUseCase } from '../../application/use-cases/task/add-ch
 import { RemoveChecklistItemUseCase } from '../../application/use-cases/task/remove-checklist-item/RemoveChecklistItemUseCase';
 import { ToggleChecklistItemUseCase } from '../../application/use-cases/task/toggle-checklist-item/ToggleChecklistItemUseCase';
 import { ReorderChecklistItemUseCase } from '../../application/use-cases/task/reorder-checklist-item/ReorderChecklistItemUseCase';
+import { GetDashboardStatsUseCase } from '../../application/use-cases/task/get-dashboard-stats/GetDashboardStatsUseCase';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ChangeTaskStatusDto } from './dto/change-task-status.dto';
@@ -102,6 +103,8 @@ export class TaskController {
     private readonly toggleChecklistItem: ToggleChecklistItemUseCase,
     @Inject(ReorderChecklistItemUseCase)
     private readonly reorderChecklistItem: ReorderChecklistItemUseCase,
+    @Inject(GetDashboardStatsUseCase)
+    private readonly getDashboardStats: GetDashboardStatsUseCase,
   ) {}
 
   @Post()
@@ -125,6 +128,13 @@ export class TaskController {
   @ApiResponse({ status: 200, description: 'Lista de task tools.' })
   listTools() {
     return this.listTaskTools.execute();
+  }
+
+  @Get('dashboard/stats')
+  @ApiOperation({ summary: 'Obter estatísticas do dashboard' })
+  @ApiResponse({ status: 200, description: 'Estatísticas de tarefas.' })
+  dashboardStats() {
+    return this.getDashboardStats.execute();
   }
 
   @Get()

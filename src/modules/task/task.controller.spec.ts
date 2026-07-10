@@ -23,6 +23,7 @@ import { AddChecklistItemUseCase } from '../../application/use-cases/task/add-ch
 import { RemoveChecklistItemUseCase } from '../../application/use-cases/task/remove-checklist-item/RemoveChecklistItemUseCase';
 import { ToggleChecklistItemUseCase } from '../../application/use-cases/task/toggle-checklist-item/ToggleChecklistItemUseCase';
 import { ReorderChecklistItemUseCase } from '../../application/use-cases/task/reorder-checklist-item/ReorderChecklistItemUseCase';
+import { GetDashboardStatsUseCase } from '../../application/use-cases/task/get-dashboard-stats/GetDashboardStatsUseCase';
 import { TaskPriority, TaskStatus } from '../../domain/entities/task.entity';
 import { JwtPayload } from '../auth/current-user.decorator';
 import { randomUUID } from 'crypto';
@@ -50,6 +51,7 @@ const mockAddChecklistItem = { execute: jest.fn() };
 const mockRemoveChecklistItem = { execute: jest.fn() };
 const mockToggleChecklistItem = { execute: jest.fn() };
 const mockReorderChecklistItem = { execute: jest.fn() };
+const mockGetDashboardStats = { execute: jest.fn() };
 
 const fakeUser: JwtPayload = {
   sub: randomUUID(),
@@ -88,6 +90,7 @@ describe('TaskController', () => {
         { provide: RemoveChecklistItemUseCase, useValue: mockRemoveChecklistItem },
         { provide: ToggleChecklistItemUseCase, useValue: mockToggleChecklistItem },
         { provide: ReorderChecklistItemUseCase, useValue: mockReorderChecklistItem },
+        { provide: GetDashboardStatsUseCase, useValue: mockGetDashboardStats },
       ],
     }).compile();
     controller = module.get(TaskController);

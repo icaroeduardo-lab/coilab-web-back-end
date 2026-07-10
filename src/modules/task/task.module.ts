@@ -34,6 +34,7 @@ import { AddChecklistItemUseCase } from '../../application/use-cases/task/add-ch
 import { RemoveChecklistItemUseCase } from '../../application/use-cases/task/remove-checklist-item/RemoveChecklistItemUseCase';
 import { ToggleChecklistItemUseCase } from '../../application/use-cases/task/toggle-checklist-item/ToggleChecklistItemUseCase';
 import { ReorderChecklistItemUseCase } from '../../application/use-cases/task/reorder-checklist-item/ReorderChecklistItemUseCase';
+import { GetDashboardStatsUseCase } from '../../application/use-cases/task/get-dashboard-stats/GetDashboardStatsUseCase';
 import { S3StorageService } from '../../infra/storage/S3StorageService';
 import { TaskController } from './task.controller';
 
@@ -181,6 +182,11 @@ import { TaskController } from './task.controller';
     {
       provide: ReorderChecklistItemUseCase,
       useFactory: (repo: ITaskRepository) => new ReorderChecklistItemUseCase(repo),
+      inject: [REPOSITORY_TOKENS.TASK],
+    },
+    {
+      provide: GetDashboardStatsUseCase,
+      useFactory: (repo: ITaskRepository) => new GetDashboardStatsUseCase(repo),
       inject: [REPOSITORY_TOKENS.TASK],
     },
   ],
